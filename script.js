@@ -1166,27 +1166,31 @@
         	});
         }
 
-        function activateEditMode() {
-        	isEditingModeActive = true;
-        	// Attiva tremolio su biomarcatori
-        	databaseEsami.forEach((_, index) => {
-        		const card = document.getElementById(`card-${index}`);
-        		if (card) {
-        			card.classList.add('animate-wiggle', 'border-red-300');
-        			card.querySelector('.indicator-status').classList.add('hidden');
-        			card.querySelector('.edit-controls').classList.remove('hidden');
-        		}
-        	});
-        	// Attiva tremolio su allegati
-        	databaseAllegati.forEach((_, index) => {
-        		const row = document.getElementById(`doc-row-${index}`);
-        		if (row) {
-        			row.classList.add('animate-wiggle', 'bg-red-50/50', 'border', 'border-red-200');
-        			row.querySelector('.indicator-link').classList.add('hidden');
-        			row.querySelector('.edit-controls-doc').classList.remove('hidden');
-        		}
-        	});
+    
+ function activateEditMode() {
+    isEditingModeActive = true;
+    
+    // Attiva tremolio su biomarcatori
+    databaseEsami.forEach((_, index) => {
+        const card = document.getElementById(`card-${index}`);
+        if (card) {
+            card.classList.add('animate-wiggle', 'border-red-300');
+            card.querySelector('.indicator-status').classList.add('hidden');
+            card.querySelector('.edit-controls').classList.remove('hidden');
         }
+    });
+    
+    // Attiva tremolio su allegati
+    databaseAllegati.forEach((_, index) => {
+        const row = document.getElementById(`doc-row-${index}`);
+        if (row) {
+            row.classList.add('animate-wiggle', 'bg-red-50/50', 'border', 'border-red-200');
+            row.querySelector('.indicator-link').classList.add('hidden');
+            row.querySelector('.edit-controls-doc').classList.remove('hidden');
+        }
+    });
+ } 
+
 
         function clearEditMode() {
         	if (!isEditingModeActive) return;
@@ -1437,29 +1441,48 @@
         		.catch(err => alert("Errore di rete: " + err));
         }
 
-        function openEditAllegatoModal(index, event) {
-        	if (event) event.stopPropagation();
-        	clearEditMode();
+        // 👑 LA FUNZIONE RIUNITA E CORRETTA AL 100% (SISTEMA IL CRASH):
+function openEditAllegatoModal(index, event) {
+    if (event) event.stopPropagation();
+    clearEditMode();
 
-        	const doc = databaseAllegati[index];
-        	openModal('modalAllegati');
+    const doc = databaseAllegati[index];
+    if (!doc) return;
+    
+    openModal('modalAllegati');
 
-        	// Compila i campi esistenti se è una modifica
-        	if (doc) {
-        		document.getElementById('addDocTitolo').value = doc.titolo || "";
-        		document.getElementById('addDocData').value = doc.data || "";
-        	}
+    // Cambia i testi del modal per la modifica (Spostati qui dentro in sicurezza!)
+    document.querySelector('#modalAllegati h3').innerText = "Modifica Documento";
+    document.querySelector('#modalAllegati button[type="submit"]').innerText = "✓ Aggiorna Allegato";
 
-        	// Aggiorna subito il menu a tendina delle terapie
-        	aggiornaSelectTerapieInAllegati();
+    // Popola i campi nascosti e i dati di backup per Google Sheets
+    document.getElementById('editDocIndex').value = index;
+    document.getElementById('oldDocData').value = doc.data || "";
+    document.getElementById('oldDocTitolo').value = doc.yellow || doc.titolo || "";
+    document.getElementById('oldDocUrl').value = doc.url || "";
 
-        	// Se l'allegato aveva già una terapia collegata, la seleziona nel menu
-        	if (doc && doc.terapiaCollegataId) {
-        		document.getElementById('addDocTerapiaCollegata').value = doc.terapiaCollegataId;
-        	}
+    // Popola i campi visibili con i dati attuali del documento
+    document.getElementById('addDocData').value = doc.data || "";
+    document.getElementById('addDocTitolo').value = doc.titolo || "";
+    document.getElementById('uploadFileLabel').innerText = "File già presente (Seleziona solo se vuoi sostituirlo)";
+    document.getElementById('addDocTag').value = ""; // Resetta la tendina in modifica
+
+    // Aggiorna subito il menu a tendina delle terapie
+    if (typeof aggiornaSelectTerapieInAllegati === 'function') {
+        aggiornaSelectTerapieInAllegati();
+    }
+
+    // Se l'allegato aveva già una terapia collegata, la seleziona nel menu
+    if (doc.terapiaCollegataId || doc.terapiaId) {
+        const selectTerapia = document.getElementById('addDocTerapiaCollegata');
+        if (selectTerapia) {
+            selectTerapia.value = doc.terapiaCollegataId || doc.terapiaId;
         }
+    }
+}
 
-        // QUESTA È LA FUNZIONE CORRETTA E COLLEGATA AL TUO DATABASE REAL-TIME
+
+        
         function aggiornaSelectTerapieInAllegati() {
         	const selectTerapia = document.getElementById('addDocTerapiaCollegata');
         	if (!selectTerapia) return;
@@ -1480,20 +1503,7 @@
         }
 
 
-        // Cambia i testi del modal per la modifica
-        document.querySelector('#modalAllegati h3').innerText = "Modifica Documento";
-        document.querySelector('#modalAllegati button[type="submit"]').innerText = "✓ Aggiorna Allegato";
-
-        document.getElementById('editDocIndex').value = index;
-        document.getElementById('oldDocData').value = doc.data;
-        document.getElementById('oldDocTitolo').value = doc.yellow || doc.titolo;
-        document.getElementById('oldDocUrl').value = doc.url;
-
-        // Popola i campi con i dati attuali
-        document.getElementById('addDocData').value = doc.data;
-        document.getElementById('addDocTitolo').value = doc.titolo;
-        document.getElementById('uploadFileLabel').innerText = "File già presente (Seleziona solo se vuoi sostituirlo)";
-        document.getElementById('addDocTag').value = ""; // Resetta la tendina in modifica
+        
 
 
         function saveAllegato(e) {
@@ -1582,7 +1592,6 @@
         		}
         	}
         }
-
 
         function backToFolders() {
         	currentOpenYear = null;
