@@ -148,6 +148,10 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+/* FORZATURA FONT UNICO SU TUTTI I DISPOSITIVI */
+* {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
 body {
   background: var(--bg-page);
   color: var(--colore-scuro);
