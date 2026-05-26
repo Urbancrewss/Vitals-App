@@ -1,0 +1,349 @@
+:root {
+  /* Tema Default: Lavanda Delicato */
+  --colore-principale: #948ef2;
+  --colore-secondario: #e2a9be;
+  --colore-scuro: #1a1636;
+  --colore-chiaro: #f6f5ff;
+  --gradient-stats: linear-gradient(
+    to right,
+    rgba(148, 142, 242, 0.15),
+    rgba(226, 169, 190, 0.15)
+  );
+  --gradient-promemoria: linear-gradient(
+    to right,
+    rgba(148, 142, 242, 0.15),
+    rgba(226, 169, 190, 0.15),
+    rgba(246, 245, 255, 0.4)
+  );
+  --border-sections: 1px solid rgba(148, 142, 242, 0.2);
+}
+
+/* Tema 1: Menta & Pesca Pastello */
+[data-theme="mint-peach"] {
+  --colore-principale: #8fd3c5;
+  --colore-secondario: #ffafbd;
+  --colore-scuro: #2d3e3a;
+  --colore-chiaro: #f4fbf9;
+  --gradient-stats: linear-gradient(
+    to right,
+    rgba(143, 211, 197, 0.15),
+    rgba(255, 175, 189, 0.15)
+  );
+  --gradient-promemoria: linear-gradient(
+    to right,
+    rgba(143, 211, 197, 0.15),
+    rgba(255, 175, 189, 0.15),
+    rgba(244, 251, 249, 0.4)
+  );
+  --border-sections: 1px solid rgba(143, 211, 197, 0.2);
+}
+
+/* Tema 2: Cielo & Sabbia Serena */
+[data-theme="sky-sand"] {
+  --colore-principale: #a8d8ea;
+  --colore-secondario: #f3e5ab;
+  --colore-scuro: #3d4a52;
+  --colore-chiaro: #f7fbfe;
+  --gradient-stats: linear-gradient(
+    to right,
+    rgba(168, 216, 234, 0.15),
+    rgba(243, 229, 171, 0.15)
+  );
+  --gradient-promemoria: linear-gradient(
+    to right,
+    rgba(168, 216, 234, 0.15),
+    rgba(243, 229, 171, 0.15),
+    rgba(247, 251, 254, 0.4)
+  );
+  --border-sections: 1px solid rgba(168, 216, 234, 0.2);
+}
+/* Tema 3: Electric Indigo & Midnight Ink  */
+[data-theme="cyberpunk"] {
+  --colore-principale: #444ade;
+  --colore-secondario: #1b1f3c;
+  --colore-scuro: #0b0220;
+  --colore-chiaro: #e3e3ee;
+  --gradient-stats: linear-gradient(
+    to right,
+    rgba(68, 74, 222, 0.15),
+    rgba(27, 31, 60, 0.15)
+  );
+  --gradient-promemoria: linear-gradient(
+    to right,
+    rgba(68, 74, 222, 0.15),
+    rgba(27, 31, 60, 0.15),
+    rgba(227, 227, 238, 0.4)
+  );
+  --border-sections: 1px solid rgba(68, 74, 222, 0.2);
+}
+
+/* Tema 4: Salvia Profondo & Argilla */
+[data-theme="sage-clay"] {
+  --colore-principale: #6b7a6e;
+  --colore-secondario: #b68d77;
+  --colore-scuro: #2a2d2a;
+  --colore-chiaro: #f1f2f0;
+  --gradient-stats: linear-gradient(
+    to right,
+    rgba(107, 122, 110, 0.15),
+    rgba(182, 141, 119, 0.15)
+  );
+  --gradient-promemoria: linear-gradient(
+    to right,
+    rgba(107, 122, 110, 0.15),
+    rgba(182, 141, 119, 0.15),
+    rgba(241, 242, 240, 0.4)
+  );
+  --border-sections: 1px solid rgba(107, 122, 110, 0.2);
+}
+
+/* Tema 5: Prugna Smorzata & Oro Antico */
+[data-theme="plum-gold"] {
+  --colore-principale: #7a607a;
+  --colore-secondario: #c5a87a;
+  --colore-scuro: #261f26;
+  --colore-chiaro: #f5f2f5;
+  --gradient-stats: linear-gradient(
+    to right,
+    rgba(122, 96, 122, 0.15),
+    rgba(197, 168, 122, 0.15)
+  );
+  --gradient-promemoria: linear-gradient(
+    to right,
+    rgba(122, 96, 122, 0.15),
+    rgba(197, 168, 122, 0.15),
+    rgba(245, 242, 245, 0.4)
+  );
+  --border-sections: 1px solid rgba(122, 96, 122, 0.2);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+body {
+  background-color: #fcf8f9;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-1.5deg);
+  }
+  50% {
+    transform: rotate(1.5deg);
+  }
+}
+.animate-wiggle {
+  animation: wiggle 0.25s ease-in-out infinite;
+}
+
+.bubble-item {
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease;
+  opacity: 0;
+  transform: translate(0, 0) scale(0.6);
+  pointer-events: none;
+}
+
+/* Custom Flatpickr - Coordinato all'App */
+.flatpickr-calendar {
+  background: #fcf8f9 !important;
+  border-radius: 24px !important;
+  border: 1px solid rgba(148, 142, 242, 0.15) !important;
+  box-shadow: 0 15px 30px rgba(148, 142, 242, 0.1) !important;
+  font-family: system-ui, sans-serif !important;
+}
+/* Mese e frecce */
+.flatpickr-current-month,
+.flatpickr-months .flatpickr-month {
+  color: #4b5563 !important;
+  font-weight: 800 !important;
+}
+.flatpickr-months .flatpickr-prev-month svg,
+.flatpickr-months .flatpickr-next-month svg {
+  fill: var(--colore-principale) !important;
+}
+/* I giorni della settimana */
+span.flatpickr-weekday {
+  color: #9ca3af !important;
+  font-weight: 700 !important;
+}
+/* I giorni del mese (stile cerchietto/goccia) */
+.flatpickr-day {
+  border-radius: 50% !important; /* Cerchio perfetto */
+  font-weight: 600 !important;
+  color: #4b5563 !important;
+}
+/* Giorno selezionato  */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: var(--colore-principale) !important;
+  border-color: var(--colore-principale) !important;
+  color: white !important;
+}
+/* Giorno corrente (Oggi - Bordo) */
+.flatpickr-day.today {
+  border-color: var(--colore-secondario) !important;
+  color: var(--colore-secondario) !important;
+}
+.flatpickr-day:hover {
+  background: rgba(148, 142, 242, 0.1) !important;
+}
+
+.menu-active .bubble-allegato {
+  opacity: 1;
+  transform: translate(-4.2rem, -4.2rem) scale(1);
+  pointer-events: auto;
+}
+
+.menu-active .bubble-record {
+  opacity: 1;
+  transform: translate(0, -5.8rem) scale(1);
+  pointer-events: auto;
+}
+
+.filter-sidebar {
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ==================== IL TUO MAGIC NAVIGATION MENU (CSS) - AGGIORNATO A 4 VOCI ==================== */
+.navigation {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 370px; /* 🚀 Leggermente allungato (da 350px a 370px) per ospitare comodamente 4 icone */
+  height: 70px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 40;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f3f4f6;
+}
+
+.navigation ul {
+  display: flex;
+  width: 330px; /* 🚀 Allargata la griglia interna (da 310px a 330px) per fare spazio al quarto bottone */
+  padding: 0;
+  margin: 0;
+  justify-content: space-between;
+}
+
+.navigation ul li {
+  position: relative;
+  list-style: none;
+  width: 70px;
+  height: 70px;
+  z-index: 1;
+}
+
+/* Rende le icone del menu leggermente grigie a riposo */
+.navigation ul li a .icon img {
+  opacity: 0.6;
+  transition: all 0.5s;
+}
+
+/* Quando l'icona è attiva e sale sul cerchio, diventa bianca pura */
+.navigation ul li.active a .icon img {
+  opacity: 1;
+  filter: brightness(0) invert(1); /* Trasforma l'immagine nera in bianca */
+}
+
+.navigation ul li a .icon svg {
+  width: 1.5rem; /* w-6 */
+  height: 1.5rem; /* h-6 */
+  transform: translateY(3px);
+  color: #030712; /* gray-950 */
+  opacity: 0.6;
+  transition: all 0.5s;
+}
+
+.navigation ul li.active a .icon svg {
+  color: #ffffff; /* white */
+  opacity: 1;
+}
+
+.navigation ul li a {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  text-align: center;
+  font-weight: 700;
+}
+
+.navigation ul li a .icon {
+  position: relative;
+  display: block;
+  line-height: 75px;
+  font-size: 24px;
+  text-align: center;
+  transition: 0.5s;
+  color: #9ca3af;
+}
+
+/* Sollevamento dell'icona attiva */
+.navigation ul li.active a .icon {
+  transform: translateY(-29px);
+  color: #ffffff;
+  z-index: 2;
+}
+
+.navigation ul li a .text {
+  position: absolute;
+  color: var(--colore-principale);
+  font-weight: 800;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: 0.5s;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* Comparsa del testo sotto l'icona */
+.navigation ul li.active a .text {
+  opacity: 1;
+  transform: translateY(12px);
+}
+
+/* L'indicatore rotondo magico che segue il bottone attivo */
+.indicator {
+  position: absolute;
+  top: -50%;
+  width: 70px;
+  height: 70px;
+  background: gradient-to-tr;
+  background-image: linear-gradient(
+    to top right,
+    var(--colore-principale),
+    var(--colore-secondario)
+  );
+  border-radius: 50%;
+  border: 6px solid #fcf8f9; /* Colore dello sfondo dell'app per fondersi */
+  transition: 0.5s;
+}
+
+/* 🚀 SPOSTAMENTI FISSI PERFETTAMENTE CALCOLATI SUI NUOVI SPAZI ICONE MENU (Spazio totale 330px - 70px elemento = 260px di corsa utili divisi in 3 intervalli da 86.6px) */
+.navigation ul li:nth-child(1).active ~ .indicator {
+  transform: translateX(0px);
+}
+.navigation ul li:nth-child(2).active ~ .indicator {
+  transform: translateX(86.6px);
+}
+.navigation ul li:nth-child(3).active ~ .indicator {
+  transform: translateX(173.3px);
+}
+.navigation ul li:nth-child(4).active ~ .indicator {
+  transform: translateX(260px);
+}

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Log App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/it.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body class="relative min-h-screen overflow-hidden max-w-md mx-auto shadow-2xl bg-[#fcf8f9]" onclick="clearEditMode()">
+    <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-md z-[100] flex flex-col items-center justify-center gap-4 transition-opacity duration-300">
+      <div class="w-10 h-10 border-4 border-[var(--colore-principale)] border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Sincronizzazione Cloud...</p>
+    </div>
+    <!-- 👑 WELCOME SCREEN STREETWEAR - VIOLA EDITION -->
+    <div id="welcomeScreen" class="fixed inset-0 bg-[var(--colore-principale)] z-50 flex select-none transition-transform duration-600 ease-out overflow-hidden" style="font-family: system-ui, -apple-system, sans-serif;">
+      <!-- 💜 LATO SINISTRO (Viola Principale): Titolo impattante, descrizione e mascotte -->
+      <div class="w-[72%] h-full relative flex flex-col justify-between p-6 text-white bg-[var(--colore-principale)]">
+        <!-- Titolo Ultra Incisivo Stile Brand -->
+        <div class="pt-8">
+          <h1 class="text-4xl font-[1000] tracking-tighter leading-[0.8] uppercase flex flex-col">
+            <span class="text-[var(--colore-scuro)]">Health!</span>
+            <span class="text-[var(--colore-chiaro)]">Tracker.</span>
+            <span class="text-[var(--colore-scuro)] opacity-90">App</span>
+          </h1>
+          <!-- 📝 LA DESCRIZIONE DELL'APP (Inserita qui sotto per massima leggibilità) -->
+          <p class="mt-4 text-[10px] font-bold text-[var(--colore-chiaro)]/80 leading-relaxed max-w-[85%] pr-4 uppercase tracking-wide"> Monitora le tue analisi del sangue, tieni traccia dei biomarcatori e archivia i tuoi documenti medici in un unico posto sicuro. </p>
+        </div>
+        <!-- 🦖 LA TUA MASCOTTE (Aggiornata per file PNG con rendering ad alta definizione) -->
+        <div class="absolute left-6 bottom-20 z-10 pointer-events-none">
+          <!-- Cambiato in .png e aggiunto image-rendering per non far sgranare il PC catorcio -->
+          <img src="assets/icons/mascotte.png" class="w-350 h-350 object-contain filter drop-shadow-[0_12px_20px_rgba(26,22,54,0.25)]" style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;
+                 /* 👑 IL TRUCCO DEL CONTORNO NEI PNG: Genera un bordo nero da 1.5px lungo la sagoma trasparente */
+                    filter: drop-shadow(1.5px 0px 0px #1a1636) 
+                            drop-shadow(-1.5px 0px 0px #1a1636) 
+                            drop-shadow(0px 1.5px 0px #1a1636) 
+                            drop-shadow(0px -1.5px 0px #1a1636)
+                            drop-shadow(1px 1px 0px #1a1636)
+                            drop-shadow(-1px -1px 0px #1a1636)
+                            drop-shadow(1px -1px 0px #1a1636)
+                            drop-shadow(-1px 1px 0px #1a1636);">
+        </div>
+        <!-- Scritta tecnica verticale in basso a sinistra -->
+        <div class="pb-6">
+          <p class="text-[8px] font-black tracking-widest text-[var(--colore-scuro)]/40 uppercase whitespace-nowrap" style="transform: rotate(-90deg) translateX(-100%); transform-origin: top left;"> @ixalexbyron &copy; 2026 </p>
+        </div>
+      </div>
+      <!-- 🤍 LATO DESTRO (Panna/Sfondo Chiaro): Testo verticale Vitals, dettagli tecnici e swipe -->
+      <div class="w-[28%] h-full bg-[var(--colore-chiaro)] relative flex flex-col justify-between items-center py-8 text-[var(--colore-principale)]">
+        <!-- Scritta Gigante Verticale Ruotata -->
+        <div class="h-full flex items-center justify-center relative">
+          <span class="text-6xl font-[1000] uppercase tracking-tighter select-none opacity-20" style="transform: rotate(90deg); white-space: nowrap; font-size: 5.5rem; letter-spacing: -4px; color: #1a1636;"> Vitals </span>
+        </div>
+        <!-- Elementi grafici, Codice a barre e Freccia di sblocco -->
+        <div class="flex flex-col items-center gap-4 w-full px-2 z-20">
+          <!-- Icone geometriche minimali -->
+          <div class="text-xs font-black tracking-tighter flex flex-col items-center gap-1 opacity-60 text-[#1a1636]">
+            <span>✦</span>
+            <span>◯</span>
+          </div>
+          <!-- Codice a barre viola notte scuro -->
+          <div class="w-1 h-12 bg-[#1a1636] opacity-15 rounded-xs flex gap-[1px] p-[1px] overflow-hidden" style="writing-mode: vertical-lr;"> ||||||| | ||||| ||| || </div>
+          <!-- ↕️ FRECCETTA DI SWIPE / CLICK (Viola scuro in risalto) -->
+          <div class="flex flex-col items-center animate-pulse text-[#1a1636]" onclick="goToHome()">
+            <span class="text-xs font-black uppercase tracking-widest mb-1 cursor-pointer" style="font-size: 8px; font-variant: small-caps;">Swipe Up</span>
+            <span class="text-lg font-black leading-none transform rotate-180 -translate-y-1 cursor-pointer">⋏</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="appPagesContainer" class="w-full h-screen relative overflow-hidden">
+      <div id="page-home" class="w-full h-full p-6 overflow-y-auto no-scrollbar pb-32">
+        <div class="flex justify-between items-center my-4">
+          <div>
+            <h1 id="mainGreeting" class="text-xl font-black text-gray-800 tracking-tight">Salute Cloud</h1>
+            <p class="text-xs text-gray-400 font-semibold uppercase">Pannello di controllo</p>
+          </div>
+          <div class="w-10 h-10 bg-[var(--colore-principale)]/10 rounded-full flex items-center justify-center text-[var(--colore-principale)] font-bold cursor-pointer" onclick="fetchDatiCloud()">
+            <svg class="w-8 h-8 text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#synchronize"></use>
+            </svg>
+          </div>
+        </div>
+        <div onclick="openStatsPage(); event.stopPropagation();" class="mb-2 p-5 rounded-[2rem] shadow-sm flex items-center justify-between cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all" style="background: var(--gradient-stats); border: var(--border-sections);">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-2xl">
+              <svg class="w-8 h-8 text-[var(--colore-principale)]">
+                <use href="assets/icons/sprite.svg#bar-graph"></use>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-xs font-black text-gray-800">Andamento & Statistiche</h3>
+              <p class="text-xs text-gray-400 font-medium">Analizza i grafici storici</p>
+            </div>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm">
+            <svg class="w-6 h-6  text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#arrow-right"></use>
+            </svg>
+          </div>
+        </div>
+        <!-- 📅 SEZIONE PROSSIME ANALISI SISTEMATA (Sfumatura trasparente a 3 colori) -->
+        <div class="p-5 rounded-[2rem] shadow-sm space-y-4 mt-2" style="background: var(--gradient-promemoria); border: var(--border-sections);">
+          <div class="flex justify-between items-center px-1">
+            <div>
+              <h4 class="text-base font-black text-gray-800">Prossime Analisi</h4>
+              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Esami pianificati e scadenze</p>
+            </div>
+            <!-- Bottone "+" rapido coordinato con lo stile dell'app -->
+            <button onclick="apriModalNuovoPromemoria()" class="w-7 h-7 text-[var(--colore-principale)] bg-white rounded-xl flex items-center justify-center text-m font-black active:scale-95 transition-all"> + </button>
+          </div>
+          <!-- Lista dei promemoria (Verrà popolata dinamicamente da JavaScript) -->
+          <div id="promemoriaContainer" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar">
+            <!-- Contenuto dinamico -->
+          </div>
+        </div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 mt-2">Archivio Anni</h3>
+        <div id="foldersContainer" class="grid grid-cols-2 gap-4"></div>
+        <div id="folderDetail" class="hidden mt-2 space-y-6">
+          <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
+            <button onclick="backToFolders(); event.stopPropagation();" class="p-2 bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200">
+              <svg class="w-7 h-7 text-[var(--colore-principale)]">
+                <use href="assets/icons/sprite.svg#arrow-back"></use>
+              </svg>
+            </button>
+            <h3 id="detailYearTitle" class="text-xl font-bold text-gray-800">Anno</h3>
+          </div>
+          <div id="examsTimeline" class="space-y-8"></div>
+        </div>
+      </div>
+      <div id="page-search" class="hidden w-full h-full p-6 overflow-y-auto no-scrollbar pb-32 bg-[#fcf8f9]">
+        <div class="my-4">
+          <h2 class="text-2xl font-extrabold text-gray-800">Cerca Biomarcatore</h2>
+          <p class="text-xs text-gray-400 font-semibold uppercase mb-4">Storico analisi incrociato</p>
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 flex items-center gap-3 shadow-sm mb-6">
+            <span class="text-xl text-gray-400">
+              <svg class="w-6 h-6 translate-y-[3px] text-[var(--colore-principale)]">
+                <use href="assets/icons/sprite.svg#magnifying-glass"></use>
+              </svg>
+            </span>
+            <input type="text" id="searchInput" oninput="eseguiRicerca()" placeholder="Scrivi il nome di un esame..." class="w-full text-sm font-bold text-gray-900 outline-none bg-transparent placeholder-gray-300">
+          </div>
+          <div id="searchResultsContainer" class="space-y-3">
+            <p class="text-center text-xs font-semibold text-gray-400 py-10">Inserisci una parola chiave per avviare la ricerca.</p>
+          </div>
+        </div>
+      </div>
+      <div id="page-therapies" class="hidden min-h-screen pb-32 animate-fade-in">
+        <header class="p-6 pb-2">
+          <h1 class="text-2xl font-black text-gray-800 leading-none">Piani Terapeutici</h1>
+          <p class="text-[10px] font-bold text-gray-400 uppercase mt-1">Monitoraggio terapie e scadenze farmaci</p>
+        </header>
+        <div class="px-6 mt-4" id="therapiesContainer">
+          <p class="text-center text-xs font-semibold text-gray-400 py-10">Nessuna terapia attiva registrata.</p>
+        </div>
+      </div>
+      <div id="page-settings" class="hidden w-full h-full p-6 overflow-y-auto no-scrollbar pb-32 bg-[#fcf8f9]">
+        <div class="my-4">
+          <h2 class="text-2xl font-extrabold text-gray-800">Impostazioni</h2>
+          <div class="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tuo Nome (per il saluto nella Home)</label>
+            <div class="flex gap-2">
+              <input type="text" id="inputNomeUtente" placeholder="Inserisci il tuo nome..." class="flex-grow p-3 bg-white rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--colore-principale)]/50">
+              <button onclick="salvaNomeImpostazioni()" class="bg-[var(--colore-principale)] text-white px-4 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#837ddc] active:scale-95 transition-all">Salva</button>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 font-semibold uppercase mb-6">Configurazione applicazione</p>
+          <!-- 🎨 SELETTORE TEMI CROMATICI -->
+          <div class="mt-6 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm space-y-3">
+            <p class="text-[10px] font-black uppercase text-gray-400 tracking-wider">Personalizza Tema App</p>
+            <div class="grid grid-cols-3 gap-2">
+              <!-- Bottone Tema Lavanda & Limone Delicato -->
+              <button onclick="applicaTema('default')" class="p-2.5 bg-[#c3b1e1] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Delicato </button>
+              <!-- Bottone Tema Cyberpunk -->
+              <button onclick="applicaTema('cyberpunk')" class="p-2.5 bg-[#444ade] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Cyberpunk </button>
+              <!-- Bottone Tema Menta & Pesca Pastello -->
+              <button onclick="applicaTema('mint-peach')" class="p-2.5 bg-[#8fd3c5] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Pastello </button>
+              <!-- Bottone Tema Cielo & Sabbia Serena -->
+              <button onclick="applicaTema('sky-sand')" class="p-2.5 bg-[#a8d8f1] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Sereno </button>
+              <!-- Bottone Tema Profondo -->
+              <button onclick="applicaTema('sage-clay')" class="p-2.5 bg-[#6b7a6e] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Profondo </button>
+              <!-- Bottone Tema Smorzato -->
+              <button onclick="applicaTema('plum-gold')" class="p-2.5 bg-[#7a607a] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Smorzato </button>
+            </div>
+          </div>
+          <div class="bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm space-y-4">
+            <div class="flex items-center justify-between p-2 border-b border-gray-50">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">👤</span>
+                <div>
+                  <h4 class="text-xs font-bold text-gray-800">Profilo Utente</h4>
+                  <p class="text-[10px] text-gray-400">Account Cloud sincronizzato</p>
+                </div>
+              </div>
+              <span class="text-xs text-green-500 font-bold bg-green-50 px-2 py-1 rounded-lg">Attivo</span>
+            </div>
+            <div class="flex items-center justify-between p-2 cursor-pointer" onclick="fetchDatiCloud()">
+              <div class="flex items-center gap-3">
+                <span class="text-xl">🔄</span>
+                <div>
+                  <h4 class="text-xs font-bold text-gray-800">Forza Sincronizzazione</h4>
+                  <p class="text-[10px] text-gray-400">Aggiorna dati da Google Sheets</p>
+                </div>
+              </div>
+              <span class="text-gray-400 text-xs font-bold">→</span>
+            </div>
+          </div>
+          <!-- 🚨 PULSANTE RESET TOTALE DATI -->
+          <div class="mt-4 px-1">
+            <button onclick="piallaTuttiIDatiDellApp()" class="w-full bg-red-500 text-white font-extrabold p-4 rounded-2xl shadow-md text-xs tracking-wider uppercase hover:bg-red-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+              <span>🗑️</span>
+              <span>Elimina Tutti i Dati</span>
+            </button>
+            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider text-center mt-1.5 px-2 leading-relaxed"> Attenzione: Rimuoverà per sempre esami, referti, promemoria locali e le impostazioni del profilo. </p>
+          </div>
+        </div>
+      </div>
+      <div id="statsPage" class="hidden fixed inset-x-0 top-0 bottom-0 z-40 flex flex-col p-6 bg-[#fcf8f9] pb-28">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4 flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <button onclick="closeStatsPage()" class="p-2 bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200">
+              <svg class="w-7 h-7 text-[var(--colore-principale)]">
+                <use href="assets/icons/sprite.svg#arrow-back"></use>
+              </svg>
+            </button>
+            <div>
+              <h2 class="text-xl font-black text-gray-800 leading-none">Grafici Storici</h2>
+              <p class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">Analisi fluttuazione</p>
+            </div>
+          </div>
+          <button onclick="toggleFilterSidebar(true); event.stopPropagation();" class="p-3 bg-white border border-gray-100 shadow-sm rounded-2xl text-lg hover:bg-purple-50/50 active:scale-95 transition-all">
+            <svg class="w-7 h-7 text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#filter"></use>
+            </svg>
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-4" id="chartsContainer"></div>
+        <div id="filterSidebarOverlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-50" onclick="toggleFilterSidebar(false)">
+          <div id="filterSidebar" class="filter-sidebar absolute top-0 right-0 h-full w-64 bg-white shadow-2xl p-6 flex flex-col translate-x-full" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
+              <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider">Filtra Esami</h3>
+              <button onclick="toggleFilterSidebar(false)" class="text-gray-400 font-bold text-sm p-1">✕</button>
+            </div>
+            <div class="flex-1 overflow-y-auto no-scrollbar space-y-2" id="filtersScrollContainer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+    <div id="overlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30 transition-opacity" onclick="closeAllModals(); event.stopPropagation();"></div>
+    <div id="bubbleMenu" class="fixed bottom-28 right-6 md:right-[calc(50%-12rem)] w-14 h-14 z-40">
+      <div class="bubble-item bubble-allegato absolute top-0 left-0">
+        <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="openModal('modalAllegati')">
+          <div class="w-12 h-12 bg-rose-50 rounded-full shadow-lg flex items-center justify-center border border-rose-100 hover:scale-110 transition-transform p-3">
+            <svg class="w-7 h-7 text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#paperclip"></use>
+            </svg>
+          </div>
+          <span class="bg-white text-gray-700 text-[9px] font-bold px-2 py-0.5 rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">Allegato</span>
+        </div>
+      </div>
+      <div class="bubble-item bubble-record absolute top-0 left-0">
+        <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="openModal('modalBiomarcatori')">
+          <div class="w-12 h-12 bg-indigo-50 rounded-full shadow-lg flex items-center justify-center border border-indigo-100 hover:scale-110 transition-transform p-3">
+            <svg class="w-7 h-7 text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#blood-drop"></use>
+            </svg>
+          </div>
+          <span class="bg-white text-gray-700 text-[9px] font-bold px-2 py-0.5 rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">Record</span>
+        </div>
+      </div>
+    </div>
+    <button id="floatingAddBtn" onclick="toggleBubbleMenu(); event.stopPropagation();" class="hidden fixed bottom-28 right-6 md:right-[calc(50%-12rem)] w-14 h-14 bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white rounded-full shadow-lg shadow-purple-200 flex items-center justify-center text-2xl font-bold z-50 transition-all active:scale-95">
+      <span id="plusIcon" class="transition-transform duration-300 inline-block">
+        <svg class="w-10 h-10">
+          <use href="assets/icons/sprite.svg#plus"></use>
+        </svg>
+      </span>
+    </button>
+    <div id="bottomNavBar" class="hidden navigation">
+      <ul>
+        <!-- HOME ICON -->
+        <li class="list active" onclick="switchTab('home', this)">
+          <a href="#">
+            <span class="icon flex items-center justify-center p-4">
+              <svg class="w-6 h-6 translate-y-[3px] text-gray-800">
+                <use href="assets/icons/sprite.svg#home"></use>
+              </svg>
+            </span>
+            <span class="text">Home</span>
+          </a>
+        </li>
+        <!-- MAGNIFYING GLASS ICON -->
+        <li class="list" onclick="switchTab('search', this)">
+          <a href="#">
+            <span class="icon flex items-center justify-center p-4">
+              <svg class="w-6 h-6 translate-y-[3px] text-gray-800">
+                <use href="assets/icons/sprite.svg#magnifying-glass"></use>
+              </svg>
+            </span>
+            <span class="text">Cerca</span>
+          </a>
+        </li>
+        <!-- THERAPIES ICON -->
+        <li class="list" onclick="switchTab('therapies', this)">
+          <a href="#">
+            <span class="icon flex items-center justify-center p-4">
+              <svg class="w-6 h-6 translate-y-[3px] text-gray-800">
+                <use href="assets/icons/sprite.svg#therapies"></use>
+              </svg>
+            </span>
+            <span class="text">Terapie</span>
+          </a>
+        </li>
+        <!-- SETTINGS ICON -->
+        <li class="list" onclick="switchTab('settings', this)">
+          <a href="#">
+            <span class="icon flex items-center justify-center p-4">
+              <svg class="w-8 h-8 translate-y-[3px] text-gray-800">
+                <use href="assets/icons/sprite.svg#settings"></use>
+              </svg>
+            </span>
+            <span class="text">Set</span>
+          </a>
+        </li>
+        <div class="indicator"></div>
+      </ul>
+    </div>
+    <div id="modalBiomarcatori" class="hidden fixed bottom-0 left-0 right-0 md:left-[calc(50%-14rem)] md:right-[calc(50%-14rem)] bg-[#fcf8f9] rounded-t-[2.5rem] shadow-2xl p-6 z-50 transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
+      <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+      <h3 id="modalBioTitolo" class="text-xl font-black text-gray-800 mb-4">Nuovo Record</h3>
+      <form id="formBiomarcatori" class="space-y-4" onsubmit="saveBiomarcatore(event)">
+        <input type="hidden" id="editIndex" value="-1">
+        <input type="hidden" id="oldData" value="">
+        <input type="hidden" id="oldBiomarcatore" value="">
+        <input type="hidden" id="oldValore" value="">
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+          <div class="flex-1">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Data Referto</label>
+            <input type="date" id="addBioData" required class="w-full text-sm font-semibold text-gray-700 outline-none mt-1 bg-transparent">
+          </div>
+          <span class="text-xl text-gray-400 ml-2">
+            <svg class="w-5 h-5 translate-y-[3px]  text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#calendar"></use>
+            </svg>
+          </span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm relative">
+          <div class="flex-1">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Biomarcatore</label>
+            <select id="addBioNome" onchange="updateModalRanges()" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent appearance-none cursor-pointer max-h-40 overflow-y-auto"></select>
+          </div>
+          <span class="text-xs text-gray-400 pointer-events-none">▼</span>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-[var(--colore-principale)]/30 flex flex-col items-center justify-center shadow-sm">
+          <label class="text-[10px] font-bold text-gray-400 uppercase mb-1">Valore Riscontrato</label>
+          <div class="flex items-baseline justify-center gap-1">
+            <input type="number" step="any" id="addBioValore" placeholder="0.0" required class="w-32 text-center text-3xl font-black text-gray-800 outline-none bg-transparent placeholder-gray-300">
+            <span id="addBioUnitaLabel" class="text-xs font-bold text-gray-400">mg/dL</span>
+          </div>
+        </div>
+        <div id="addBioRangeBox" class="bg-purple-50/50 p-4 rounded-2xl border border-purple-100 text-center text-xs font-semibold text-gray-500"></div>
+        <button type="submit" id="btnBioSubmit" class="w-full bg-gradient-to-r from-[var(--colore-principale)] to-[var(--colore-secondario)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Add Record </button>
+      </form>
+    </div>
+    <div id="modalAllegati" class="hidden fixed bottom-0 left-0 right-0 md:left-[calc(50%-14rem)] md:right-[calc(50%-14rem)] bg-[#fcf8f9] rounded-t-[2.5rem] shadow-2xl p-6 z-50 transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
+      <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+      <h3 class="text-xl font-black text-gray-800 mb-4">Aggiungi Documento</h3>
+      <form id="formAllegati" class="space-y-4" onsubmit="saveAllegato(event)">
+        <input type="hidden" id="editDocIndex" value="-1">
+        <input type="hidden" id="oldDocData" value="">
+        <input type="hidden" id="oldDocTitolo" value="">
+        <input type="hidden" id="oldDocUrl" value="">
+        <!-- 📅 DATA -->
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+          <div class="flex-1">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Collega a Data</label>
+            <input type="date" id="addDocData" required class="w-full text-sm font-semibold text-gray-700 outline-none mt-1 bg-transparent">
+          </div>
+          <span class="text-xl text-gray-400 ml-2">
+            <svg class="w-5 h-5 translate-y-[3px] text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#calendar"></use>
+            </svg>
+          </span>
+        </div>
+        <!-- 💊 TERAPIA COLLEGATA -->
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+          <div class="flex-1">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Terapia collegata</label>
+            <select id="addDocTerapiaCollegata" class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent appearance-none cursor-pointer">
+              <option value="">-- Nessuna terapia --</option>
+            </select>
+          </div>
+          <span class="text-xs text-gray-400 pointer-events-none pr-1">▼</span>
+        </div>
+        <!-- 🏷️ ETICHETTA ALLEGATO / CATEGORIA (Uniformata al 100% nei box bianchi!) -->
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+          <div class="flex-1">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Etichetta Allegato</label>
+            <select id="addDocTag" class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent appearance-none cursor-pointer">
+              <option value="">-- Seleziona una categoria --</option>
+              <option value="Ecografia Pelvica">Ecografia Pelvica</option>
+              <option value="Ecografia Addome">Ecografia Addome</option>
+              <option value="Esami del Sangue">Esami del Sangue</option>
+              <option value="Analisi Urine">Analisi Urine</option>
+              <option value="Piano Terapeutico (PT)">Piano Terapeutico (PT)</option>
+              <option value="Visita Endocrinologica (RE)">Visita Endocrinologica (RE)</option>
+              <option value="Risonanza (RMN) / TAC">Risonanza (RMN) / TAC</option>
+              <option value="Visita Specialistica">Visita Specialistica</option>
+              <option value="Altro Referto">Altro Referto</option>
+            </select>
+          </div>
+          <span class="text-xs text-gray-400 pointer-events-none pr-1">▼</span>
+        </div>
+        <!-- ✍️ NOME DOCUMENTO -->
+        <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+          <div class="flex-1">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Nome Documento</label>
+            <input type="text" id="addDocTitolo" placeholder="Es. Ecografia Addominale" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent placeholder-gray-300">
+          </div>
+          <span class="text-xl text-gray-400 ml-2">
+            <svg class="w-5 h-5 text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#document"></use>
+            </svg>
+          </span>
+        </div>
+        <!-- 📷 CARICAMENTO FILE -->
+        <div class="bg-white p-5 rounded-2xl border border-dashed border-[var(--colore-secondario)] flex flex-col items-center justify-center shadow-sm cursor-pointer relative">
+          <input type="file" id="addDocFile" class="absolute inset-0 opacity-0 cursor-pointer">
+          <span class="text-2xl mb-1">
+            <svg class="w-7 h-7 text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#camera"></use>
+            </svg>
+          </span>
+          <span class="text-xs font-bold text-gray-500" id="uploadFileLabel">Seleziona File o Scatta Foto</span>
+        </div>
+        <!-- 🚀 BOTTONE -->
+        <button type="submit" class="w-full bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Salva Allegato </button>
+      </form>
+    </div>
+    <div id="modalTerapia" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-6 transition-all duration-300">
+      <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-gray-100 transform scale-95 transition-all duration-300 flex flex-col max-h-[85vh]">
+        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4 flex-shrink-0">
+          <h3 id="modalTerapiaTitolo" class="text-base font-black text-gray-800 uppercase tracking-wider">Nuovo Piano Terapeutico</h3>
+          <button onclick="chiudiModalTerapia()" class="text-gray-400 font-bold text-sm p-1 hover:text-gray-600">✕</button>
+        </div>
+        <div class="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-4">
+          <input type="hidden" id="inputTerapiaId">
+          <div>
+            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Nome Terapia / Patologia</label>
+            <input type="text" id="inputTerapiaNome" placeholder="Es. Testosterone, Ipertensione..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
+          </div>
+          <div>
+            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Nome Farmaco / Soluzione</label>
+            <input type="text" id="inputTerapiaFarmaco" placeholder="Es. Testoviron, Eutirox..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
+          </div>
+          <div>
+            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Indicazioni e Dosaggio</label>
+            <textarea id="inputTerapiaDosaggio" rows="2" placeholder="Es. Una fiala intramuscolo ogni 25 giorni per 1 anno..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors resize-none"></textarea>
+          </div>
+          <div>
+            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Data di Prima Assunzione / Inizio</label>
+            <div class="relative flex items-center w-full">
+              <input type="text" id="inputTerapiaDataInizio" placeholder="Seleziona Data" class="w-full px-4 py-3 pr-10 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors cursor-pointer">
+              <!-- 📅 L'ICONA DEL CALENDARIO: Agganciata a destra in modo assoluto e centrata in verticale -->
+              <span class="absolute right-3 flex items-center pointer-events-none">
+                <svg class="w-4 h-4 text-[var(--colore-principale)]">
+                  <use href="assets/icons/sprite.svg#calendar"></use>
+                </svg>
+              </span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Frequenza (Ogni quanti gg)</label>
+              <input type="number" id="inputTerapiaFrequenza" min="1" placeholder="Es. 25" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
+            </div>
+            <div>
+              <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Durata Complessiva (Mesi)</label>
+              <input type="number" id="inputTerapiaDurata" min="1" placeholder="Es. 12" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
+            </div>
+          </div>
+          <div>
+            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Collega un Referto/Documento esistente</label>
+            <select id="selectTerapiaAllegato" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors"></select>
+          </div>
+        </div>
+        <div class="flex gap-3 border-t border-gray-100 pt-4 flex-shrink-0">
+          <button onclick="chiudiModalTerapia()" class="flex-1 py-3 bg-gray-100 text-gray-500 text-xs font-black uppercase tracking-wider rounded-xl active:scale-95 transition-all">Annulla</button>
+          <button onclick="salvaTerapia()" class="flex-1 py-3 bg-[var(--colore-principale)] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all">Salva</button>
+        </div>
+      </div>
+    </div>
+    <!-- 🚨 MODAL NUOVO PROMEMORIA -->
+    <div id="modalPromemoria" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-end justify-center" onclick="chiudiModalPromemoria()">
+      <div class="w-full max-w-md bg-[#fcf8f9] rounded-t-[2.5rem] p-6 space-y-4 shadow-2xl transform translate-y-0 transition-transform" onclick="event.stopPropagation()">
+        <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-2"></div>
+        <h3 class="text-lg font-black text-gray-800">Pianifica Analisi</h3>
+        <form id="formPromemoria" class="space-y-3" onsubmit="salvaPromemoria(event)">
+          <!-- Input Data -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Quando farle?</label>
+              <input type="date" id="addPromemoriaData" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent">
+            </div>
+          </div>
+          <!-- Input Nome Esame -->
+          <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
+            <div class="flex-1">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase">Quali analisi / esami?</label>
+              <input type="text" id="addPromemoriaNome" placeholder="Es. Controllo Emocromo, Urina" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent placeholder-gray-300">
+            </div>
+          </div>
+          <button type="submit" class="w-full bg-gradient-to-r from-[var(--colore-principale)] to-[var(--colore-secondario)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Aggiungi Promemoria </button>
+        </form>
+      </div>
+    </div>
+    <div id="modalColorPicker" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closeColorPicker()">
+      <div class="bg-white p-6 rounded-3xl w-80 max-w-[90%] shadow-2xl border border-gray-100 transform scale-95 transition-transform" onclick="event.stopPropagation()">
+        <h4 class="text-sm font-extrabold text-gray-800 text-center mb-1">Personalizza Cartella</h4>
+        <p class="text-[10px] font-bold text-gray-400 text-center uppercase tracking-wider mb-4">Seleziona un colore pastello</p>
+        <input type="hidden" id="selectedFolderYear" value="">
+        <div class="grid grid-cols-4 gap-3 mb-4">
+          <button onclick="applicaColoreCartella('#f3f4f6')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#f3f4f6] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#fde2e4')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#fde2e4] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#ffcad4')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#ffcad4] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#b5e2fa')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#b5e2fa] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#c5dedd')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#c5dedd] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#e2ece9')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#e2ece9] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#d8f3dc')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#d8f3dc] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#f0e6ef')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#f0e6ef] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#eaf2d7')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#eaf2d7] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#fceade')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#fceade] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#ddfff7')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#ddfff7] hover:scale-105 active:scale-95 transition-transform"></button>
+          <button onclick="applicaColoreCartella('#e8dbfc')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#e8dbfc] hover:scale-105 active:scale-95 transition-transform"></button>
+        </div>
+        <button onclick="closeColorPicker()" class="w-full mt-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold text-xs transition-colors uppercase tracking-wider"> Annulla </button>
+        <div class="mt-4 border-t border-gray-100 pt-3">
+          <p class="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-2">Scegli un'icona</p>
+          <div class="grid grid-cols-5 gap-2 justify-items-center bg-gray-50 p-2 rounded-xl">
+            <!-- 💡 Inserisci gli ID esatti dei simboli presenti nel tuo sprite.svg -->
+            <button onclick="applicaIconaCartella('star')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">⭐</button>
+            <button onclick="applicaIconaCartella('sun')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">☀️</button>
+            <button onclick="applicaIconaCartella('moon')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🌙</button>
+            <button onclick="applicaIconaCartella('cloud')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">☁️</button>
+            <button onclick="applicaIconaCartella('flame')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🔥</button>
+            <button onclick="applicaIconaCartella('planet')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🪐</button>
+            <button onclick="applicaIconaCartella('ufo')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🛸</button>
+            <button onclick="applicaIconaCartella('heart')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">❤️</button>
+            <button onclick="applicaIconaCartella('ghost')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">👻</button>
+            <button onclick="applicaIconaCartella('bone')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🦴</button>
+            <button onclick="applicaIconaCartella('crown')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">👑</button>
+          </div>
+          <!-- 🗑️ IL TASTO ELIMINA -->
+          <button onclick="eliminaInteroAnnoArchivio()" class="w-full bg-red-500/10 text-red-500 font-black p-2.5 rounded-xl text-[9px] tracking-wider uppercase hover:bg-red-500 hover:text-white active:scale-95 transition-all flex items-center justify-center gap-1.5">
+            <span>🗑️</span>
+            <span>Elimina questo Anno</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="temi.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
