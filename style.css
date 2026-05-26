@@ -4,6 +4,10 @@
   --colore-secondario: #e2a9be;
   --colore-scuro: #1a1636;
   --colore-chiaro: #f6f5ff;
+  --bg-page: #fcf8f9;
+  --bg-surface: rgba(255, 255, 255, 0.96);
+  --bg-calendar: #fcf8f9;
+  --bg-navigation: rgba(255, 255, 255, 0.95);
   --gradient-stats: linear-gradient(
     to right,
     rgba(148, 142, 242, 0.15),
@@ -24,6 +28,10 @@
   --colore-secondario: #ffafbd;
   --colore-scuro: #2d3e3a;
   --colore-chiaro: #f4fbf9;
+  --bg-page: var(--colore-chiaro);
+  --bg-surface: rgba(255, 255, 255, 0.94);
+  --bg-calendar: rgba(255, 255, 255, 0.98);
+  --bg-navigation: rgba(255, 255, 255, 0.95);
   --gradient-stats: linear-gradient(
     to right,
     rgba(143, 211, 197, 0.15),
@@ -44,6 +52,10 @@
   --colore-secondario: #f3e5ab;
   --colore-scuro: #3d4a52;
   --colore-chiaro: #f7fbfe;
+  --bg-page: var(--colore-chiaro);
+  --bg-surface: rgba(255, 255, 255, 0.95);
+  --bg-calendar: rgba(255, 255, 255, 0.98);
+  --bg-navigation: rgba(255, 255, 255, 0.95);
   --gradient-stats: linear-gradient(
     to right,
     rgba(168, 216, 234, 0.15),
@@ -63,6 +75,10 @@
   --colore-secondario: #1b1f3c;
   --colore-scuro: #0b0220;
   --colore-chiaro: #e3e3ee;
+  --bg-page: var(--colore-chiaro);
+  --bg-surface: rgba(255, 255, 255, 0.94);
+  --bg-calendar: rgba(255, 255, 255, 0.98);
+  --bg-navigation: rgba(255, 255, 255, 0.95);
   --gradient-stats: linear-gradient(
     to right,
     rgba(68, 74, 222, 0.15),
@@ -83,6 +99,10 @@
   --colore-secondario: #b68d77;
   --colore-scuro: #2a2d2a;
   --colore-chiaro: #f1f2f0;
+  --bg-page: var(--colore-chiaro);
+  --bg-surface: rgba(255, 255, 255, 0.94);
+  --bg-calendar: rgba(255, 255, 255, 0.98);
+  --bg-navigation: rgba(255, 255, 255, 0.95);
   --gradient-stats: linear-gradient(
     to right,
     rgba(107, 122, 110, 0.15),
@@ -103,6 +123,10 @@
   --colore-secondario: #c5a87a;
   --colore-scuro: #261f26;
   --colore-chiaro: #f5f2f5;
+  --bg-page: var(--colore-chiaro);
+  --bg-surface: rgba(255, 255, 255, 0.95);
+  --bg-calendar: rgba(255, 255, 255, 0.98);
+  --bg-navigation: rgba(255, 255, 255, 0.95);
   --gradient-stats: linear-gradient(
     to right,
     rgba(122, 96, 122, 0.15),
@@ -125,7 +149,8 @@
   scrollbar-width: none;
 }
 body {
-  background-color: #fcf8f9;
+  background: var(--bg-page);
+  color: var(--colore-scuro);
   font-family: system-ui, -apple-system, sans-serif;
 }
 
@@ -151,7 +176,7 @@ body {
 
 /* Custom Flatpickr - Coordinato all'App */
 .flatpickr-calendar {
-  background: #fcf8f9 !important;
+  background: var(--bg-calendar) !important;
   border-radius: 24px !important;
   border: 1px solid rgba(148, 142, 242, 0.15) !important;
   box-shadow: 0 15px 30px rgba(148, 142, 242, 0.1) !important;
@@ -218,7 +243,7 @@ span.flatpickr-weekday {
   transform: translateX(-50%);
   width: 370px; /* 🚀 Leggermente allungato (da 350px a 370px) per ospitare comodamente 4 icone */
   height: 70px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-navigation);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
