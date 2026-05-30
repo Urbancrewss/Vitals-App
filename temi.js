@@ -18,22 +18,8 @@ function inizializzaTemaAllAvvio() {
 
 // ==================== DATABASE TEMI CROMATICI ====================
 
-const databaseTemi = {
+const databaseTemi = {  
   "default": {
-    "--colore-principale": "#948ef2",
-    "--colore-secondario": "#e2a9be",
-    "--colore-scuro": "#1a1636",
-    "--colore-chiaro": "#f6f5ff",
-    "--colore-accento": "#000000",
-    "--bg-page": "#fcf8f9",
-    "--bg-surface": "rgba(255, 255, 255, 0.96)",
-    "--bg-calendar": "#fcf8f9",
-    "--bg-navigation": "rgba(255, 255, 255, 0.95)",
-    "--gradient-stats": "linear-gradient(to right, rgba(148, 142, 242, 0.15), rgba(226, 169, 190, 0.15))",
-    "--gradient-promemoria": "linear-gradient(to right, rgba(148, 142, 242, 0.15), rgba(246, 245, 255, 0.4))",
-    "--border-sections": "1px solid rgba(148, 142, 242, 0.2)"
-  },
-  "icy": {
     "--colore-principale": "#7692ff",
     "--colore-secondario": "#abd2fa",
     "--colore-scuro": "#091540",
@@ -46,6 +32,20 @@ const databaseTemi = {
     "--gradient-stats": "linear-gradient(to right, rgba(118, 146, 255, 0.25), rgba(171, 210, 250, 0.25))",
     "--gradient-promemoria": "linear-gradient(to right, rgba(118, 146, 255, 0.25), rgba(27, 44, 193, 0.25))",
     "--border-sections": "1px solid rgba(9, 21, 64, 0.25)"
+  },
+  "purple": {
+    "--colore-principale": "#948ef2",
+    "--colore-secondario": "#e2a9be",
+    "--colore-scuro": "#1a1636",
+    "--colore-chiaro": "#f6f5ff",
+    "--colore-accento": "#000000",
+    "--bg-page": "#fcf8f9",
+    "--bg-surface": "rgba(255, 255, 255, 0.96)",
+    "--bg-calendar": "#fcf8f9",
+    "--bg-navigation": "rgba(255, 255, 255, 0.95)",
+    "--gradient-stats": "linear-gradient(to right, rgba(148, 142, 242, 0.15), rgba(226, 169, 190, 0.15))",
+    "--gradient-promemoria": "linear-gradient(to right, rgba(148, 142, 242, 0.15), rgba(246, 245, 255, 0.4))",
+    "--border-sections": "1px solid rgba(148, 142, 242, 0.2)"
   },
   "melon": {
     "--colore-principale": "#fdcb7b",
