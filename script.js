@@ -1,247 +1,6 @@
         const API_URL = "https://script.google.com/macros/s/AKfycbwVrFAO7Ca7twZ_FZ1Y1tiLAWjKnpLTEd_FAOG4nQPY4EHJh74e7j-PU3cjLykjZnc/exec";
 
-        const configBiomarcatori = {
-        	"Tempo Quick Plasma Controllo": {
-        		unita: "sec",
-        		noRange: true
-        	},
-        	"Tempo Quick Plasma Esame": {
-        		unita: "sec",
-        		noRange: true
-        	},
-        	"Attività Protrombinica": {
-        		unita: "%",
-        		min: 70.0,
-        		max: 120.0
-        	},
-        	"Tempo TromboPlastina (PTT)": {
-        		unita: "sec",
-        		min: 20.0,
-        		max: 38.0
-        	},
-        	"Fibrogeno": {
-        		unita: "mg/dL",
-        		min: 200,
-        		max: 400
-        	},
-        	"Glicemia": {
-        		unita: "mg/dL",
-        		min: 60,
-        		max: 110
-        	},
-        	"Creatina": {
-        		unita: "mg/dL",
-        		min: 0.70,
-        		max: 1.40
-        	},
-        	"Trigliceridi": {
-        		unita: "mg/dL",
-        		min: 60,
-        		max: 170
-        	},
-        	"Colesterolo Totale": {
-        		unita: "mg/dL",
-        		isColesterolo: true
-        	},
-        	"HDL Colesterolo": {
-        		unita: "mg/dL",
-        		isHDL: true
-        	},
-        	"Gamma - GT": {
-        		unita: "IU/l",
-        		min: 11,
-        		max: 50
-        	},
-        	"Bilirubina Totale": {
-        		unita: "mg/dL",
-        		maxSoglia: 1.25
-        	},
-        	"Bilirubina Diretta": {
-        		unita: "mg/dL",
-        		maxSoglia: 0.30
-        	},
-        	"Bilirubina Indiretta": {
-        		unita: "mg/dL",
-        		maxSoglia: 0.95
-        	},
-        	"G.O.T.": {
-        		unita: "IU/l",
-        		maxSoglia: 37
-        	},
-        	"G.P.T.": {
-        		unita: "IU/l",
-        		maxSoglia: 45
-        	},
-        	"Ultra-TSH": {
-        		unita: "μIU/ml",
-        		min: 0.3000,
-        		max: 4.5000
-        	},
-        	"Prolattina": {
-        		unita: "ng/ml",
-        		min: 2.00,
-        		max: 18.00
-        	},
-        	"Testosterone Totale": {
-        		unita: "ng/ml",
-        		min: 2.2,
-        		max: 10.5
-        	},
-        	"Globuli Bianchi (WBC)": {
-        		unita: "migliaia/mmc",
-        		min: 4.00,
-        		max: 10.00
-        	},
-        	"Neutrofili %": {
-        		unita: "%",
-        		min: 50.0,
-        		max: 65.0
-        	},
-        	"Linfociti %": {
-        		unita: "%",
-        		min: 20.0,
-        		max: 40.0
-        	},
-        	"Monociti %": {
-        		unita: "%",
-        		min: 0.0,
-        		max: 8.0
-        	},
-        	"Eosinofili %": {
-        		unita: "%",
-        		min: 0.0,
-        		max: 4.0
-        	},
-        	"Basofili %": {
-        		unita: "%",
-        		min: 0.0,
-        		max: 1.0
-        	},
-        	"Neutrofili #": {
-        		unita: "10^3/μl",
-        		min: 2.00,
-        		max: 7.50
-        	},
-        	"Linfociti #": {
-        		unita: "10^3/μl",
-        		min: 1.50,
-        		max: 3.50
-        	},
-        	"Monociti #": {
-        		unita: "10^3/μl",
-        		min: 0.00,
-        		max: 0.80
-        	},
-        	"Eosinofili #": {
-        		unita: "10^3/μl",
-        		min: 0.00,
-        		max: 0.70
-        	},
-        	"Basofili #": {
-        		unita: "10^3/μl",
-        		min: 0.00,
-        		max: 0.10
-        	},
-        	"Globuli Rossi (RBC)": {
-        		unita: "milioni/mmc",
-        		min: 4.50,
-        		max: 6.00
-        	},
-        	"Emoglobina (HGB)": {
-        		unita: "g/dl",
-        		min: 14.0,
-        		max: 17.5
-        	},
-        	"Ematocrito (HCT)": {
-        		unita: "%",
-        		min: 42.0,
-        		max: 54.0
-        	},
-        	"Volume Globulare Medio (MCV)": {
-        		unita: "fl",
-        		min: 82.0,
-        		max: 98.0
-        	},
-        	"Contenuto Emoglobinico Medio (MCH)": {
-        		unita: "pg",
-        		min: 27.0,
-        		max: 33.0
-        	},
-        	"Concentrazione Emoglobinica Media (MCHC)": {
-        		unita: "%",
-        		min: 32.0,
-        		max: 38.0
-        	},
-        	"RDW-CV": {
-        		unita: "%",
-        		min: 10.0,
-        		max: 14.5
-        	},
-        	"RDW-SD": {
-        		unita: "fl",
-        		min: 39.0,
-        		max: 45.0
-        	},
-        	"Piastrine (PLT)": {
-        		unita: "migliaia/mmc",
-        		min: 150,
-        		max: 500
-        	},
-        	"Volume Piastrinico Medio (MPV)": {
-        		unita: "fl",
-        		min: 8.2,
-        		max: 12.3
-        	},
-        	"Ampiezza distribuzione Piastrine (PDW)": {
-        		unita: "fl",
-        		min: 10.0,
-        		max: 16.5
-        	},
-        	"PCT": {
-        		unita: "%",
-        		min: 0.000,
-        		max: 0.999
-        	},
-        	"Omocisteina": {
-        		unita: "μmol/L",
-        		noRange: true
-        	},
-        	"Azotemia": {
-        		unita: "mg/dL",
-        		min: 15,
-        		max: 50
-        	},
-        	"Sodiemia": {
-        		unita: "mEq/l",
-        		min: 135,
-        		max: 150
-        	},
-        	"Potassiemia": {
-        		unita: "mEq/l",
-        		min: 3.60,
-        		max: 5.40
-        	},
-        	"Colinesterasi": {
-        		unita: "U/l",
-        		min: 2500,
-        		max: 9400
-        	},
-        	"LH": {
-        		unita: "mIU/ml",
-        		min: 1.10,
-        		max: 25.00
-        	},
-        	"FSH": {
-        		unita: "mIU/ml",
-        		min: 1.50,
-        		max: 11.80
-        	},
-        	"Estradiolo": {
-        		unita: "pg/ml",
-        		maxSoglia: 87.0
-        	}
-        };
-
+        let configBiomarcatori = {};
         let databaseEsami = [];
         let databaseAllegati = [];
         let currentOpenYear = null;
@@ -457,22 +216,58 @@
         			databaseEsami = data.esami || [];
         			databaseAllegati = data.allegati || [];
 
+        			// 👑 IL MIRACOLO DINAMICO: Trasformiamo la tabella online nell'oggetto config dell'app
+        			if (data.dizionario && data.dizionario.length > 0) {
+        				configBiomarcatori = {}; // Resetta la vecchia lista locale
+
+        				data.dizionario.forEach(item => {
+        					if (!item.biomarcatore) return;
+
+        					// Ricostruiamo la configurazione dei limiti medici al volo
+        					configBiomarcatori[item.biomarcatore] = {
+        						unita: item.unita || "",
+        						min: item.min !== null ? parseFloat(item.min) : undefined,
+        						max: item.max !== null ? parseFloat(item.max) : undefined,
+        						maxSoglia: item.maxSoglia !== null ? parseFloat(item.maxSoglia) : undefined,
+        						isColesterolo: item.tipoSpeciale && item.tipoSpeciale.toLowerCase() === "colesterolo",
+        						isHDL: item.tipoSpeciale && item.tipoSpeciale.toLowerCase() === "hdl",
+        						noRange: item.tipoSpeciale && item.tipoSpeciale.toLowerCase() === "norange"
+        					};
+        				});
+
+        				// 🧬 POPOLIAMO IN AUTOMATICO LA TENDINA DEL MODAL HTML "ADD RECORD"
+        				const selectMenu = document.getElementById('addBioNome');
+        				if (selectMenu) {
+        					selectMenu.innerHTML = '<option value="">-- Seleziona Biomarcatore --</option>';
+        					// Estrae i nomi ordinati alfabeticamente dal foglio Google
+        					Object.keys(configBiomarcatori).sort().forEach(nomeBio => {
+        						selectMenu.innerHTML += `<option value="${nomeBio}">${nomeBio}</option>`;
+        					});
+        				}
+        			}
+
         			// Recupera il nome dal LocalStorage del browser
         			const nomePersonalizzato = localStorage.getItem('user-custom-name') || 'Utente';
-        			document.getElementById('mainGreeting').innerText = `Ciao, ${nomePersonalizzato}`;
+        			const mainGreetingEl = document.getElementById('mainGreeting');
+        			if (mainGreetingEl) mainGreetingEl.innerText = `Ciao, ${nomePersonalizzato}`;
 
-        			// Carica il nome anche dentro la casella delle impostazioni, così lo vedi già scritto
-        			document.getElementById('inputNomeUtente').value = localStorage.getItem('user-custom-name') || '';
+        			// Carica il nome anche dentro la casella delle impostazioni
+        			const inputNomeEl = document.getElementById('inputNomeUtente');
+        			if (inputNomeEl) inputNomeEl.value = localStorage.getItem('user-custom-name') || '';
 
         			renderFolders();
         			if (currentOpenYear) refreshTimeline();
         		})
         		.catch(err => alert("Errore nel caricamento dati dal cloud: " + err))
         		.finally(() => {
+        			// Sblocco dell'agenda promemoria locali alla fine di tutto
+        			if (typeof renderPromemoria === 'function') renderPromemoria();
+
         			document.getElementById('loadingOverlay').style.opacity = "0";
         			setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 300);
         		});
         }
+
 
         // ==================== RESET TOTALE APPLICAZIONE ====================
 
@@ -815,15 +610,19 @@
         		databaseEsami.forEach((esame, index) => {
         			if (esame.data !== dataString) return;
         			counterEsamiInData++;
+
+        			// Recupera la configurazione dinamica scaricata da Google Sheets
         			const conf = configBiomarcatori[esame.biomarcatore] || {
         				unita: "",
         				noRange: true
         			};
 
+        			// Stato di default: Tutto Ottimo (Verde)
         			let emoji = "👍",
         				colorClass = "text-green-500 bg-green-50/60 border-green-100",
         				rangeText = "";
 
+        			// 🧪 1. LOGICA COLESTEROLO TOTALE
         			if (conf.isColesterolo) {
         				if (esame.valore < 220) {
         					rangeText = "Normale (<220)";
@@ -836,7 +635,9 @@
         					colorClass = "text-red-500 bg-red-50/60 border-red-100";
         					rangeText = "Elevato (>240)";
         				}
-        			} else if (conf.isHDL) {
+        			}
+        			// 💊 2. LOGICA HDL (Lavora al contrario!)
+        			else if (conf.isHDL) {
         				if (esame.valore > 45) {
         					rangeText = "Normale (>45)";
         				} else if (esame.valore >= 35) {
@@ -848,13 +649,17 @@
         					colorClass = "text-red-500 bg-red-50/60 border-red-100";
         					rangeText = "Rischio (<35)";
         				}
-        			} else if (conf.maxSoglia) {
+        			}
+        			// 📈 3. LOGICA MAX SOGLIA (Fino a...)
+        			else if (conf.maxSoglia !== undefined && conf.maxSoglia !== null) {
         				if (esame.valore > conf.maxSoglia) {
         					emoji = "📈";
         					colorClass = "text-red-500 bg-red-50/60 border-red-100";
         				}
         				rangeText = `Max: ${conf.maxSoglia}`;
-        			} else if (!conf.noRange) {
+        			}
+        			// 📐 4. LOGICA STANDARD (Minimo - Massimo)
+        			else if (!conf.noRange && conf.min !== undefined && conf.max !== undefined) {
         				if (esame.valore < conf.min) {
         					emoji = "📉";
         					colorClass = "text-blue-500 bg-blue-50/60 border-blue-100";
@@ -863,9 +668,13 @@
         					colorClass = "text-red-500 bg-red-50/60 border-red-100";
         				}
         				rangeText = `Ref: ${conf.min}-${conf.max}`;
-        			} else {
+        			}
+        			// ◯ 5. LOGICA MONITORAGGIO PURO (Nessun limite)
+        			else {
         				rangeText = "Monitoraggio";
         			}
+
+        			// ... Qui sotto continua normalmente con il codice del tuo row.innerHTML che stampa l'esame ...
 
         			const card = document.createElement('div');
         			card.id = `card-${index}`;
@@ -1166,30 +975,30 @@
         	});
         }
 
-    
- function activateEditMode() {
-    isEditingModeActive = true;
-    
-    // Attiva tremolio su biomarcatori
-    databaseEsami.forEach((_, index) => {
-        const card = document.getElementById(`card-${index}`);
-        if (card) {
-            card.classList.add('animate-wiggle', 'border-red-300');
-            card.querySelector('.indicator-status').classList.add('hidden');
-            card.querySelector('.edit-controls').classList.remove('hidden');
+
+        function activateEditMode() {
+        	isEditingModeActive = true;
+
+        	// Attiva tremolio su biomarcatori
+        	databaseEsami.forEach((_, index) => {
+        		const card = document.getElementById(`card-${index}`);
+        		if (card) {
+        			card.classList.add('animate-wiggle', 'border-red-300');
+        			card.querySelector('.indicator-status').classList.add('hidden');
+        			card.querySelector('.edit-controls').classList.remove('hidden');
+        		}
+        	});
+
+        	// Attiva tremolio su allegati
+        	databaseAllegati.forEach((_, index) => {
+        		const row = document.getElementById(`doc-row-${index}`);
+        		if (row) {
+        			row.classList.add('animate-wiggle', 'bg-red-50/50', 'border', 'border-red-200');
+        			row.querySelector('.indicator-link').classList.add('hidden');
+        			row.querySelector('.edit-controls-doc').classList.remove('hidden');
+        		}
+        	});
         }
-    });
-    
-    // Attiva tremolio su allegati
-    databaseAllegati.forEach((_, index) => {
-        const row = document.getElementById(`doc-row-${index}`);
-        if (row) {
-            row.classList.add('animate-wiggle', 'bg-red-50/50', 'border', 'border-red-200');
-            row.querySelector('.indicator-link').classList.add('hidden');
-            row.querySelector('.edit-controls-doc').classList.remove('hidden');
-        }
-    });
- } 
 
 
         function clearEditMode() {
@@ -1338,78 +1147,34 @@
         	}
         }
 
+        // 📄 AGGIORNA LA FUNZIONE DI SALVATAGGIO IN SCRIPT.JS:
         function saveBiomarcatore(e) {
         	e.preventDefault();
+
         	const data = document.getElementById('addBioData').value;
-        	const nome = document.getElementById('addBioNome').value;
-        	const valore = parseFloat(document.getElementById('addBioValore').value);
-        	const index = parseInt(document.getElementById('editIndex').value);
+        	const biomarcatore = document.getElementById('addBioNome').value;
+        	const valore = Number(document.getElementById('addBioValore').value);
 
+        	// Salva nell'array in memoria RAM
+        	databaseEsami.push({
+        		data: data,
+        		biomarcatore: biomarcatore,
+        		valore: valore
+        	});
+
+        	// Salva nel browser (Immortale sul telefono anche offline)
+        	localStorage.setItem('health-app-esami-locali', JSON.stringify(databaseEsami));
+
+        	// Segna che ci sono modifiche da salvare nel Cloud!
+        	localStorage.setItem('health-app-pending-sync', 'true');
+
+        	// Chiude il modal e aggiorna lo schermo all'istante (0 millisecondi!)
         	closeAllModals();
-        	document.getElementById('loadingOverlay').classList.remove('hidden');
-
-        	if (index === -1) {
-        		fetch(API_URL, {
-        				method: "POST",
-        				body: JSON.stringify({
-        					azione: "nuovoBiomarcatore",
-        					data: data,
-        					biomarcatore: nome,
-        					valore: valore
-        				})
-        			})
-        			.then(res => res.json())
-        			.then(res => {
-        				if (res.status === "success") {
-        					document.getElementById('formBiomarcatori').reset();
-        					fetchDatiCloud();
-        				} else {
-        					alert("Errore: " + res.message);
-        				}
-        			})
-        			.catch(err => alert("Errore di rete: " + err));
-        	} else {
-        		const oldData = document.getElementById('oldData').value;
-        		const oldBio = document.getElementById('oldBiomarcatore').value;
-        		const oldVal = parseFloat(document.getElementById('oldValore').value);
-
-        		fetch(API_URL, {
-        				method: "POST",
-        				body: JSON.stringify({
-        					azione: "eliminaBiomarcatore",
-        					data: oldData,
-        					biomarcatore: oldBio,
-        					valore: oldVal
-        				})
-        			})
-        			.then(res => res.json())
-        			.then(res => {
-        				if (res.status === "success") {
-        					return fetch(API_URL, {
-        						method: "POST",
-        						body: JSON.stringify({
-        							azione: "nuovoBiomarcatore",
-        							data: data,
-        							biomarcatore: nome,
-        							valore: valore
-        						})
-        					});
-        				} else {
-        					throw new Error("Errore rimozione");
-        				}
-        			})
-        			.then(res => res.json())
-        			.then(res => {
-        				if (res.status === "success") {
-        					document.getElementById('formBiomarcatori').reset();
-        					fetchDatiCloud();
-        				} else {
-        					alert("Errore: " + res.message);
-        				}
-        			})
-        			.catch(err => alert("Errore: " + err));
-        	}
+        	renderFolders();
+        	if (currentOpenYear) refreshTimeline();
         }
+
+
 
         function deleteAllegato(index, event) {
         	event.stopPropagation();
@@ -1442,47 +1207,47 @@
         }
 
         // 👑 LA FUNZIONE RIUNITA E CORRETTA AL 100% (SISTEMA IL CRASH):
-function openEditAllegatoModal(index, event) {
-    if (event) event.stopPropagation();
-    clearEditMode();
+        function openEditAllegatoModal(index, event) {
+        	if (event) event.stopPropagation();
+        	clearEditMode();
 
-    const doc = databaseAllegati[index];
-    if (!doc) return;
-    
-    openModal('modalAllegati');
+        	const doc = databaseAllegati[index];
+        	if (!doc) return;
 
-    // Cambia i testi del modal per la modifica (Spostati qui dentro in sicurezza!)
-    document.querySelector('#modalAllegati h3').innerText = "Modifica Documento";
-    document.querySelector('#modalAllegati button[type="submit"]').innerText = "✓ Aggiorna Allegato";
+        	openModal('modalAllegati');
 
-    // Popola i campi nascosti e i dati di backup per Google Sheets
-    document.getElementById('editDocIndex').value = index;
-    document.getElementById('oldDocData').value = doc.data || "";
-    document.getElementById('oldDocTitolo').value = doc.yellow || doc.titolo || "";
-    document.getElementById('oldDocUrl').value = doc.url || "";
+        	// Cambia i testi del modal per la modifica (Spostati qui dentro in sicurezza!)
+        	document.querySelector('#modalAllegati h3').innerText = "Modifica Documento";
+        	document.querySelector('#modalAllegati button[type="submit"]').innerText = "✓ Aggiorna Allegato";
 
-    // Popola i campi visibili con i dati attuali del documento
-    document.getElementById('addDocData').value = doc.data || "";
-    document.getElementById('addDocTitolo').value = doc.titolo || "";
-    document.getElementById('uploadFileLabel').innerText = "File già presente (Seleziona solo se vuoi sostituirlo)";
-    document.getElementById('addDocTag').value = ""; // Resetta la tendina in modifica
+        	// Popola i campi nascosti e i dati di backup per Google Sheets
+        	document.getElementById('editDocIndex').value = index;
+        	document.getElementById('oldDocData').value = doc.data || "";
+        	document.getElementById('oldDocTitolo').value = doc.yellow || doc.titolo || "";
+        	document.getElementById('oldDocUrl').value = doc.url || "";
 
-    // Aggiorna subito il menu a tendina delle terapie
-    if (typeof aggiornaSelectTerapieInAllegati === 'function') {
-        aggiornaSelectTerapieInAllegati();
-    }
+        	// Popola i campi visibili con i dati attuali del documento
+        	document.getElementById('addDocData').value = doc.data || "";
+        	document.getElementById('addDocTitolo').value = doc.titolo || "";
+        	document.getElementById('uploadFileLabel').innerText = "File già presente (Seleziona solo se vuoi sostituirlo)";
+        	document.getElementById('addDocTag').value = ""; // Resetta la tendina in modifica
 
-    // Se l'allegato aveva già una terapia collegata, la seleziona nel menu
-    if (doc.terapiaCollegataId || doc.terapiaId) {
-        const selectTerapia = document.getElementById('addDocTerapiaCollegata');
-        if (selectTerapia) {
-            selectTerapia.value = doc.terapiaCollegataId || doc.terapiaId;
+        	// Aggiorna subito il menu a tendina delle terapie
+        	if (typeof aggiornaSelectTerapieInAllegati === 'function') {
+        		aggiornaSelectTerapieInAllegati();
+        	}
+
+        	// Se l'allegato aveva già una terapia collegata, la seleziona nel menu
+        	if (doc.terapiaCollegataId || doc.terapiaId) {
+        		const selectTerapia = document.getElementById('addDocTerapiaCollegata');
+        		if (selectTerapia) {
+        			selectTerapia.value = doc.terapiaCollegataId || doc.terapiaId;
+        		}
+        	}
         }
-    }
-}
 
 
-        
+
         function aggiornaSelectTerapieInAllegati() {
         	const selectTerapia = document.getElementById('addDocTerapiaCollegata');
         	if (!selectTerapia) return;
@@ -1503,95 +1268,69 @@ function openEditAllegatoModal(index, event) {
         }
 
 
-        
-
-
         function saveAllegato(e) {
         	e.preventDefault();
-        	const fileInput = document.getElementById('addDocFile');
+
         	const data = document.getElementById('addDocData').value;
-        	const tagSelezionato = document.getElementById('addDocTag').value;
-        	let titolo = document.getElementById('addDocTitolo').value.trim();
-        	const terapiaCollegata = document.getElementById('addDocTerapiaCollegata').value; // Recupera l'ID della terapia
+        	const titolo = document.getElementById('addDocTitolo').value.trim();
+        	const tag = document.getElementById('addDocTag').value;
+        	const terapiaCollegata = document.getElementById('addDocTerapiaCollegata').value;
+        	const fileInput = document.getElementById('addDocFile');
         	const index = parseInt(document.getElementById('editDocIndex').value);
 
-        	if (tagSelezionato) {
-        		titolo = `[${tagSelezionato}] ${titolo}`;
+        	if (!data || !titolo) {
+        		alert("Compila i campi obbligatori!");
+        		return;
         	}
 
-        	closeAllModals();
-        	document.getElementById('loadingOverlay').classList.remove('hidden');
-
-        	const inviaDatiCloud = (stringaBase64 = null, fileObj = null) => {
-        		const payload = {
-        			azione: index === -1 ? "nuovoAllegato" : "modificaAllegato",
-        			data: data,
-        			titolo: titolo,
-        			terapiaId: terapiaCollegata, // ✨ Spediamo 'terapiaId' a Google Sheets così combacia con la colonna del foglio!
-        			oldData: document.getElementById('oldDocData').value,
-        			oldTitolo: document.getElementById('oldDocTitolo').value,
-        			oldUrl: document.getElementById('oldDocUrl').value
-        		};
-
-        		if (stringaBase64 && fileObj) {
-        			payload.nomeFile = fileObj.name;
-        			payload.tipoMime = fileObj.type;
-        			payload.fileBase64 = stringaBase64;
-        		}
-
-        		fetch(API_URL, {
-        				method: "POST",
-        				body: JSON.stringify(payload)
-        			})
-        			.then(res => res.json())
-        			.then(res => {
-        				if (res.status === "success") {
-
-        					// ✨ TRUCCO: Se è un nuovo allegato, spingilo subito dentro l'array locale per vederlo all'istante
-        					if (index === -1) {
-        						databaseAllegati.push({
-        							titolo: titolo,
-        							data: data,
-        							url: res.fileUrl || "#",
-        							terapiaId: terapiaCollegata // ✨ Aggiornato in terapiaId
-        						});
-        					}
-
-        					document.getElementById('formAllegati').reset();
-        					document.getElementById('editDocIndex').value = "-1";
-        					document.querySelector('#modalAllegati h3').innerText = "Aggiungi Documento";
-        					document.querySelector('#modalAllegati button[type="submit"]').innerText = "+ Salva Allegato";
-
-        					fetchDatiCloud();
-        					if (typeof renderTerapie === 'function') setTimeout(renderTerapie, 500);
-        				} else {
-        					alert("Errore file: " + res.message);
-        					document.getElementById('loadingOverlay').classList.add('hidden');
-        				}
-        			})
-        			.catch(err => {
-        				alert("Errore network: " + err);
-        				document.getElementById('loadingOverlay').classList.add('hidden');
-        			});
+        	// Creiamo l'oggetto dell'allegato locale
+        	const nuovoAllegato = {
+        		data: data,
+        		titolo: titolo,
+        		tag: tag || "Altro Referto",
+        		terapiaId: terapiaCollegata || "",
+        		url: "#" // In locale non abbiamo l'URL di Google Drive finché non sincronizziamo
         	};
 
-        	if (fileInput.files.length > 0) {
+        	// Gestione del caricamento file in Base64 (se l'utente ha selezionato un file)
+        	if (fileInput && fileInput.files.length > 0) {
         		const file = fileInput.files[0];
-        		const lettore = new FileReader();
-        		lettore.onload = function(evento) {
-        			const stringaBase64 = evento.target.result.split(',')[1];
-        			inviaDatiCloud(stringaBase64, file);
+        		const reader = new FileReader();
+        		reader.onload = function(event) {
+        			nuovoAllegato.fileBase64 = event.target.result.split(',')[1];
+        			nuovoAllegato.nomeFile = file.name;
+        			nuovoAllegato.tipoMime = file.type;
+
+        			// Salva nel database allegati
+        			processaSalvataggioAllegato(nuovoAllegato, index);
         		};
-        		lettore.readAsDataURL(file);
+        		reader.readAsDataURL(file);
         	} else {
+        		// Se è una modifica senza cambio file, mantiene il vecchio URL di backup
         		if (index !== -1) {
-        			inviaDatiCloud();
-        		} else {
-        			alert("Seleziona un file prima di salvare!");
-        			document.getElementById('loadingOverlay').classList.add('hidden');
+        			nuovoAllegato.url = document.getElementById('oldDocUrl').value;
         		}
+        		processaSalvataggioAllegato(nuovoAllegato, index);
         	}
         }
+
+        // Sotto-funzione di supporto locale per gli allegati
+        function processaSalvataggioAllegato(allegato, index) {
+        	if (index === -1) {
+        		databaseAllegati.push(allegato);
+        	} else {
+        		databaseAllegati[index] = allegato;
+        	}
+
+        	// Salva nel browser
+        	localStorage.setItem('health-app-allegati-locali', JSON.stringify(databaseAllegati));
+        	localStorage.setItem('health-app-pending-sync', 'true');
+
+        	closeAllModals();
+        	renderFolders();
+        	if (currentOpenYear) refreshTimeline();
+        }
+
 
         function backToFolders() {
         	currentOpenYear = null;
@@ -1879,62 +1618,53 @@ function openEditAllegatoModal(index, event) {
         }
 
         // Salva o Aggiorna la Terapia
-        function salvaTerapia() {
-        	const id = document.getElementById('inputTerapiaId').value;
+        function saveTerapia(e) {
+        	if (e) e.preventDefault();
+
+        	const idTerapia = document.getElementById('inputTerapiaId').value;
         	const nome = document.getElementById('inputTerapiaNome').value.trim();
         	const farmaco = document.getElementById('inputTerapiaFarmaco').value.trim();
         	const dosaggio = document.getElementById('inputTerapiaDosaggio').value.trim();
+        	const frequenza = Number(document.getElementById('inputTerapiaFrequenza').value);
+        	const durata = Number(document.getElementById('inputTerapiaDurata').value);
         	const dataInizio = document.getElementById('inputTerapiaDataInizio').value;
-        	const frequenza = document.getElementById('inputTerapiaFrequenza').value;
-        	const durata = document.getElementById('inputTerapiaDurata').value;
+        	const allegatoSelezionato = document.getElementById('selectTerapiaAllegato').value;
 
-        	const selectAllegato = document.getElementById('selectTerapiaAllegato');
-        	const allegatoUrl = selectAllegato.value;
-        	const allegatoNome = allegatoUrl ? selectAllegato.options[selectAllegato.selectedIndex].getAttribute('data-nome') : "";
-
-        	if (!nome || !farmaco || !dataInizio || !frequenza || !durata) {
-        		alert("Per favore, compila tutti i campi obbligatori!");
+        	if (!nome || !farmaco || !dataInizio) {
+        		alert("Compila i campi obbligatori della terapia!");
         		return;
         	}
 
-        	if (id) {
-        		// MODALITÀ MODIFICA: cerchiamo la vecchia terapia e la aggiorniamo
-        		const index = databaseTerapie.findIndex(t => t.id === id);
-        		if (index !== -1) {
-        			databaseTerapie[index] = {
-        				id,
-        				nome,
-        				farmaco,
-        				dosaggio,
-        				dataInizio,
-        				frequenzaGiorni: frequenza,
-        				durataMesi: durata,
-        				allegatoUrl,
-        				allegatoNome
-        			};
-        		}
+        	const datiTerapia = {
+        		id: idTerapia || "TER_" + Date.now(), // Genera un ID offline unico se è nuova
+        		nome: nome,
+        		farmaco: farmaco,
+        		dosaggio: dosaggio,
+        		frequenzaGiorni: frequenza || 1,
+        		durataMesi: durata || 1,
+        		dataInizio: dataInizio,
+        		allegatoNome: allegatoSelezionato ? databaseAllegati[allegatoSelezionato].titolo : "",
+        		allegatoUrl: allegatoSelezionato ? databaseAllegati[allegatoSelezionato].url : ""
+        	};
+
+        	if (!idTerapia) {
+        		// Nuova terapia
+        		databaseTerapie.push(datiTerapia);
         	} else {
-        		// MODALITÀ NUOVA: creiamo un oggetto fresco con ID univoco temporale
-        		const nuovaTerapia = {
-        			id: 'terapia_' + Date.now(),
-        			nome,
-        			farmaco,
-        			dosaggio,
-        			dataInizio,
-        			frequenzaGiorni: frequenza,
-        			durataMesi: durata,
-        			allegatoUrl,
-        			allegatoNome
-        		};
-        		databaseTerapie.push(nuovaTerapia);
-        		terapiaAttivaId = nuovaTerapia.id; // Seleziona automaticamente la nuova tab creata
+        		// Modifica terapia esistente
+        		const idx = databaseTerapie.findIndex(t => t.id === idTerapia);
+        		if (idx !== -1) databaseTerapie[idx] = datiTerapia;
         	}
 
-        	// Salva nel browser e aggiorna la schermata
+        	// Salva nel browser (Le terapie nascono già locali nel tuo vecchio codice!)
         	localStorage.setItem('health-app-terapie', JSON.stringify(databaseTerapie));
+        	localStorage.setItem('health-app-pending-sync', 'true');
+
+        	// Chiude il modal e rinfresca la pagina terapie
         	chiudiModalTerapia();
-        	renderTerapie();
+        	if (typeof renderTerapie === 'function') renderTerapie();
         }
+
 
         // Elimina una Terapia dallo schedario
         function eliminaTerapia(id) {
@@ -2107,3 +1837,51 @@ function openEditAllegatoModal(index, event) {
         			setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 300);
         		});
         }
+
+        // ==================== SINCRONIZZAZIONE MANUALE CLOUD ====================
+
+        function forzaSincronizzazioneManuale() {
+        	document.getElementById('loadingOverlay').style.opacity = "1";
+        	document.getElementById('loadingOverlay').classList.remove('hidden');
+
+        	// Impacchetta tutti i dati locali per spedirli al server Google
+        	const payload = {
+        		azione: "sincronizzazioneTotale",
+        		esami: databaseEsami,
+        		allegati: databaseAllegati
+        	};
+
+        	fetch(API_URL, {
+        			method: "POST",
+        			body: JSON.stringify(payload)
+        		})
+        		.then(res => res.json())
+        		.then(res => {
+        			if (res.status === "success") {
+        				// Sincronizzazione riuscita: azzera il flag dei dati pendenti
+        				localStorage.setItem('health-app-pending-sync', 'false');
+        				alert("Sincronizzazione completata con successo sul Cloud! Cloud protetto. ☁️");
+        			} else {
+        				alert("Errore del server Google: " + res.message);
+        			}
+        		})
+        		.catch(err => alert("Errore di rete (Sei offline?). I dati restano comunque sicuri sul telefono: " + err))
+        		.finally(() => {
+        			document.getElementById('loadingOverlay').style.opacity = "0";
+        			setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 300);
+        		});
+        }
+
+        // 🚨 INTERCETTA LA CHIUSURA DELLA PAGINA / PWA
+        window.addEventListener('beforeunload', function(e) {
+        	// Controlla se ci sono dati locali non ancora sincronizzati
+        	const haDatiPendenti = localStorage.getItem('health-app-pending-sync') === 'true';
+
+        	if (haDatiPendenti) {
+        		// I browser moderni per sicurezza mostrano un messaggio standard di sistema,
+        		// ma l'attivazione blocca l'utente impedendo la perdita dei dati!
+        		e.preventDefault();
+        		e.returnValue = "Hai dimenticato di sincronizzare! Se non sincronizzi, i dati aggiornati potrebbero non essere salvati nel Cloud. Vuoi uscire comunque?";
+        		return e.returnValue;
+        	}
+        });
