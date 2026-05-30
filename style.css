@@ -4,6 +4,7 @@
   --colore-secondario: #e2a9be;
   --colore-scuro: #1a1636;
   --colore-chiaro: #f6f5ff;
+  --colore-accento: #000000;
   --bg-page: #fcf8f9;
   --bg-surface: rgba(255, 255, 255, 0.96);
   --bg-calendar: #fcf8f9;
@@ -16,129 +17,135 @@
   --gradient-promemoria: linear-gradient(
     to right,
     rgba(148, 142, 242, 0.15),
-    rgba(226, 169, 190, 0.15),
     rgba(246, 245, 255, 0.4)
   );
   --border-sections: 1px solid rgba(148, 142, 242, 0.2);
 }
 
-/* Tema 1: Menta & Pesca Pastello */
-[data-theme="mint-peach"] {
-  --colore-principale: #8fd3c5;
-  --colore-secondario: #ffafbd;
-  --colore-scuro: #2d3e3a;
-  --colore-chiaro: #f4fbf9;
-  --bg-page: var(--colore-chiaro);
-  --bg-surface: rgba(255, 255, 255, 0.94);
-  --bg-calendar: rgba(255, 255, 255, 0.98);
-  --bg-navigation: rgba(255, 255, 255, 0.95);
+/* Tema: Icy */
+[data-theme="icy"] {
+  --colore-principale: #7692ff;
+  --colore-secondario: #abd2fa;
+  --colore-scuro: #091540;
+  --colore-chiaro: #d5e9fd;
+  --colore-accento: #000000;
+  --bg-page: #f5f8ff;
+  --bg-surface: rgb(255, 255, 255, 0.95);
+  --bg-calendar: #f0f4ff;
+  --bg-navigation: #9dabd4;
+
   --gradient-stats: linear-gradient(
     to right,
-    rgba(143, 211, 197, 0.15),
-    rgba(255, 175, 189, 0.15)
+    rgba(118, 146, 255, 0.25),
+    rgba(171, 210, 250, 0.25)
   );
   --gradient-promemoria: linear-gradient(
     to right,
-    rgba(143, 211, 197, 0.15),
-    rgba(255, 175, 189, 0.15),
-    rgba(244, 251, 249, 0.4)
+    rgba(118, 146, 255, 0.25),
+    rgba(27, 44, 193, 0.25)
   );
-  --border-sections: 1px solid rgba(143, 211, 197, 0.2);
+  --border-sections: 1px solid rgba(9, 21, 64, 0.25);
 }
 
-/* Tema 2: Cielo & Sabbia Serena */
-[data-theme="sky-sand"] {
-  --colore-principale: #a8d8ea;
-  --colore-secondario: #f3e5ab;
-  --colore-scuro: #3d4a52;
-  --colore-chiaro: #f7fbfe;
-  --bg-page: var(--colore-chiaro);
+/* Tema: Melone Estivo */
+[data-theme="melon"] {
+  --colore-principale: #fdcb7b;
+  --colore-secondario: #eea64b;
+  --colore-scuro: #788417;
+  --colore-chiaro: #f6f1bc;
+  --colore-accento: #000000;
+  --bg-page: #f6f1bc;
   --bg-surface: rgba(255, 255, 255, 0.95);
-  --bg-calendar: rgba(255, 255, 255, 0.98);
-  --bg-navigation: rgba(255, 255, 255, 0.95);
+  --bg-calendar: #fff8e8;
+  --bg-navigation: #d9a85f;
   --gradient-stats: linear-gradient(
     to right,
-    rgba(168, 216, 234, 0.15),
-    rgba(243, 229, 171, 0.15)
+    rgba(253, 203, 123, 0.25),
+    rgba(238, 166, 75, 0.25)
   );
   --gradient-promemoria: linear-gradient(
     to right,
-    rgba(168, 216, 234, 0.15),
-    rgba(243, 229, 171, 0.15),
-    rgba(247, 251, 254, 0.4)
+    rgba(253, 203, 123, 0.25),
+    rgba(217, 100, 31, 0.25)
   );
-  --border-sections: 1px solid rgba(168, 216, 234, 0.2);
-}
-/* Tema 3: Electric Indigo & Midnight Ink  */
-[data-theme="cyberpunk"] {
-  --colore-principale: #444ade;
-  --colore-secondario: #1b1f3c;
-  --colore-scuro: #0b0220;
-  --colore-chiaro: #e3e3ee;
-  --bg-page: var(--colore-chiaro);
-  --bg-surface: rgba(255, 255, 255, 0.94);
-  --bg-calendar: rgba(255, 255, 255, 0.98);
-  --bg-navigation: rgba(255, 255, 255, 0.95);
-  --gradient-stats: linear-gradient(
-    to right,
-    rgba(68, 74, 222, 0.15),
-    rgba(27, 31, 60, 0.15)
-  );
-  --gradient-promemoria: linear-gradient(
-    to right,
-    rgba(68, 74, 222, 0.15),
-    rgba(27, 31, 60, 0.15),
-    rgba(227, 227, 238, 0.4)
-  );
-  --border-sections: 1px solid rgba(68, 74, 222, 0.2);
+  --border-sections: 1px solid rgba(170, 176, 38, 0.35);
 }
 
-/* Tema 4: Salvia Profondo & Argilla */
-[data-theme="sage-clay"] {
-  --colore-principale: #6b7a6e;
-  --colore-secondario: #b68d77;
-  --colore-scuro: #2a2d2a;
-  --colore-chiaro: #f1f2f0;
-  --bg-page: var(--colore-chiaro);
-  --bg-surface: rgba(255, 255, 255, 0.94);
-  --bg-calendar: rgba(255, 255, 255, 0.98);
-  --bg-navigation: rgba(255, 255, 255, 0.95);
+/* Tema: Dark Midnight */
+[data-theme="dark-midnight"] {
+  --colore-principale: #464c55;
+  --colore-secondario: #7f8995;
+  --colore-scuro: #141214;
+  --colore-chiaro: #c2c7cf;
+  --colore-accento: #9ea7b3;
+  --bg-page: #141214;
+  --bg-surface: rgb(255, 255, 255, 0.95);
+  --bg-calendar: #232227;
+  --bg-navigation: #636d79;
   --gradient-stats: linear-gradient(
     to right,
-    rgba(107, 122, 110, 0.15),
-    rgba(182, 141, 119, 0.15)
+    rgba(70, 76, 85, 0.25),
+    rgba(127, 137, 149, 0.25)
   );
   --gradient-promemoria: linear-gradient(
     to right,
-    rgba(107, 122, 110, 0.15),
-    rgba(182, 141, 119, 0.15),
-    rgba(241, 242, 240, 0.4)
+    rgba(70, 76, 85, 0.25),
+    rgba(158, 167, 179, 0.25)
   );
-  --border-sections: 1px solid rgba(107, 122, 110, 0.2);
+  --border-sections: 1px solid rgba(99, 109, 121, 0.35);
 }
 
-/* Tema 5: Prugna Smorzata & Oro Antico */
-[data-theme="plum-gold"] {
-  --colore-principale: #7a607a;
-  --colore-secondario: #c5a87a;
-  --colore-scuro: #261f26;
-  --colore-chiaro: #f5f2f5;
-  --bg-page: var(--colore-chiaro);
-  --bg-surface: rgba(255, 255, 255, 0.95);
-  --bg-calendar: rgba(255, 255, 255, 0.98);
-  --bg-navigation: rgba(255, 255, 255, 0.95);
+/* Tema: Blue Ocean Dark*/
+[data-theme="blue-ocean-dark"] {
+  --colore-principale: #6f7fae;
+  --colore-secondario: #a9bfd3;
+  --colore-scuro: #091540;
+  --colore-chiaro: #a9bfd3;
+  --colore-accento: #5c69a8;
+  --bg-page: #000000;
+  --bg-surface: rgb(255, 255, 255, 0.95);
+  --bg-calendar: #16224a;
+  --bg-navigation: #3a4666;
   --gradient-stats: linear-gradient(
     to right,
-    rgba(122, 96, 122, 0.15),
-    rgba(197, 168, 122, 0.15)
+    rgba(111, 127, 174, 0.2),
+    rgba(169, 191, 211, 0.2)
   );
   --gradient-promemoria: linear-gradient(
     to right,
-    rgba(122, 96, 122, 0.15),
-    rgba(197, 168, 122, 0.15),
-    rgba(245, 242, 245, 0.4)
+    rgba(111, 127, 174, 0.2),
+    rgba(42, 58, 143, 0.2)
   );
-  --border-sections: 1px solid rgba(122, 96, 122, 0.2);
+  --border-sections: 1px solid rgba(169, 191, 211, 0.25);
+}
+
+/* Tema: Herbs */
+[data-theme="herbs"] {
+  --colore-principale: #90a875;
+  --colore-secondario: #403542;
+  --colore-scuro: #18161a;
+  --colore-chiaro: #c2c7cf;
+  --colore-accento: #6a6e64;
+
+  --bg-page: #18161a;
+  --bg-surface: rgb(255, 255, 255, 0.95);
+  --bg-calendar: #242328;
+
+  --bg-navigation: #6f8c57;
+
+  --gradient-stats: linear-gradient(
+    to right,
+    rgba(144, 168, 117, 0.25),
+    rgba(64, 53, 66, 0.25)
+  );
+
+  --gradient-promemoria: linear-gradient(
+    to right,
+    rgba(144, 168, 117, 0.25),
+    rgba(84, 86, 81, 0.25)
+  );
+
+  --border-sections: 1px solid rgba(144, 168, 117, 0.25);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -148,14 +155,14 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
 /* FORZATURA FONT UNICO SU TUTTI I DISPOSITIVI */
 * {
-    font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-family: "Archivo", sans-serif;
 }
 body {
   background: var(--bg-page);
   color: var(--colore-scuro);
-  font-family: system-ui, -apple-system, sans-serif;
 }
 
 @keyframes wiggle {
@@ -359,7 +366,7 @@ span.flatpickr-weekday {
     var(--colore-secondario)
   );
   border-radius: 50%;
-  border: 6px solid #fcf8f9; /* Colore dello sfondo dell'app per fondersi */
+  border: 6px solid var(--bg-navigation); /* Colore dello sfondo del menu per fondersi */
   transition: 0.5s;
 }
 
