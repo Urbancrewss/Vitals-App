@@ -734,7 +734,7 @@
         	const risultati = [...esamiFiltrati, ...allegatiFiltrati].sort((a, b) => new Date(b.data) - new Date(a.data));
 
         	if (risultati.length === 0) {
-        		container.innerHTML = `<p class="text-center text-xs font-semibold text-gray-400 py-10">Nessun record trovato corrispondente.</p>`;
+        		container.innerHTML = `<p class="text-center text-xs font-semibold text-gray-400 py-10">Nessun Biomarcatore trovato corrispondente.</p>`;
         		return;
         	}
 
@@ -993,7 +993,7 @@
         			card.innerHTML = `
                         <div class="absolute top-1 right-1 text-xs indicator-status">${emoji}</div>
                         <div class="edit-controls hidden absolute inset-0 bg-white/95 rounded-2xl flex items-center justify-center gap-2 z-10">
-                            <button onclick="deleteRecord(${index}, event)" class="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md font-bold text-xs hover:scale-105 active:scale-95">✕</button>
+                            <button onclick="deleteBiomarcatore(${index}, event)" class="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md font-bold text-xs hover:scale-105 active:scale-95">✕</button>
                             <button onclick="openEditModal(${index}, event)" class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-md text-xs hover:scale-105 active:scale-95">✏️</button>
                         </div>
                         <div class="flex-1 flex flex-col justify-center items-center mt-3">
@@ -1154,9 +1154,9 @@
                 `;
         		containerGrafici.appendChild(chartBox);
 
-        		const recordOrdinati = datiRaggruppati[nomeBio].sort((a, b) => new Date(a.data) - new Date(b.data));
+        		const BiomarcatoreOrdinati = datiRaggruppati[nomeBio].sort((a, b) => new Date(a.data) - new Date(b.data));
 
-        		const etichetteDate = recordOrdinati.map(r => {
+        		const etichetteDate = BiomarcatoreOrdinati.map(r => {
         			const d = new Date(r.data);
         			return d.toLocaleDateString('it-IT', {
         				day: '2-digit',
@@ -1164,12 +1164,12 @@
         				year: '2-digit'
         			});
         		});
-        		const arrayValori = recordOrdinati.map(r => r.valore);
+        		const arrayValori = BiomarcatoreOrdinati.map(r => r.valore);
 
         		const coloriPunti = [];
         		const coloriBordoPunti = [];
 
-        		recordOrdinati.forEach(r => {
+        		BiomarcatoreOrdinati.forEach(r => {
         			let colore = 'var(--colore-principale)';
         			if (conf.isCololesstolo) {
         				colore = r.valore > 220 ? '#ef4444' : '#10b981';
@@ -1322,42 +1322,51 @@
         	});
         }
 
-        function deleteRecord(index, event) {
-        	event.stopPropagation();
-        	const esame = databaseEsami[index];
-        	if (!confirm(`Vuoi davvero eliminare definitivamente ${esame.biomarcatore} (${esame.valore})?`)) {
-        		clearEditMode();
-        		return;
-        	}
-        	document.getElementById('loadingOverlay').classList.remove('hidden');
-        	fetch(API_URL, {
-        			method: "POST",
-        			body: JSON.stringify({
-        				azione: "eliminaBiomarcatore",
-        				data: esame.data,
-        				biomarcatore: esame.biomarcatore,
-        				valore: esame.valore
-        			})
-        		})
-        		.then(res => res.json())
-        		.then(res => {
-        			if (res.status === "success") {
-        				isEditingModeActive = false;
-        				fetchDatiCloud();
-        			} else {
-        				alert("Errore: " + res.message);
-        			}
-        		})
-        		.catch(err => alert("Errore di rete: " + err));
+        function deleteBiomarcatore(index, event) {
+        	if (event) event.stopPropagation();
+    const esame = databaseEsami[index];
+    if (!esame) return;
+
+    // 👑 1. Richiesta di conferma con il nuovo popup custom smussato
+    pwaConfirm(`Vuoi davvero eliminare definitivamente ${esame.biomarcatore} (${esame.valore})?`, "Elimina Valore")
+    .then(confermato => {
+        if (!confermato) {
+            clearEditMode();
+            return; // Se clicca NO si ferma qui
         }
+
+        // Se clicca SÌ, esegue la fetch silenziosa in background senza bloccare lo schermo
+        isEditingModeActive = false;
+
+        // 💾 Rimozione immediata dalla memoria RAM per farlo sparire dallo schermo in 0ms
+        databaseEsami.splice(index, 1);
+        renderFolders();
+        if (currentOpenYear) refreshTimeline();
+        clearEditMode();
+
+        // 🌐 Spedisce il comando di cancellazione a Google Sheets in sottofondo
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                azione: "eliminaBiomarcatore",
+                data: esame.data,
+                biomarcatore: esame.biomarcatore,
+                valore: esame.valore
+            })
+        })
+        .then(res => res.json())
+        .then(res => console.log("Biomarcatore rimosso dal cloud in background:", res))
+        .catch(err => console.warn("Errore di rete cloud, cancellazione comunque salvata sul telefono:", err));
+    });
+}
 
         function openEditModal(index, event) {
         	event.stopPropagation();
         	clearEditMode();
         	const esame = databaseEsami[index];
         	openModal('modalBiomarcatori');
-        	document.getElementById('modalBioTitolo').innerText = "Modifica Record";
-        	document.getElementById('btnBioSubmit').innerText = "✓ Aggiorna Record";
+        	document.getElementById('modalBioTitolo').innerText = "Modifica Biomarcatore";
+        	document.getElementById('btnBioSubmit').innerText = "✓ Aggiorna Biomarcatore";
         	document.getElementById('editIndex').value = index;
         	document.getElementById('oldData').value = esame.data;
         	document.getElementById('oldBiomarcatore').value = esame.biomarcatore;
@@ -1394,8 +1403,8 @@
         		modal.classList.remove('hidden');
         		if (modalId === 'modalBiomarcatori') {
         			if (parseInt(document.getElementById('editIndex').value) === -1) {
-        				document.getElementById('modalBioTitolo').innerText = "Nuovo Record";
-        				document.getElementById('btnBioSubmit').innerText = "+ Add Record";
+        				document.getElementById('modalBioTitolo').innerText = "Nuovo Biomarcatore";
+        				document.getElementById('btnBioSubmit').innerText = "+ Aggiungi Biomarcatore";
         				document.getElementById('addBioData').valueAsDate = new Date();
         			}
         			updateModalRanges();
@@ -1462,7 +1471,7 @@
         		dataFormattataPerTimeline = `${p[2]}-${p[1]}-${p[0]}`; // Diventa AAAA-MM-GG
         	}
 
-        	const nuovoRecord = {
+        	const nuovoBiomarcatore = {
         		data: dataFormattataPerTimeline,
         		biomarcatore: nome,
         		valore: valore
@@ -1470,9 +1479,9 @@
 
         	// 2. AGGIORNAMENTO MEMORIA RAM REALE
         	if (index === -1) {
-        		databaseEsami.push(nuovoRecord);
+        		databaseEsami.push(nuovoBiomarcatore);
         	} else {
-        		databaseEsami[index] = nuovoRecord;
+        		databaseEsami[index] = nuovoBiomarcatore;
         	}
 
         	// 👑 RAGGRUPPAMENTO DI SICUREZZA: Ordina l'array per data così i grafici non impazziscono
@@ -1555,34 +1564,43 @@
 
 
         function deleteAllegato(index, event) {
-        	event.stopPropagation();
-        	const doc = databaseAllegati[index];
-        	if (!confirm(`Vuoi davvero eliminare definitivamente il documento "${doc.titolo}"?`)) {
-        		clearEditMode();
-        		return;
-        	}
-        	document.getElementById('loadingOverlay').classList.remove('hidden');
+    if (event) event.stopPropagation();
+    const doc = databaseAllegati[index];
+    if (!doc) return;
 
-        	fetch(API_URL, {
-        			method: "POST",
-        			body: JSON.stringify({
-        				azione: "eliminaAllegato",
-        				data: doc.data,
-        				titolo: doc.titolo,
-        				url: doc.url
-        			})
-        		})
-        		.then(res => res.json())
-        		.then(res => {
-        			if (res.status === "success") {
-        				isEditingModeActive = false;
-        				fetchDatiCloud();
-        			} else {
-        				alert("Errore: " + res.message);
-        			}
-        		})
-        		.catch(err => alert("Errore di rete: " + err));
+    // 👑 2. Richiesta di conferma con il nuovo popup custom smussato
+    pwaConfirm(`Vuoi davvero eliminare definitivamente il documento "${doc.titolo}"?`, "Elimina Allegato")
+    .then(confermato => {
+        if (!confermato) {
+            clearEditMode();
+            return; // Se clicca NO si ferma qui
         }
+
+        // Se clicca SÌ, esegue la rimozione locale e la fetch in background
+        isEditingModeActive = false;
+
+        // 💾 Rimozione immediata dalla memoria RAM per farlo sparire dalla timeline in 0ms
+        databaseAllegati.splice(index, 1);
+        renderFolders();
+        if (currentOpenYear) refreshTimeline();
+        clearEditMode();
+
+        // 🌐 Spedisce il comando di cancellazione a Google Sheets in sottofondo
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                azione: "eliminaAllegato",
+                data: doc.data,
+                titolo: doc.titolo,
+                url: doc.url
+            })
+        })
+        .then(res => res.json())
+        .then(res => console.log("Allegato rimosso dal cloud in background:", res))
+        .catch(err => console.warn("Errore network rimozione allegato cloud:", err));
+    });
+}
+
 
         // 👑 LA FUNZIONE RIUNITA E CORRETTA AL 100% (SISTEMA IL CRASH):
         function openEditAllegatoModal(index, event) {
