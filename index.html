@@ -61,24 +61,10 @@
     <!-- Container delle pagine principali -->
     <div id="appPagesContainer" class="w-full h-screen relative overflow-hidden">
       <div id="page-home" class="w-full h-full p-6 overflow-y-auto no-scrollbar pb-32">
-
-        <!-- 🚨 BANNER STATO SINCRONIZZAZIONE (Mettilo nella Home vicino al Greeting) -->
-<div id="syncWarningBanner" class="hidden mx-6 mt-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-between gap-3 animate-pulse">
-    <div class="flex items-center gap-2">
-        <span class="text-base">⚠️</span>
-        <p class="text-[10px] font-black uppercase text-amber-600 tracking-wider">Modifiche locali non salvate nel Cloud!</p>
-    </div>
-    <!-- Tasto di salvataggio rapido incorporato -->
-    <button onclick="forzaSincronizzazioneManuale()" class="px-2.5 py-1 bg-amber-500 text-white font-black text-[9px] uppercase tracking-widest rounded-lg shadow-xs active:scale-95 transition-all">
-        Sincronizza
-    </button>
-</div>
-
-
         <!-- Intestazione home -->
         <div class="flex justify-between items-center my-4">
           <div>
-            <h1 id="mainGreeting" class="text-xl font-black text-[var(--colore-accento)] tracking-tight">Ciao, [utente]</h1>
+            <h1 id="mainGreeting" class="text-xl font-black text-[var(--colore-accento)] tracking-tight">Salute Cloud</h1>
             <p class="text-xs text-gray-400 font-semibold uppercase">Pannello di controllo</p>
           </div>
           <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[var(--colore-principale)] font-bold cursor-pointer" onclick="fetchDatiCloud()">
@@ -108,19 +94,19 @@
         </div>
         <!-- Sezione prossime analisi -->
         <div class="p-5 rounded-[2rem] shadow-sm space-y-4 mt-2" style="background: var(--gradient-stats); border: var(--border-sections);">
-  <div class="flex justify-between items-center px-1">
-    <div>
-      <h4 class="text-sm font-black text-[var(--colore-accento)] uppercase tracking-wider">Prossime Analisi</h4>
-      <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Esami pianificati e scadenze</p>
-    </div>
-    <button onclick="apriModalNuovoPromemoria()" class="w-7 h-7 text-[var(--colore-principale)] bg-white rounded-xl flex items-center justify-center text-m font-black active:scale-95 transition-all">
-      <span id="plusIcon" class="transition-transform duration-300 inline-block">
-        <svg class="w-6 h-6">
-          <use href="assets/icons/sprite.svg#plus"></use>
-        </svg>
-      </span>
-    </button>
-  </div>
+          <div class="flex justify-between items-center px-1">
+            <div>
+              <h4 class="text-sm font-black text-[var(--colore-accento)] uppercase tracking-wider">Prossime Analisi</h4>
+              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Esami pianificati e scadenze</p>
+            </div>
+            <button onclick="apriModalNuovoPromemoria()" class="w-7 h-7 text-[var(--colore-principale)] bg-white rounded-xl flex items-center justify-center text-m font-black active:scale-95 transition-all">
+              <span id="plusIcon" class="transition-transform duration-300 inline-block">
+                <svg class="w-6 h-6">
+                  <use href="assets/icons/sprite.svg#plus"></use>
+                </svg>
+              </span>
+            </button>
+          </div>
           <!-- Promemoria popolati dinamicamente da JS -->
           <div id="promemoriaContainer" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar"></div>
         </div>
@@ -167,7 +153,6 @@
           <p class="text-center text-xs font-semibold text-gray-400 py-10">Nessuna terapia attiva registrata.</p>
         </div>
       </div>
-
       <!-- Pagina impostazioni -->
       <div id="page-settings" class="hidden w-full h-full p-6 overflow-y-auto no-scrollbar pb-32">
         <div class="my-4">
@@ -179,19 +164,17 @@
               <button onclick="salvaNomeImpostazioni()" class="bg-[var(--colore-principale)] text-white px-4 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#837ddc] active:scale-95 transition-all">Salva</button>
             </div>
           </div>
-
           <p class="text-xs text-gray-400 font-semibold uppercase">Configurazione applicazione</p>
           <!-- Selettore temi -->
           <div class="mt-3 p-4 rounded-2xl border border-gray-100 space-y-3" style="background: var(--gradient-stats); border: var(--border-sections);">
             <p class="text-[10px] font-black uppercase text-[var(--colore-accento)] tracking-wider">Personalizza Tema App</p>
             <div class="grid grid-cols-3 gap-2">
-              <button onclick="applicaTema('default')" class="p-2.5 bg-[#c3b1e1] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Delicato </button>
-              <button onclick="applicaTema('icy')" class="p-2.5 bg-[#7692FF] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Icy </button>
+              <button onclick="applicaTema('default')" class="p-2.5 bg-[#7692FF] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Icy </button>
+              <button onclick="applicaTema('purple')" class="p-2.5 bg-[#c3b1e1] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Purple </button>
               <button onclick="applicaTema('melon')" class="p-2.5 bg-[#FDCB7B] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Melon </button>
               <button onclick="applicaTema('dark-midnight')" class="p-2.5 bg-[#464c55] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Dark Midnight </button>
               <button onclick="applicaTema('blue-ocean-dark')" class="p-2.5 bg-[#6f7fae] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Blue Ocean Dark </button>
               <button onclick="applicaTema('herbs')" class="p-2.5 bg-[#90A875] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Herbs </button>
-
             </div>
           </div>
           <div class="mt-2 p-5 rounded-2xl border border-gray-100 space-y-4" style="background: var(--gradient-stats); border: var(--border-sections);">
@@ -206,15 +189,16 @@
               <span class="text-xs text-green-500 font-bold bg-green-50 px-2 py-1 rounded-lg">Attivo</span>
             </div>
             <div class="flex items-center justify-between p-2 cursor-pointer" onclick="forzaSincronizzazioneManuale()">
-  <div class="flex items-center gap-3">
-    <span class="text-xl">📤</span> <!-- Cambiata l'emoji in una freccia in su per farti capire che stai inviando! -->
-    <div>
-      <h4 class="text-xs font-bold text-[var(--colore-accento)]">Salva modifiche nel Cloud</h4>
-      <p class="text-[10px] text-gray-400">Invia esami e allegati a Google Sheets</p>
-    </div>
-  </div>
-  <span class="text-gray-400 text-xs font-bold">→</span>
-</div>
+              <div class="flex items-center gap-3">
+                <span class="text-xl">📤</span>
+                <!-- Cambiata l'emoji in una freccia in su per farti capire che stai inviando! -->
+                <div>
+                  <h4 class="text-xs font-bold text-[var(--colore-accento)]">Salva modifiche nel Cloud</h4>
+                  <p class="text-[10px] text-gray-400">Invia esami e allegati a Google Sheets</p>
+                </div>
+              </div>
+              <span class="text-gray-400 text-xs font-bold">→</span>
+            </div>
           </div>
           <!-- 🚨 PULSANTE RESET TOTALE DATI -->
           <div class="mt-4 px-1">
@@ -278,7 +262,7 @@
               <use href="assets/icons/sprite.svg#blood-drop"></use>
             </svg>
           </div>
-          <span class="bg-white text-gray-700 text-[9px] font-bold px-2 py-0.5 rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">Record</span>
+          <span class="bg-white text-gray-700 text-[9px] font-bold px-2 py-0.5 rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">Biomarcatore</span>
         </div>
       </div>
     </div>
@@ -338,7 +322,7 @@
     <!-- Modal biomarcatori -->
     <div id="modalBiomarcatori" class="hidden fixed bottom-0 left-0 right-0 md:left-[calc(50%-14rem)] md:right-[calc(50%-14rem)] bg-[var(--bg-page)] rounded-t-[2.5rem] shadow-2xl p-6 z-50 transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
       <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
-      <h3 id="modalBioTitolo" class="text-xl font-black text-[var(--colore-accento)] mb-4">Nuovo Record</h3>
+      <h3 id="modalBioTitolo" class="text-xl font-black text-[var(--colore-accento)] mb-4">Nuovo Esame</h3>
       <form id="formBiomarcatori" class="space-y-4" onsubmit="saveBiomarcatore(event)">
         <input type="hidden" id="editIndex" value="-1">
         <input type="hidden" id="oldData" value="">
@@ -357,7 +341,7 @@
         </div>
         <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm relative">
           <div class="flex-1">
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Biomarcatore</label>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Seleziona Biomarcatore</label>
             <select id="addBioNome" onchange="updateModalRanges()" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent appearance-none cursor-pointer max-h-40 overflow-y-auto"></select>
           </div>
           <span class="text-xs text-[var(--colore-principale)] pointer-events-none">▼</span>
@@ -368,8 +352,20 @@
             <input type="number" step="any" id="addBioValore" placeholder="0.0" required class="w-32 text-center text-3xl font-black text-gray-800 outline-none bg-transparent placeholder-gray-300">
             <span id="addBioUnitaLabel" class="text-xs font-bold text-gray-400">mg/dL</span>
           </div>
-        </div>        
-        <button type="submit" id="btnBioSubmit" class="w-full bg-gradient-to-r from-[var(--colore-principale)] to-[var(--colore-secondario)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Add Record </button>
+        </div>
+        <!-- 📊 RIQUADRO RANGE MEDICI DINAMICO (SOTTO IL VALORE) -->
+        <div id="boxRangeInformativo" class="hidden p-4 rounded-2xl border border-dashed border-gray-100 flex items-start gap-3 transition-all duration-300" style="background-color: var(--bg-page);">
+          <span class="text-base mt-0.5">
+             <svg class="w-5 h-5 text-[var(--colore-principale)]">
+              <use href="assets/icons/sprite.svg#value-check"></use>
+             </svg>
+          </span>
+          <div class="flex-1">
+            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-wider">Riferimenti Medici Standard</h4>
+            <div id="testoRangeInformativo" class="text-xs font-bold text-gray-700 mt-1 leading-relaxed"></div>
+          </div>
+        </div>
+        <button type="submit" id="btnBioSubmit" class="w-full bg-gradient-to-r from-[var(--colore-principale)] to-[var(--colore-secondario)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Aggiungi Biomarcatore </button>
       </form>
     </div>
     <div id="modalAllegati" class="hidden fixed bottom-0 left-0 right-0 md:left-[calc(50%-14rem)] md:right-[calc(50%-14rem)] bg-[var(--bg-page)] rounded-t-[2.5rem] shadow-2xl p-6 z-50 transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
@@ -501,6 +497,23 @@
         </div>
       </div>
     </div>
+    <!-- 📄 MODAL RAPIDO PER COLLEGARE MULTIPLI ALLEGATI A UNA TERAPIA -->
+    <div id="modalCollegaAllegati" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-end justify-center" onclick="chiudiModalCollegaAllegati()">
+      <div class="w-full max-w-md bg-[var(--bg-page)] rounded-t-[2.5rem] p-6 space-y-4 shadow-2xl transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
+        <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-2"></div>
+        <div>
+          <h3 class="text-base font-black text-[var(--colore-scuro)] uppercase tracking-wider">Collega Documenti</h3>
+          <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Seleziona i referti da associare a questo piano</p>
+        </div>
+        <!-- ID Nascosto della terapia corrente che stiamo modificando -->
+        <input type="hidden" id="collegaTerapiaTargetId">
+        <!-- Lista dinamica degli allegati con checkbox (Popolata da JS) -->
+        <div id="listaAllegatiSelezionabili" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar py-1">
+          <!-- I tuoi allegati compariranno qui con un interruttore -->
+        </div>
+        <button onclick="salvaCollegamentiAllegatiBackground()" class="w-full bg-[var(--colore-principale)] text-white font-extrabold p-3.5 rounded-2xl shadow-md text-xs tracking-wider uppercase active:scale-95 transition-all"> ✓ Conferma Collegamenti </button>
+      </div>
+    </div>
     <!-- Modal promemoria -->
     <div id="modalPromemoria" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-end justify-center" onclick="chiudiModalPromemoria()">
       <div class="w-full max-w-md bg-[var(--bg-page)] rounded-t-[2.5rem] p-6 space-y-4 shadow-2xl transform translate-y-0 transition-transform" onclick="event.stopPropagation()">
@@ -571,6 +584,24 @@
         </div>
       </div>
     </div>
+    <!-- 🚨 SYSTEM MODAL CUSTOM: AVVISI E CONFERME IN STILE PWA -->
+<div id="pwaSystemModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-[100] flex items-center justify-center p-6 animate-fade-in">
+  <div class="w-full max-w-sm bg-[var(--bg-surface)] border border-gray-100 rounded-[2.5rem] p-6 shadow-2xl space-y-4 text-center transform scale-95 transition-transform duration-300">
+    <div class="w-12 h-12 bg-[var(--colore-principale)]/10 text-[var(--colore-principale)] rounded-2xl flex items-center justify-center text-xl mx-auto" id="pwaModalIcon">
+      🔔
+    </div>
+    <div class="space-y-1">
+      <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider" id="pwaModalTitle">Avviso di Sistema</h3>
+      <p class="text-xs font-bold text-gray-500 leading-relaxed px-2" id="pwaModalMessage">Messaggio...</p>
+    </div>
+    
+    <!-- Pulsantiera Dinamica -->
+    <div class="flex gap-2 pt-2" id="pwaModalButtonsContainer">
+      <!-- I bottoni verranno iniettati al volo da JavaScript -->
+    </div>
+  </div>
+</div>
+
     <script src="temi.js"></script>
     <script src="script.js"></script>
   </body>
