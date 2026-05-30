@@ -11,6 +11,7 @@
         	// FORZA IL CARICAMENTO DEL TEMA SALVATO IMMEDIATAMENTE
         	if (typeof inizializzaTemaAllAvvio === 'function') {
         		inizializzaTemaAllAvvio();
+				controllaStatoSincronizzazione();
         	}
         	const select = document.getElementById('addBioNome');
         	select.innerHTML = "";
@@ -24,8 +25,7 @@
         	document.getElementById('addDocFile').addEventListener('change', function() {
         		if (this.files.length > 0) {
         			document.getElementById('uploadFileLabel').innerText = "Selezionato: " + this.files[0].name;
-
-        			inizializzaTemaAllAvvio();
+        			inizializzaTemaAllAvvio();					
         		}
         	});
 
@@ -257,6 +257,7 @@
 
         			renderFolders();
         			if (currentOpenYear) refreshTimeline();
+					controllaStatoSincronizzazione();
         		})
         		.catch(err => alert("Errore nel caricamento dati dal cloud: " + err))
         		.finally(() => {
@@ -1172,6 +1173,7 @@
         	closeAllModals();
         	renderFolders();
         	if (currentOpenYear) refreshTimeline();
+			 controllaStatoSincronizzazione();
         }
 
 
@@ -1312,6 +1314,7 @@
         		}
         		processaSalvataggioAllegato(nuovoAllegato, index);
         	}
+			 controllaStatoSincronizzazione();
         }
 
         // Sotto-funzione di supporto locale per gli allegati
@@ -1663,6 +1666,7 @@
         	// Chiude il modal e rinfresca la pagina terapie
         	chiudiModalTerapia();
         	if (typeof renderTerapie === 'function') renderTerapie();
+			 controllaStatoSincronizzazione();
         }
 
 
@@ -1860,6 +1864,7 @@
         			if (res.status === "success") {
         				// Sincronizzazione riuscita: azzera il flag dei dati pendenti
         				localStorage.setItem('health-app-pending-sync', 'false');
+						controllaStatoSincronizzazione();
         				alert("Sincronizzazione completata con successo sul Cloud! Cloud protetto. ☁️");
         			} else {
         				alert("Errore del server Google: " + res.message);
@@ -1885,3 +1890,16 @@
         		return e.returnValue;
         	}
         });
+
+function controllaStatoSincronizzazione() {
+    const banner = document.getElementById('syncWarningBanner');
+    if (!banner) return;
+
+    const haDatiPendenti = localStorage.getItem('health-app-pending-sync') === 'true';
+
+    if (haDatiPendenti) {
+        banner.classList.remove('hidden'); // Accende il banner giallo
+    } else {
+        banner.classList.add('hidden');    // Spegne il banner
+    }
+}
