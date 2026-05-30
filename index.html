@@ -12,7 +12,7 @@
     <script src="https://npmcdn.com/flatpickr/dist/l10n/it.js"></script>
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
   </head>
   <body class="relative min-h-screen overflow-hidden max-w-md mx-auto shadow-2xl bg-[var(--bg-page)]" onclick="clearEditMode()">
@@ -23,7 +23,7 @@
     <!-- Welcome screen iniziale -->
     <div id="welcomeScreen" class="fixed inset-0 bg-[var(--colore-principale)] z-50 flex select-none transition-transform duration-600 ease-out overflow-hidden" style="font-family: system-ui, -apple-system, sans-serif;">
       <!-- Lato sinistro: titolo, descrizione e mascot -->
-      <div class="w-[72%] h-full relative flex flex-col justify-between p-6 text-white bg-[var(--colore-principale)]">
+      <div class="w-[72%] h-full relative flex flex-col justify-between p-6 text-white bg-[var(--colore-secondario)]">
         <div class="pt-8">
           <h1 class="text-4xl font-[1000] tracking-tighter leading-[0.8] uppercase flex flex-col">
             <span class="text-[var(--colore-scuro)]">Health!</span>
@@ -34,33 +34,26 @@
         </div>
         <div class="absolute left-6 bottom-20 z-10 pointer-events-none">
           <img src="assets/icons/mascotte.png" class="w-350 h-350 object-contain filter drop-shadow-[0_12px_20px_rgba(26,22,54,0.25)]" style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;
-                 filter: drop-shadow(1.5px 0px 0px #1a1636) 
-                         drop-shadow(-1.5px 0px 0px #1a1636) 
-                         drop-shadow(0px 1.5px 0px #1a1636) 
-                         drop-shadow(0px -1.5px 0px #1a1636)
-                         drop-shadow(1px 1px 0px #1a1636)
-                         drop-shadow(-1px -1px 0px #1a1636)
-                         drop-shadow(1px -1px 0px #1a1636)
-                         drop-shadow(-1px 1px 0px #1a1636);">
+                 filter: drop-shadow(5px 5px 5px var(--colore-chiaro));">
         </div>
         <div class="pb-6">
           <p class="text-[8px] font-black tracking-widest text-[var(--colore-scuro)]/40 uppercase whitespace-nowrap" style="transform: rotate(-90deg) translateX(-100%); transform-origin: top left;"> @ixalexbyron &copy; 2026 </p>
         </div>
       </div>
       <!-- Lato destro: brand Vitals e gesto di ingresso -->
-      <div class="w-[28%] h-full bg-[var(--colore-chiaro)] relative flex flex-col justify-between items-center py-8 text-[var(--colore-principale)]">
+      <div class="w-[28%] h-full bg-[var(--colore-principale)] relative flex flex-col justify-between items-center py-8 text-[var(--colore-chiaro)]">
         <div class="h-full flex items-center justify-center relative">
-          <span class="text-6xl font-[1000] uppercase tracking-tighter select-none opacity-20" style="transform: rotate(90deg); white-space: nowrap; font-size: 5.5rem; letter-spacing: -4px; color: #1a1636;"> Vitals </span>
+          <span class="text-6xl font-[1000] uppercase tracking-tighter select-none opacity-50" style="transform: rotate(90deg); white-space: nowrap; font-size: 5.5rem; letter-spacing: -4px; color:var(--colore-scuro);"> Vitals </span>
         </div>
         <div class="flex flex-col items-center gap-4 w-full px-2 z-20">
-          <div class="text-xs font-black tracking-tighter flex flex-col items-center gap-1 opacity-60 text-[#1a1636]">
+          <div class="text-xs font-black tracking-tighter flex flex-col items-center gap-1 opacity-60 text-[var(--colore-chiaro)]">
             <span>✦</span>
             <span>◯</span>
           </div>
-          <div class="w-1 h-12 bg-[#1a1636] opacity-15 rounded-xs flex gap-[1px] p-[1px] overflow-hidden" style="writing-mode: vertical-lr;"> ||||||| | ||||| ||| || </div>
+          <div class="w-1 h-12 bg-[var(--colore-chiaro)] opacity-15 rounded-xs flex gap-[1px] p-[1px] overflow-hidden" style="writing-mode: vertical-lr;"> ||||||| | ||||| ||| || </div>
           <div class="flex flex-col items-center animate-pulse text-[#1a1636]" onclick="goToHome()">
-            <span class="text-xs font-black uppercase tracking-widest mb-1 cursor-pointer" style="font-size: 8px; font-variant: small-caps;">Swipe Up</span>
-            <span class="text-lg font-black leading-none transform rotate-180 -translate-y-1 cursor-pointer">⋏</span>
+            <span class="text-xs text-[var(--colore-chiaro)] tracking-widest mb-1 cursor-pointer" style="font-size: 8px; font-variant: small-caps;">Swipe Up</span>
+            <span class="text-lg text-[var(--colore-chiaro)] leading-none transform rotate-180 -translate-y-1 cursor-pointer">⋏</span>
           </div>
         </div>
       </div>
@@ -71,10 +64,10 @@
         <!-- Intestazione home -->
         <div class="flex justify-between items-center my-4">
           <div>
-            <h1 id="mainGreeting" class="text-xl font-black text-gray-800 tracking-tight">Salute Cloud</h1>
+            <h1 id="mainGreeting" class="text-xl font-black text-[var(--colore-accento)] tracking-tight">Salute Cloud</h1>
             <p class="text-xs text-gray-400 font-semibold uppercase">Pannello di controllo</p>
           </div>
-          <div class="w-10 h-10 bg-[var(--colore-principale)]/10 rounded-full flex items-center justify-center text-[var(--colore-principale)] font-bold cursor-pointer" onclick="fetchDatiCloud()">
+          <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[var(--colore-principale)] font-bold cursor-pointer" onclick="fetchDatiCloud()">
             <svg class="w-8 h-8 text-[var(--colore-principale)]">
               <use href="assets/icons/sprite.svg#synchronize"></use>
             </svg>
@@ -89,21 +82,21 @@
               </svg>
             </div>
             <div>
-              <h3 class="text-xs font-black text-gray-800">Andamento & Statistiche</h3>
+              <h3 class="text-xs font-black text-[var(--colore-accento)] uppercase tracking-wider">Andamento & Statistiche</h3>
               <p class="text-xs text-gray-400 font-medium">Analizza i grafici storici</p>
             </div>
           </div>
           <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm">
-            <svg class="w-6 h-6  text-[var(--colore-principale)]">
+            <svg class="w-6 h-6 text-[var(--colore-principale)]">
               <use href="assets/icons/sprite.svg#arrow-right"></use>
             </svg>
           </div>
         </div>
         <!-- Sezione prossime analisi -->
-        <div class="p-5 rounded-[2rem] shadow-sm space-y-4 mt-2" style="background: var(--gradient-promemoria); border: var(--border-sections);">
+        <div class="p-5 rounded-[2rem] shadow-sm space-y-4 mt-2" style="background: var(--gradient-stats); border: var(--border-sections);">
           <div class="flex justify-between items-center px-1">
             <div>
-              <h4 class="text-base font-black text-gray-800">Prossime Analisi</h4>
+              <h4 class="text-sm font-black text-[var(--colore-accento)] uppercase tracking-wider">Prossime Analisi</h4>
               <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Esami pianificati e scadenze</p>
             </div>
             <button onclick="apriModalNuovoPromemoria()" class="w-7 h-7 text-[var(--colore-principale)] bg-white rounded-xl flex items-center justify-center text-m font-black active:scale-95 transition-all">
@@ -135,7 +128,7 @@
       <div id="page-search" class="hidden w-full h-full p-6 overflow-y-auto no-scrollbar pb-32">
         <!-- Pagina ricerca -->
         <div class="my-4">
-          <h2 class="text-2xl font-extrabold text-gray-800">Cerca Biomarcatore</h2>
+          <h2 class="text-2xl font-extrabold text-[var(--colore-accento)]">Cerca Biomarcatore</h2>
           <p class="text-xs text-gray-400 font-semibold uppercase mb-4">Storico analisi incrociato</p>
           <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex items-center gap-3 shadow-sm mb-6">
             <span class="text-xl text-gray-400">
@@ -153,7 +146,7 @@
       <!-- Pagina terapie -->
       <div id="page-therapies" class="hidden min-h-screen pb-32 animate-fade-in">
         <header class="p-6 pb-2">
-          <h1 class="text-2xl font-black text-gray-800 leading-none">Piani Terapeutici</h1>
+          <h1 class="text-2xl font-black text-[var(--colore-accento)] leading-none">Piani Terapeutici</h1>
           <p class="text-[10px] font-bold text-gray-400 uppercase mt-1">Monitoraggio terapie e scadenze farmaci</p>
         </header>
         <div class="px-6 mt-4" id="therapiesContainer">
@@ -163,9 +156,9 @@
       <!-- Pagina impostazioni -->
       <div id="page-settings" class="hidden w-full h-full p-6 overflow-y-auto no-scrollbar pb-32">
         <div class="my-4">
-          <h2 class="text-2xl font-extrabold text-gray-800">Impostazioni</h2>
-          <div class="mb-6 p-4 bg-[var(--bg-surface)] rounded-2xl border border-gray-100">
-            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Tuo Nome (per il saluto nella Home)</label>
+          <h2 class="text-2xl font-extrabold text-[var(--colore-accento)]">Impostazioni</h2>
+          <div class="mb-6 p-4 rounded-2xl border border-gray-100" style="background: var(--gradient-stats); border: var(--border-sections);">
+            <label class="block text-xs font-bold text-[var(--colore-accento)] uppercase tracking-wider mb-2">Tuo Nome (per il saluto nella Home)</label>
             <div class="flex gap-2">
               <input type="text" id="inputNomeUtente" placeholder="Inserisci il tuo nome..." class="flex-grow p-3 bg-[var(--bg-surface)] rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--colore-principale)]/50">
               <button onclick="salvaNomeImpostazioni()" class="bg-[var(--colore-principale)] text-white px-4 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#837ddc] active:scale-95 transition-all">Salva</button>
@@ -173,34 +166,35 @@
           </div>
           <p class="text-xs text-gray-400 font-semibold uppercase">Configurazione applicazione</p>
           <!-- Selettore temi -->
-          <div class="mt-3 p-4 rounded-2xl border border-gray-100 space-y-3 bg-[var(--bg-surface)]">
-            <p class="text-[10px] font-black uppercase text-gray-400 tracking-wider">Personalizza Tema App</p>
+          <div class="mt-3 p-4 rounded-2xl border border-gray-100 space-y-3" style="background: var(--gradient-stats); border: var(--border-sections);">
+            <p class="text-[10px] font-black uppercase text-[var(--colore-accento)] tracking-wider">Personalizza Tema App</p>
             <div class="grid grid-cols-3 gap-2">
               <button onclick="applicaTema('default')" class="p-2.5 bg-[#c3b1e1] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Delicato </button>
-              <button onclick="applicaTema('sky-sand')" class="p-2.5 bg-[#a8d8f1] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Sereno </button>
-              <button onclick="applicaTema('mint-peach')" class="p-2.5 bg-[#8fd3c5] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Pastello </button>
-              <button onclick="applicaTema('cyberpunk')" class="p-2.5 bg-[#444ade] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Cyberpunk </button>
-              <button onclick="applicaTema('sage-clay')" class="p-2.5 bg-[#6b7a6e] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Profondo </button>
-              <button onclick="applicaTema('plum-gold')" class="p-2.5 bg-[#7a607a] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Smorzato </button>
+              <button onclick="applicaTema('icy')" class="p-2.5 bg-[#7692FF] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Icy </button>
+              <button onclick="applicaTema('melon')" class="p-2.5 bg-[#FDCB7B] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Melon </button>
+              <button onclick="applicaTema('dark-midnight')" class="p-2.5 bg-[#464c55] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Dark Midnight </button>
+              <button onclick="applicaTema('blue-ocean-dark')" class="p-2.5 bg-[#6f7fae] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Blue Ocean Dark </button>
+              <button onclick="applicaTema('herbs')" class="p-2.5 bg-[#90A875] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Herbs </button>
             </div>
           </div>
-          <div class="mt-2 p-5 rounded-2xl border border-gray-100 space-y-4 bg-[var(--bg-surface)]">
+          <div class="mt-2 p-5 rounded-2xl border border-gray-100 space-y-4" style="background: var(--gradient-stats); border: var(--border-sections);">
             <div class="flex items-center justify-between p-2 border-b border-gray-50">
               <div class="flex items-center gap-3">
                 <span class="text-xl">👤</span>
                 <div>
-                  <h4 class="text-xs font-bold text-gray-800">Profilo Utente</h4>
+                  <h4 class="text-xs font-bold text-[var(--colore-accento)]">Profilo Utente</h4>
                   <p class="text-[10px] text-gray-400">Account Cloud sincronizzato</p>
                 </div>
               </div>
               <span class="text-xs text-green-500 font-bold bg-green-50 px-2 py-1 rounded-lg">Attivo</span>
             </div>
-            <div class="flex items-center justify-between p-2 cursor-pointer" onclick="fetchDatiCloud()">
+            <div class="flex items-center justify-between p-2 cursor-pointer" onclick="forzaSincronizzazioneManuale()">
               <div class="flex items-center gap-3">
-                <span class="text-xl">🔄</span>
+                <span class="text-xl">📤</span>
+                <!-- Cambiata l'emoji in una freccia in su per farti capire che stai inviando! -->
                 <div>
-                  <h4 class="text-xs font-bold text-gray-800">Forza Sincronizzazione</h4>
-                  <p class="text-[10px] text-gray-400">Aggiorna dati da Google Sheets</p>
+                  <h4 class="text-xs font-bold text-[var(--colore-accento)]">Salva modifiche nel Cloud</h4>
+                  <p class="text-[10px] text-gray-400">Invia esami e allegati a Google Sheets</p>
                 </div>
               </div>
               <span class="text-gray-400 text-xs font-bold">→</span>
@@ -225,11 +219,11 @@
               </svg>
             </button>
             <div>
-              <h2 class="text-xl font-black text-gray-800 leading-none">Grafici Storici</h2>
+              <h2 class="text-xl font-black text-[var(--colore-accento)] leading-none">Grafici Storici</h2>
               <p class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">Analisi fluttuazione</p>
             </div>
           </div>
-          <button onclick="toggleFilterSidebar(true); event.stopPropagation();" class="p-3 bg-[var(--bg-surface)] border border-gray-100 shadow-sm rounded-2xl text-lg hover:bg-purple-50/50 active:scale-95 transition-all">
+          <button onclick="toggleFilterSidebar(true); event.stopPropagation();" class="p-3 bg-[var(--bg-surface)] border border-gray-100 shadow-sm rounded-2xl text-lg hover:bg-[var(--colore-principale)]-50/50 active:scale-95 transition-all">
             <svg class="w-7 h-7 text-[var(--colore-principale)]">
               <use href="assets/icons/sprite.svg#filter"></use>
             </svg>
@@ -239,7 +233,7 @@
         <div id="filterSidebarOverlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-50" onclick="toggleFilterSidebar(false)">
           <div id="filterSidebar" class="filter-sidebar absolute top-0 right-0 h-full w-64 bg-[var(--bg-surface)] shadow-2xl p-6 flex flex-col translate-x-full" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
-              <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider">Filtra Esami</h3>
+              <h3 class="text-sm font-black text-[var(--colore-accento)] uppercase tracking-wider">Filtra Esami</h3>
               <button onclick="toggleFilterSidebar(false)" class="text-gray-400 font-bold text-sm p-1">✕</button>
             </div>
             <div class="flex-1 overflow-y-auto no-scrollbar space-y-2" id="filtersScrollContainer"></div>
@@ -254,7 +248,7 @@
       <div class="bubble-item bubble-allegato absolute top-0 left-0">
         <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="openModal('modalAllegati')">
           <div class="w-12 h-12 bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white rounded-full shadow-lg flex items-center justify-center border border-rose-100 hover:scale-110 transition-transform p-3">
-            <svg class="w-7 h-7 text-[var(--colore-chiaro)]">
+            <svg class="w-7 h-7 text-white">
               <use href="assets/icons/sprite.svg#paperclip"></use>
             </svg>
           </div>
@@ -264,7 +258,7 @@
       <div class="bubble-item bubble-record absolute top-0 left-0">
         <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="openModal('modalBiomarcatori')">
           <div class="w-12 h-12 bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white rounded-full shadow-lg flex items-center justify-center border border-rose-100 hover:scale-110 transition-transform p-3">
-            <svg class="w-7 h-7 text-[var(--colore-chiaro)]">
+            <svg class="w-7 h-7 text-white">
               <use href="assets/icons/sprite.svg#blood-drop"></use>
             </svg>
           </div>
@@ -272,7 +266,7 @@
         </div>
       </div>
     </div>
-    <button id="floatingAddBtn" onclick="toggleBubbleMenu(); event.stopPropagation();" class="hidden fixed bottom-28 right-6 md:right-[calc(50%-12rem)] w-14 h-14 bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white rounded-full shadow-lg shadow-purple-200 flex items-center justify-center text-2xl font-bold z-50 transition-all active:scale-95">
+    <button id="floatingAddBtn" onclick="toggleBubbleMenu(); event.stopPropagation();" class="hidden fixed bottom-28 right-6 md:right-[calc(50%-12rem)] w-14 h-14 bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white rounded-full shadow-lg shadow-[var(--colore-principale)] flex items-center justify-center text-2xl font-bold z-50 transition-all active:scale-95">
       <span id="plusIcon" class="transition-transform duration-300 inline-block">
         <svg class="w-10 h-10">
           <use href="assets/icons/sprite.svg#plus"></use>
@@ -328,7 +322,7 @@
     <!-- Modal biomarcatori -->
     <div id="modalBiomarcatori" class="hidden fixed bottom-0 left-0 right-0 md:left-[calc(50%-14rem)] md:right-[calc(50%-14rem)] bg-[var(--bg-page)] rounded-t-[2.5rem] shadow-2xl p-6 z-50 transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
       <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
-      <h3 id="modalBioTitolo" class="text-xl font-black text-gray-800 mb-4">Nuovo Record</h3>
+      <h3 id="modalBioTitolo" class="text-xl font-black text-[var(--colore-accento)] mb-4">Nuovo Record</h3>
       <form id="formBiomarcatori" class="space-y-4" onsubmit="saveBiomarcatore(event)">
         <input type="hidden" id="editIndex" value="-1">
         <input type="hidden" id="oldData" value="">
@@ -350,7 +344,7 @@
             <label class="block text-[10px] font-bold text-gray-400 uppercase">Biomarcatore</label>
             <select id="addBioNome" onchange="updateModalRanges()" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent appearance-none cursor-pointer max-h-40 overflow-y-auto"></select>
           </div>
-          <span class="text-xs text-gray-400 pointer-events-none">▼</span>
+          <span class="text-xs text-[var(--colore-principale)] pointer-events-none">▼</span>
         </div>
         <div class="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--colore-principale)]/30 flex flex-col items-center justify-center shadow-sm">
           <label class="text-[10px] font-bold text-gray-400 uppercase mb-1">Valore Riscontrato</label>
@@ -359,13 +353,12 @@
             <span id="addBioUnitaLabel" class="text-xs font-bold text-gray-400">mg/dL</span>
           </div>
         </div>
-        <div id="addBioRangeBox" class="bg-purple-50/50 p-4 rounded-2xl border border-purple-100 text-center text-xs font-semibold text-gray-500"></div>
         <button type="submit" id="btnBioSubmit" class="w-full bg-gradient-to-r from-[var(--colore-principale)] to-[var(--colore-secondario)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Add Record </button>
       </form>
     </div>
     <div id="modalAllegati" class="hidden fixed bottom-0 left-0 right-0 md:left-[calc(50%-14rem)] md:right-[calc(50%-14rem)] bg-[var(--bg-page)] rounded-t-[2.5rem] shadow-2xl p-6 z-50 transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
       <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
-      <h3 class="text-xl font-black text-gray-800 mb-4">Aggiungi Documento</h3>
+      <h3 class="text-xl font-black text-[var(--colore-accento)] mb-4">Aggiungi Documento</h3>
       <form id="formAllegati" class="space-y-4" onsubmit="saveAllegato(event)">
         <input type="hidden" id="editDocIndex" value="-1">
         <input type="hidden" id="oldDocData" value="">
@@ -442,18 +435,18 @@
     <div id="modalTerapia" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-6 transition-all duration-300">
       <div class="bg-[var(--bg-page)] w-full max-w-md rounded-3xl p-6 shadow-2xl border border-gray-100 transform scale-95 transition-all duration-300 flex flex-col max-h-[85vh]">
         <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4 flex-shrink-0">
-          <h3 id="modalTerapiaTitolo" class="text-base font-black text-gray-800 uppercase tracking-wider">Nuovo Piano Terapeutico</h3>
+          <h3 id="modalTerapiaTitolo" class="text-base font-black text-[var(--colore-accento)] uppercase tracking-wider">Nuovo Piano Terapeutico</h3>
           <button onclick="chiudiModalTerapia()" class="text-gray-400 font-bold text-sm p-1 hover:text-gray-600">✕</button>
         </div>
         <div class="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-4">
           <input type="hidden" id="inputTerapiaId">
           <div>
             <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Nome Terapia / Patologia</label>
-            <input type="text" id="inputTerapiaNome" placeholder="Es. Testosterone, Ipertensione..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
+            <input type="text" id="inputTerapiaNome" placeholder="Es. Testosterone, Cistite..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
           </div>
           <div>
             <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Nome Farmaco / Soluzione</label>
-            <input type="text" id="inputTerapiaFarmaco" placeholder="Es. Testoviron, Eutirox..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
+            <input type="text" id="inputTerapiaFarmaco" placeholder="Es. Testoviron, Cistiflor plus..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
           </div>
           <div>
             <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Indicazioni e Dosaggio</label>
@@ -488,7 +481,7 @@
         </div>
         <div class="flex gap-3 border-t border-gray-100 pt-4 flex-shrink-0">
           <button onclick="chiudiModalTerapia()" class="flex-1 py-3 bg-gray-100 text-gray-500 text-xs font-black uppercase tracking-wider rounded-xl active:scale-95 transition-all">Annulla</button>
-          <button onclick="salvaTerapia()" class="flex-1 py-3 bg-[var(--colore-principale)] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all">Salva</button>
+          <button onclick="saveTerapia(event)" class="flex-1 py-3 bg-[var(--colore-principale)] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all">Salva</button>
         </div>
       </div>
     </div>
@@ -496,7 +489,7 @@
     <div id="modalPromemoria" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-end justify-center" onclick="chiudiModalPromemoria()">
       <div class="w-full max-w-md bg-[var(--bg-page)] rounded-t-[2.5rem] p-6 space-y-4 shadow-2xl transform translate-y-0 transition-transform" onclick="event.stopPropagation()">
         <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-2"></div>
-        <h3 class="text-lg font-black text-gray-800">Pianifica Analisi</h3>
+        <h3 class="text-lg font-black text-[var(--colore-accento)]">Pianifica Analisi</h3>
         <form id="formPromemoria" class="space-y-3" onsubmit="salvaPromemoria(event)">
           <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
             <div class="flex-1">
@@ -517,7 +510,7 @@
     <!-- Modal personalizzazione cartella -->
     <div id="modalColorPicker" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closeColorPicker()">
       <div class="bg-[var(--bg-page)] p-6 rounded-3xl w-80 max-w-[90%] shadow-2xl border border-gray-100 transform scale-95 transition-transform" onclick="event.stopPropagation()">
-        <h4 class="text-sm font-extrabold text-gray-800 text-center mb-1">Personalizza Cartella</h4>
+        <h4 class="text-sm font-extrabold text-gray-400 text-center mb-1">Personalizza Cartella</h4>
         <p class="text-[10px] font-bold text-gray-400 text-center uppercase tracking-wider mb-4">Seleziona un colore pastello</p>
         <input type="hidden" id="selectedFolderYear" value="">
         <div class="grid grid-cols-4 gap-3 mb-4">
@@ -534,15 +527,16 @@
           <button onclick="applicaColoreCartella('#ddfff7')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#ddfff7] hover:scale-105 active:scale-95 transition-transform"></button>
           <button onclick="applicaColoreCartella('#e8dbfc')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#e8dbfc] hover:scale-105 active:scale-95 transition-transform"></button>
         </div>
-        <button onclick="closeColorPicker()" class="w-full mt-2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold text-xs transition-colors uppercase tracking-wider"> Annulla </button>
         <div class="mt-4 border-t border-gray-100 pt-3">
           <p class="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-2">Scegli un'icona</p>
-          <div class="grid grid-cols-5 gap-2 justify-items-center bg-[var(--bg-surface)] p-2 rounded-xl">
+          <div class="grid grid-cols-5 gap-2 justify-items-center bg-[var(--bg-page)] p-2 rounded-xl">
             <!-- 💡 Inserisci gli ID esatti dei simboli presenti nel tuo sprite.svg -->
             <button onclick="applicaIconaCartella('star')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">⭐</button>
             <button onclick="applicaIconaCartella('sun')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">☀️</button>
             <button onclick="applicaIconaCartella('moon')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🌙</button>
             <button onclick="applicaIconaCartella('cloud')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">☁️</button>
+            <button onclick="applicaIconaCartella('bolt')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">⚡</button>
+            <button onclick="applicaIconaCartella('tornado')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🌪️</button>
             <button onclick="applicaIconaCartella('flame')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🔥</button>
             <button onclick="applicaIconaCartella('planet')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🪐</button>
             <button onclick="applicaIconaCartella('ufo')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🛸</button>
@@ -550,6 +544,8 @@
             <button onclick="applicaIconaCartella('ghost')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">👻</button>
             <button onclick="applicaIconaCartella('bone')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🦴</button>
             <button onclick="applicaIconaCartella('crown')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">👑</button>
+            <button onclick="applicaIconaCartella('bomb')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">💣</button>
+            <button onclick="applicaIconaCartella('donut')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🍩</button>
           </div>
           <!-- 🗑️ IL TASTO ELIMINA -->
           <button onclick="eliminaInteroAnnoArchivio()" class="w-full bg-red-500/10 text-red-500 font-black p-2.5 rounded-xl text-[9px] tracking-wider uppercase hover:bg-red-500 hover:text-white active:scale-95 transition-all flex items-center justify-center gap-1.5">
