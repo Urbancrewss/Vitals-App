@@ -288,6 +288,19 @@
             </div>
         `;
         	}
+
+			    // Incolla questo dentro aggiornaRiquadroInfoRange() insieme agli altri casi speciali:
+             else if (conf.tipoSpeciale === "vitaminad" || biomarcatoreSelezionato === "Vitamina D3") {
+             htmlContenuto = `
+             <div class="space-y-1">
+                <p class="text-red-500 flex items-center gap-1">🚨 Deficienza: <span class="font-black">&lt; 10 ${conf.unita}</span></p>
+                <p class="text-amber-500 flex items-center gap-1">🟡 Insufficienza: <span class="font-black">10 - 29 ${conf.unita}</span></p>
+                <p class="text-green-600 flex items-center gap-1">🟢 Sufficienza: <span class="font-black">30 - 100 ${conf.unita}</span></p>
+                <p class="text-purple-500 flex items-center gap-1">🔮 Tossicità: <span class="font-black">&gt; 100 ${conf.unita}</span></p>
+             </div>
+               `;
+            }
+
         	// 📈 CASO 3: MASSIMA SOGLIA (Fino a...)
         	else if (conf.maxSoglia !== undefined && conf.maxSoglia !== null) {
         		htmlContenuto = `Valore normale atteso: <span class="text-green-600 font-black">Fino a ${conf.maxSoglia} ${conf.unita}</span>`;
@@ -299,7 +312,7 @@
         	// ◯ CASO 5: MONITORAGGIO PURO
         	else {
         		htmlContenuto = `Parametro di <span class="text-purple-500 font-black">Monitoraggio Libero</span> (Nessun range fisso di riferimento).`;
-        	}
+        	}		
 
         	// Inietta il testo e mostra il box con una transizione fluida
         	testo.innerHTML = htmlContenuto;
@@ -969,10 +982,29 @@
         					emoji = "📈";
         					colorClass = "text-red-500 bg-red-50/60 border-red-100";
         				}
+
+					else if (conf.tipoSpeciale === "vitaminad" || esame.biomarcatore === "Vitamina D3") {
+						if (esame.valore >= 30 && esame.valore <= 100) {
+                         rangeText = "Sufficienza (30-100)";
+					    } else if (esame.valore >= 10 && esame.valore < 30) {
+						 emoji = "⚠️";
+                         colorClass = "text-amber-500 bg-amber-50/60 border-amber-100";
+                         rangeText = "Insufficienza (10-29)";
+                        } else if (esame.valore < 10) {
+                         emoji = "🚨";
+                         colorClass = "text-red-500 bg-red-50/60 border-red-100";
+                         rangeText = "Deficienza (<10)";
+                        } else {
+                         emoji = "☢️";
+                         colorClass = "text-purple-500 bg-purple-50/60 border-purple-100";
+                         rangeText = "Tossicità (>100)";
+                        }
+                    }
+						
         				rangeText = `Ref: ${conf.min}-${conf.max}`;
         			} else {
         				rangeText = "Monitoraggio";
-        			}
+        			}					
 
         			const card = document.createElement('div');
         			card.id = `card-${index}`;
