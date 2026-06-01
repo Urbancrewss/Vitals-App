@@ -240,3 +240,20 @@ span.flatpickr-weekday {
 .navigation ul li:nth-child(4).active ~ .indicator {
   transform: translateX(260px);
 }
+
+/* 📱 FIX DI SCROLL PER MOBILE: Impedisce al menu in basso di coprire i documenti */
+
+/* Forza un riempimento generoso in fondo alla timeline quando è aperta */
+.timeline-container, #refreshTimeline, [id^="folder-timeline-"] {
+    padding-bottom: 7rem !important; /* Spinge l'ultimo allegato sopra la barra di navigazione */
+}
+
+/* Sicurezza per la zona di scroll principale dei contenuti della PWA */
+main, .page-content, #page-home {
+    padding-bottom: 8rem !important;
+}
+
+/* Assicura che la barra di navigazione abbia il corretto livello visivo e non si impasti con il testo sotto */
+#bottomNavBar {
+    z-index: 45 !important;
+}
