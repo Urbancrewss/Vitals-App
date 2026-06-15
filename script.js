@@ -1946,7 +1946,11 @@
         	const terapiaSelezionata = databaseTerapie.find(t => t.id === terapiaAttivaId) || databaseTerapie[0];
 
         	// Calcoliamo le date future in automatico
-        	const dateScadenzeHTML = calcolaDateScadenzeHTML(terapiaSelezionata.dataInizio, terapiaSelezionata.frequenzaGiorni, terapiaSelezionata.durataMesi);
+			const dataInizioPulita = terapiaSelezionata.dataInizio || "";
+			const frequenzaPulita = parseInt(terapiaSelezionata.frequenzaGiorni) || 1;
+			const durataPulita = parseInt(terapiaSelezionata.durataMesi) || 1;
+			
+			const dateScadenzeHTML = calcolaDateScadenzeHTML(dataInizioPulita, frequenzaPulita, durataPulita);
 
         	// 👑 IL FILTRO POTENZIATO: Cerca se l'ID o il nome di questa terapia è incluso nella stringa multi-id (colonna D degli allegati)
         	const allegatiDellaTerapia = databaseAllegati.filter(a => {
@@ -2230,65 +2234,88 @@
         }
 
         function calcolaDateScadenzeHTML(dataInizioStr, frequenzaGiorni, durataMesi) {
-        	const dataInizio = new Date(dataInizioStr);
-        	const frequenza = parseInt(frequenzaGiorni);
-        	const durataInMesi = parseInt(durataMesi);
+    if (!dataInizioStr) return `<p class="col-span-2 text-center text-[11px] font-medium text-gray-400 italic">Nessuna data d'inizio impostata.</p>`;
+    
+    // 👑 IL SUPER-CONVERTITORE UNIVERSALE DI DATE (Italiane, ISO, Barre, Trattini)
+    let stringaMappata = String(dataInizioStr).trim();
+    
+    // Se la data arriva in formato italiano (GG/MM/AAAA o GG-MM-AAAA) la gira in ISO (AAAA/MM/GG)
+    if (stringaMappata.includes("/") || stringaMappata.includes("-")) {
+        const separatore = stringaMappata.includes("/") ? "/" : "-";
+        const pezzi = stringaMappata.split(separatore);
+        // Se il primo pezzo ha 2 cifre (es. 21), significa che è una data italiana e va ribaltata!
+        if (pezzi[0].length === 2) {
+            stringaMappata = `${pezzi[2]}/${pezzi[1]}/${pezzi[0]}`;
+        } else {
+            // Se inizia già con l'anno, normalizza i trattini in barre per evitare il bug del fuso orario
+            stringaMappata = stringaMappata.replace(/-/g, "/");
+        }
+    }
 
-        	if (isNaN(dataInizio.getTime()) || isNaN(frequenza) || isNaN(durataInMesi)) return "";
+    const dataInizio = new Date(stringaMappata);
+    const frequenza = parseInt(frequenzaGiorni) || 1;
+    const durataInMesi = parseInt(durataMesi) || 1;
 
-        	const dataFine = new Date(dataInizio);
-        	dataFine.setMonth(dataFine.getMonth() + durataInMesi);
+    // Paracadute di sicurezza: se la data rimane invalida, ti avvisa a schermo invece di nascondere il tasto
+    if (isNaN(dataInizio.getTime())) {
+        return `<p class="col-span-2 text-center text-[11px] font-medium text-gray-400 italic">Data non riconosciuta (${dataInizioStr}).</p>`;
+    }
 
-        	let html = "";
-        	let dataCorrente = new Date(dataInizio);
-        	const oggi = new Date();
-        	oggi.setHours(0, 0, 0, 0); // Azzeriamo le ore per un confronto preciso sulla giornata
+    const dataFine = new Date(dataInizio);
+    dataFine.setMonth(dataFine.getMonth() + durataInMesi);
 
-        	let trovatoProssimo = false;
+    let html = "";
+    let dataCorrente = new Date(dataInizio);
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0); // Azzera le ore per il confronto giornaliero preciso
 
-        	// Ciclo finché non superiamo la data di fine terapia
-        	while (dataCorrente <= dataFine) {
-        		const tempoCorrente = dataCorrente.getTime();
-        		const dataConfronto = new Date(dataCorrente);
-        		dataConfronto.setHours(0, 0, 0, 0);
+    let trovatoProssimo = false;
+    let contatoreSicurezza = 0;
 
-        		let classeStile = "";
-        		let badge = "";
+    // Ciclo di generazione delle card (Massimo 40 per non intasare la memoria del telefono)
+    while (dataCorrente <= dataFine && contatoreSicurezza < 40) {
+        const dataConfronto = new Date(dataCorrente);
+        dataConfronto.setHours(0, 0, 0, 0);
 
-        		if (dataConfronto < oggi) {
-        			// Data passata (Grigia e sbiadita)
-        			classeStile = "bg-gray-50 border-gray-100 text-gray-300 line-through";
-        			badge = `<span class="text-[8px] font-bold uppercase text-gray-400">Presa</span>`;
-        		} else if (!trovatoProssimo && dataConfronto >= oggi) {
-        			// È la prima scadenza nel futuro: la contrassegniamo come prossima assunzione!
-        			classeStile = "bg-purple-50/60 border-purple-200 text-[var(--colore-principale)] font-black shadow-sm ring-1 ring-[var(--colore-principale)]/10 animate-pulse";
-        			badge = `<span class="text-[8px] font-black uppercase bg-[var(--colore-principale)] text-white px-1.5 py-0.5 rounded">Prossima</span>`;
-        			trovatoProssimo = true;
-        		} else {
-        			// Date future successive
-        			classeStile = "bg-white border-gray-100 text-gray-700 font-semibold";
-        			badge = `<span class="text-[8px] font-bold uppercase text-gray-400">Futura</span>`;
-        		}
+        let classeStile = "";
+        let badge = "";
 
-        		// Formattazione giorno/mese/anno leggibile
-        		const giorno = String(dataCorrente.getDate()).padStart(2, '0');
-        		const mese = String(dataCorrente.getMonth() + 1).padStart(2, '0');
-        		const anno = dataCorrente.getFullYear();
-        		const dataFormattata = `${giorno}/${mese}/${anno}`;
+        if (dataConfronto < oggi) {
+            // Data passata (Grigia sbiadita)
+            classeStile = "bg-gray-50 border-gray-100 text-gray-300 line-through";
+            badge = `<span class="text-[8px] font-bold uppercase text-gray-400">Presa</span>`;
+        } else if (!trovatoProssimo && dataConfronto >= oggi) {
+            // Prima scadenza futura o odierna: si accende con il badge viola pulsante!
+            classeStile = "bg-purple-50/60 border-purple-200 text-[var(--colore-principale)] font-black shadow-sm ring-1 ring-[var(--colore-principale)]/10 animate-pulse";
+            badge = `<span class="text-[8px] font-black uppercase bg-[var(--colore-principale)] text-white px-1.5 py-0.5 rounded">Prossima</span>`;
+            trovatoProssimo = true;
+        } else {
+            // Date future successive
+            classeStile = "bg-white border-gray-100 text-gray-700 font-semibold";
+            badge = `<span class="text-[8px] font-bold uppercase text-gray-400">Futura</span>`;
+        }
 
-        		html += `
+        // Formattazione italiana leggibile (GG/MM/AAAA)
+        const giorno = String(dataCorrente.getDate()).padStart(2, '0');
+        const mese = String(dataCorrente.getMonth() + 1).padStart(2, '0');
+        const anno = dataCorrente.getFullYear();
+        const dataFormattata = `${giorno}/${mese}/${anno}`;
+
+        html += `
             <div class="border p-2.5 rounded-xl flex items-center justify-between text-xs transition-all ${classeStile}">
                 <span>${dataFormattata}</span>
                 ${badge}
             </div>
         `;
 
-        		// Avanziamo con la frequenza dei giorni stabilita
-        		dataCorrente.setDate(dataCorrente.getDate() + frequenza);
-        	}
+        // Avanza dei giorni stabiliti nella frequenza
+        dataCorrente.setDate(dataCorrente.getDate() + frequenza);
+        contatoreSicurezza++;
+    }
 
-        	return html || `<p class="col-span-2 text-center text-[11px] font-medium text-gray-400 italic">Nessuna data generabile.</p>`;
-        }
+    return html || `<p class="col-span-2 text-center text-[11px] font-medium text-gray-400 italic">Nessuna data generabile.</p>`;
+}
+
 
         // ==================== FINE LOGICA TERAPIE ====================
 
