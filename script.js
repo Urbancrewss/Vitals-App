@@ -374,103 +374,136 @@
         // ==================== LOGICA PROMEMORIA ANALISI (VERSIONE BLINDATA ANTI-CONFLITTO) ====================
 
         function renderPromemoria() {
-        	const container = document.getElementById('promemoriaContainer');
-        	if (!container) return;
+    const container = document.getElementById('promemoriaContainer');
+    if (!container) return;
 
-        	if (!databasePromemoria || databasePromemoria.length === 0) {
-        		container.innerHTML = `<p class="text-[11px] font-medium text-gray-400 italic text-center py-4">Nessun esame pianificato per il futuro.</p>`;
-        		return;
-        	}
+    let agendaTotale = [];
 
-        	// Paracadute di sicurezza per scartare date non valide
-        	databasePromemoria = databasePromemoria.filter(pro => pro && pro.data && !isNaN(new Date(pro.data).getTime()));
+    // 🩸 1. CARICAMENTO DELLE PROSSIME ANALISI (ESAMI)
+    if (databasePromemoria && databasePromemoria.length > 0) {
+        databasePromemoria.forEach(pro => {
+            if (!pro || !pro.data) return;
 
-        	// Ordina i promemoria dal più vicino al più lontano
-        	databasePromemoria.sort((a, b) => new Date(a.data) - new Date(b.data));
+            // Creiamo un oggetto data pulito senza spaccare stringhe
+            const dataEsame = new Date(pro.data.replace(/-/g, "/"));
+            
+            if (!isNaN(dataEsame.getTime())) {
+                dataEsame.setHours(0, 0, 0, 0);
+                agendaTotale.push({
+                    tipo: "esame",
+                    nome: pro.nome || pro.biomarcatore || "Controllo",
+                    dataOggetto: dataEsame
+                });
+            }
+        });
+    }
 
-        	container.innerHTML = "";
-        	// [Cerca questo blocco dentro renderPromemoria() e sostituiscilo]
-        	container.innerHTML = "";
-        	databasePromemoria.forEach((pro, index) => {
-        		//  IL TRUCCO: Convertiamo la stringa della data in un oggetto Data Locale pulito
-        		const partiData = pro.data.split("-"); // Divide la stringa AAAA-MM-GG o GG-MM-AAAA
-        		let dataEsame;
+    // 💊 2. CARICAMENTO DELLE PROSSIME DOSI (FARMACI)
+    if (typeof databaseTerapie !== 'undefined' && databaseTerapie && databaseTerapie.length > 0) {
+        databaseTerapie.forEach(t => {
+            if (typeof ottieniDataProssimaAssunzione === 'function') {
+                const dataProssimaDose = ottieniDataProssimaAssunzione(t);
+                if (dataProssimaDose && !isNaN(dataProssimaDose.getTime())) {
+                    dataProssimaDose.setHours(0, 0, 0, 0);
+                    agendaTotale.push({
+                        tipo: "farmaco",
+                        nome: `💊 ${t.nome || 'Terapia'}`,
+                        dataOggetto: dataProssimaDose
+                    });
+                }
+            }
+        });
+    }
 
-        		if (partiData[0].length === 4) {
-        			// Se formato AAAA-MM-GG
-        			dataEsame = new Date(partiData[0], partiData[1] - 1, partiData[2]);
-        		} else {
-        			// Se formato GG-MM-AAAA
-        			dataEsame = new Date(partiData[2], partiData[1] - 1, partiData[0]);
-        		}
+    // Se l'agenda combinata è vuota, stampa il tuo messaggio pulito
+    if (agendaTotale.length === 0) {
+        container.innerHTML = `<p class="text-[11px] font-medium text-gray-400 italic text-center py-4">Nessun esame o assunzione pianificata.</p>`;
+        return;
+    }
 
-        		// Azzeriamo completamente l'orario dell'esame
-        		dataEsame.setHours(0, 0, 0, 0);
+    // 🌟 3. ORDINAMENTO CRONOLOGICO: Mette in alto la scadenza più vicina
+    agendaTotale.sort((a, b) => a.dataOggetto - b.dataOggetto);
 
-        		// Azzeriamo completamente l'orario di oggi
-        		const oggi = new Date();
-        		oggi.setHours(0, 0, 0, 0);
+    container.innerHTML = "";
 
-        		// CALCOLO MATEMATICO BLINDATO (Converte i millisecondi in giorni precisi)
-        		const diffTempo = dataEsame.getTime() - oggi.getTime();
-        		const diffGiorni = Math.round(diffTempo / (1000 * 60 * 60 * 24)); // Usiamo Math.round al posto di Math.ceil
+    // 🌟 4. STAMPA GRAFICA IDENTICA AL TUO LOOK ORIGINALE
+    agendaTotale.forEach((item) => {
+        const oggi = new Date();
+        oggi.setHours(0, 0, 0, 0);
 
-        		let testoGiorni = "";
-        		let coloreBadge = "bg-purple-50 text-[var(--colore-principale)]";
+        // Calcolo matematico dei giorni rimanenti (Il tuo codice originale intatto!)
+        const diffTempo = item.dataDro || item.dataOggetto.getTime() - oggi.getTime();
+        const diffGiorni = Math.round(diffTempo / (1000 * 60 * 60 * 24));
 
-        		if (diffGiorni < 0) {
-        			testoGiorni = "Scaduto";
-        			coloreBadge = "bg-red-50 text-red-500";
-        		} else if (diffGiorni === 0) {
-        			testoGiorni = "Oggi!"; // ✨ Ora se selezioni oggi scriverà finalmente OGGI!
-        			coloreBadge = "bg-amber-50 text-amber-500 animate-pulse";
-        		} else if (diffGiorni === 1) {
-        			testoGiorni = "Domani";
-        			coloreBadge = "bg-amber-50 text-amber-500";
-        		} else {
-        			testoGiorni = `- ${diffGiorni} giorni`;
-        		}
+        let testoGiorni = "";
+        let coloreBadge = "bg-purple-50 text-[var(--colore-principale)]";
 
+        if (diffGiorni < 0) {
+            testoGiorni = "Scaduto";
+            coloreBadge = "bg-red-50 text-red-500";
+        } else if (diffGiorni === 0) {
+            testoGiorni = "Oggi!";
+            coloreBadge = "bg-amber-50 text-amber-500 animate-pulse";
+        } else if (diffGiorni === 1) {
+            testoGiorni = "Domani";
+            coloreBadge = "bg-amber-50 text-amber-500";
+        } else {
+            testoGiorni = `- ${diffGiorni} giorni`;
+        }
 
-        		const dataFormattata = dataEsame.toLocaleDateString('it-IT', {
-        			day: '2-digit',
-        			month: 'short'
-        		});
+        const isFarmaco = item.tipo === "farmaco";
+        if (isFarmaco && diffGiorni > 1) {
+            coloreBadge = "bg-blue-50 text-blue-500 border border-blue-100/50";
+        }
 
-        		const row = document.createElement('div');
-        		// 💡 FORZATO LO SFONDO GRIGIO CHIARO E IL BORDO PER FARLI STACCARE
-        		row.className = "flex justify-between items-center bg-gray-50 border border-gray-100 p-3 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group mt-1.5 shadow-2xs";
+        const dataFormattata = item.dataOggetto.toLocaleDateString('it-IT', {
+            day: '2-digit',
+            month: 'short'
+        });
 
-        		// Colleghiamo la funzione di eliminazione sicura per nome che abbiamo creato
-        		row.onclick = () => eliminaPromemoriaPerNome(pro.nome);
+        const row = document.createElement('div');
+        row.className = "flex justify-between items-center bg-gray-50 border border-gray-100 p-3 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group mt-1.5 shadow-2xs";
 
-        		// 🌟 AGGIORNATE LE CLASSI DEL TESTO: text-gray-800 e text-gray-700 (Mai più testi invisibili o bianchi!)
-        		row.innerHTML = `
+        if (isFarmaco) {
+            row.onclick = () => {
+                if (typeof switchTab === 'function') switchTab('therapies');
+                else if (typeof mostraPaginaTerapie === 'function') mostraPaginaTerapie();
+            };
+        } else {
+            row.onclick = () => {
+                if (typeof eliminaPromemoriaPerNome === 'function') eliminaPromemoriaPerNome(item.nome);
+            };
+        }
+
+        row.innerHTML = `
             <div class="flex items-center gap-3 overflow-hidden max-w-[75%]">
                 <span class="text-[10px] font-black bg-white text-gray-800 border border-gray-100 px-2 py-1 rounded-lg whitespace-nowrap shadow-2xs">${dataFormattata}</span>
-                <span class="text-xs font-black text-gray-700 truncate uppercase tracking-wide" style="font-variant: small-caps;">${pro.nome}</span>
+                <span class="text-xs font-black text-gray-700 truncate uppercase tracking-wide" style="font-variant: small-caps;">${item.nome}</span>
             </div>
             <div class="flex items-center gap-2">
                 <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${coloreBadge}">${testoGiorni}</span>
-                <span class="text-[10px] text-red-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity pl-1">✕</span>
+                ${isFarmaco ? '' : '<span class="text-[10px] text-red-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity pl-1">✕</span>'}
             </div>
         `;
-        		container.appendChild(row);
-        	});
+        container.appendChild(row);
+    });
 
-        	const selectMenu = document.getElementById('addBioNome');
-        	if (selectMenu) {
-        		// Ogni volta che l'utente cambia selezione, aggiorna il box informativo sotto
-        		selectMenu.onchange = aggiornaRiquadroInfoRange;
-        	}
-        }
+    const selectMenu = document.getElementById('addBioNome');
+    if (selectMenu) {
+        selectMenu.onchange = aggiornaRiquadroInfoRange;
+    }
+}
 
 
         function apriModalNuovoPromemoria() {
         	const modal = document.getElementById('modalPromemoria');
         	if (modal) {
         		modal.classList.remove('hidden');
-        		document.getElementById('addPromemoriaData').valueAsDate = new Date();
+				const inputData = document.getElementById('addPromemoriaData') || document.getElementById('addBioData');
+				if (inputData) {
+             // Imposta la data odierna in formato testo standard AAAA-MM-GG senza mandare in crash l'app
+              inputData.value = new Date().toISOString().split('T')[0];
+              }
         	}
         }
 
@@ -588,6 +621,8 @@
         		})
         		.catch(err => alert("Errore nel caricamento dati dal cloud: " + err))
         		.finally(() => {
+					if (typeof renderPromemoria === 'function') renderPromemoria();
+        
         			document.getElementById('loadingOverlay').style.opacity = "0";
         			setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 300);
         		});
@@ -2168,7 +2203,9 @@
         		.then(res => res.json())
         		.then(res => console.log("Terapia sincronizzata nel Cloud in background:", res))
         		.catch(err => console.warn("Sincronizzazione terapia in background rimandata (Dato salvato sul telefono):", err));
-        }
+        
+		     if (typeof renderPromemoria === 'function') renderPromemoria();
+		}
 
 
         // Elimina una Terapia dallo schedario
@@ -2200,6 +2237,8 @@
         				.then(res => console.log("Terapia rimossa dal Cloud in background:", res))
         				.catch(err => console.warn("Errore rimozione cloud:", err));
         		});
+
+				if (typeof renderPromemoria === 'function') renderPromemoria();
         }
 
 
@@ -2552,3 +2591,38 @@
         		};
         	});
         }
+
+		// ==================== CALCOLO PROSSIMA ASSUNZIONE PER HOME ====================
+function ottieniDataProssimaAssunzione(terapia) {
+    if (!terapia.dataInizio || !terapia.frequenzaGiorni || !terapia.durataMesi) return null;
+
+    const stringaAdatta = terapia.dataInizio.replace(/-/g, "/");
+    const dataInizio = new Date(stringaAdatta);
+    const frequenza = parseInt(terapia.frequenzaGiorni) || 1;
+    const durataInMesi = parseInt(terapia.durataMesi) || 1;
+
+    if (isNaN(dataInizio.getTime())) return null;
+
+    const dataFine = new Date(dataInizio);
+    dataFine.setMonth(dataFine.getMonth() + durataInMesi);
+
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+
+    let dataCorrente = new Date(dataInizio);
+    let contatore = 0;
+
+    // Cicla per trovare la prima data utile che è oggi o nel futuro
+    while (dataCorrente <= dataFine && contatore < 100) {
+        const dataConfronto = new Date(dataCorrente);
+        dataConfronto.setHours(0, 0, 0, 0);
+
+        if (dataConfronto >= oggi) {
+            // Abbiamo trovato la prossima dose! Restituiamo l'oggetto data pulito
+            return new Date(dataCorrente);
+        }
+        dataCorrente.setDate(dataCorrente.getDate() + frequenza);
+        contatore++;
+    }
+    return null; // Terapia terminata o nessuna data trovata
+}
