@@ -569,6 +569,10 @@
         			databaseEsami = data.esami || [];
         			databaseAllegati = data.allegati || [];
 
+					// 👑 Scarica le terapie dal Cloud e salvale in locale
+                    databaseTerapie = data.terapie || [];
+                    localStorage.setItem('health-app-terapie', JSON.stringify(databaseTerapie));
+
         			// 🔮 1. IL DIZIONARIO ONLINE: Scarica i limiti dal foglio Google Sheets
         			if (data.dizionario && data.dizionario.length > 0) {
         				configBiomarcatori = {}; // Svuota la cache precedente
@@ -619,6 +623,8 @@
         			}
 
         			renderFolders();
+					if (typeof renderTerapie === 'function') renderTerapie();
+                            
         			if (currentOpenYear) refreshTimeline();
         		})
         		.catch(err => alert("Errore nel caricamento dati dal cloud: " + err))
