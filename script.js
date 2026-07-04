@@ -1935,6 +1935,11 @@
         	const container = document.getElementById('therapiesContainer');
         	if (!container) return;
 
+         // 👑 SCUDO DI PROTEZIONE: Elimina dall'elenco a schermo le terapie corrotte scaricate dal Cloud
+          if (Array.isArray(databaseTerapie)) {
+          databaseTerapie = databaseTerapie.filter(t => t && t.nome && t.farmaco && t.dataInizio);
+          }
+
         	if (databaseTerapie.length === 0) {
         		container.innerHTML = `
             <div class="flex flex-col items-center justify-center py-12 text-center">
@@ -1946,7 +1951,7 @@
                     Aggiungi Terapia
                 </button>
             </div>
-        `;
+         `;
         		return;
         	}
 
@@ -2149,24 +2154,34 @@
 function saveTerapia(e) {
     if (e) e.preventDefault();
 
-    const idTerapia = document.getElementById('inputTerapiaId').value;
-    const nome = document.getElementById('inputTerapiaNome').value.trim();
-    const farmaco = document.getElementById('inputTerapiaFarmaco').value.trim();
-    const dosaggio = document.getElementById('inputTerapiaDosaggio').value.trim();
-    const frequenza = Number(document.getElementById('inputTerapiaFrequenza').value);
-    const durata = Number(document.getElementById('inputTerapiaDurata').value);
-    const dataInizio = document.getElementById('inputTerapiaDataInizio').value;
-    const allegatoSelezionato = document.getElementById('selectTerapiaAllegato').value;
+    // 👑 CONTROLLO COMPATIBILITÀ ID INPUT: Cerca sia la versione 'input' che la versione 'add'
+    const inputId = document.getElementById('inputTerapiaId') || document.getElementById('addTerapiaId');
+    const inputNome = document.getElementById('inputTerapiaNome') || document.getElementById('addTerapiaNome') || document.getElementById('terapiaNome');
+    const inputFarmaco = document.getElementById('inputTerapiaFarmaco') || document.getElementById('addTerapiaFarmaco') || document.getElementById('terapiaFarmaco');
+    const inputDosaggio = document.getElementById('inputTerapiaDosaggio') || document.getElementById('addTerapiaDosaggio') || document.getElementById('terapiaDosaggio');
+    const inputFrequenza = document.getElementById('inputTerapiaFrequenza') || document.getElementById('addTerapiaFrequenza') || document.getElementById('terapiaFrequenza');
+    const inputDurata = document.getElementById('inputTerapiaDurata') || document.getElementById('addTerapiaDurata') || document.getElementById('terapiaDurata');
+    const inputDataInizio = document.getElementById('inputTerapiaDataInizio') || document.getElementById('addTerapiaDataInizio') || document.getElementById('terapiaDataInizio');
+    const selectAllegato = document.getElementById('selectTerapiaAllegato') || document.getElementById('addTerapiaAllegato');
 
+    // Estrazione sicura dei valori
+    const idTerapia = inputId ? inputId.value : "";
+    const nome = inputNome ? inputNome.value.trim() : "";
+    const farmaco = inputFarmaco ? inputFarmaco.value.trim() : "";
+    const dosaggio = inputDosaggio ? inputDosaggio.value.trim() : "";
+    const frequenza = inputFrequenza ? Number(inputFrequenza.value) : 1;
+    const durata = inputDurata ? Number(inputDurata.value) : 1;
+    const dataInizio = inputDataInizio ? inputDataInizio.value : "";
+    const allegatoSelezionato = selectAllegato ? selectAllegato.value : "";
+
+    // 🚨 Se mancano i dati blocco l'invio prima che sporchi Google Sheets!
     if (!nome || !farmaco || !dataInizio) {
-        pwaAlert("Compila i campi obbligatori della data, del farmaco e del piano terapeutico!", "Dati Mancanti");
+        pwaAlert("Compila i campi obbligatori della data, del farmaco e del nome del piano!", "Dati Mancanti");
         return;
     }
 
-    // Genera un ID offline unico basato sul tempo se è una nuova terapia
     const idGenerato = idTerapia || "TER_" + Date.now();
 
-    // Verifica che databaseAllegati esista prima di leggerlo per non far crashare lo smartphone
     const haAllegato = typeof databaseAllegati !== 'undefined' && databaseAllegati && allegatoSelezionato !== "" && databaseAllegati[allegatoSelezionato];
     const nomeAllegato = haAllegato ? databaseAllegati[allegatoSelezionato].titolo : "";
     const urlAllegato = haAllegato ? databaseAllegati[allegatoSelezionato].url : "";
@@ -2177,7 +2192,7 @@ function saveTerapia(e) {
         farmaco: farmaco,
         dosaggio: dosaggio,
         frequenzaGiorni: frequenza || 1,
-        durataMesi: durata || 1, // 👑 CORRETTO: Messo 'durata' al posto del vecchio refuso 'duration'!
+        durataMesi: durata || 1,
         dataInizio: dataInizio,
         allegatoNome: nomeAllegato,
         allegatoUrl: urlAllegato
