@@ -606,9 +606,15 @@
     <script src="temi.js"></script>
     <script src="script.js"></script>
 
-    <!-- 👑 CACHE BUSTING: Costringe il telefono a cancellare la vecchia cache e caricare il codice corretto! -->
-<script src="script.js?v=3.0"></script>
-
+<!-- 👑 CACHE BUSTING AUTOMATICO: Genera la versione da solo ad ogni avvio, mai più modifiche a mano! -->
+<script>
+  (function() {
+    const script = document.createElement('script');
+    // Genera un numero unico basato sul millesimo di secondo corrente (es. script.js?v=1719830000)
+    script.src = "script.js?v=" + Date.now();
+    document.body.appendChild(script);
+  })();
+</script>
 
   </body>
 </html>
