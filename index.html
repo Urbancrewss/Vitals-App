@@ -1,609 +1,2646 @@
-<!DOCTYPE html>
-<html lang="it">
-  <head>
-    <link rel="icon" type="image/png" href="assets/favicon.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Log App</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/it.js"></script>
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-  </head>
-  <body class="relative min-h-screen overflow-hidden max-w-md mx-auto shadow-2xl bg-[var(--bg-page)]" onclick="clearEditMode()">
-    <div id="loadingOverlay" class="fixed inset-0 bg-[var(--bg-page)]/80 backdrop-blur-md z-[100] flex flex-col items-center justify-center gap-4 transition-opacity duration-300">
-      <div class="w-10 h-10 border-4 border-[var(--colore-principale)] border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Sincronizzazione Cloud...</p>
-    </div>
-    <!-- Welcome screen iniziale -->
-    <div id="welcomeScreen" class="fixed inset-0 bg-[var(--colore-principale)] z-50 flex select-none transition-transform duration-600 ease-out overflow-hidden" style="font-family: system-ui, -apple-system, sans-serif;">
-      <!-- Lato sinistro: titolo, descrizione e mascot -->
-      <div class="w-[72%] h-full relative flex flex-col justify-between p-6 text-white bg-[var(--colore-secondario)]">
-        <div class="pt-8">
-          <h1 class="text-4xl font-[1000] tracking-tighter leading-[0.8] uppercase flex flex-col">
-            <span class="text-[var(--colore-scuro)]">Health!</span>
-            <span class="text-[var(--colore-chiaro)]">Tracker.</span>
-            <span class="text-[var(--colore-scuro)] opacity-90">App</span>
-          </h1>
-          <p class="mt-4 text-[10px] font-bold text-[var(--colore-chiaro)]/80 leading-relaxed max-w-[85%] pr-4 uppercase tracking-wide"> Monitora le tue analisi del sangue, tieni traccia dei biomarcatori e archivia i tuoi documenti medici in un unico posto sicuro. </p>
-        </div>
-        <div class="absolute left-6 bottom-20 z-10 pointer-events-none">
-          <img src="assets/icons/mascotte.png" class="w-350 h-350 object-contain filter drop-shadow-[0_12px_20px_rgba(26,22,54,0.25)]" style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;
-                 filter: drop-shadow(5px 5px 5px var(--colore-chiaro));">
-        </div>
-        <div class="pb-6">
-          <p class="text-[8px] font-black tracking-widest text-[var(--colore-scuro)]/40 uppercase whitespace-nowrap" style="transform: rotate(-90deg) translateX(-100%); transform-origin: top left;"> @ixalexbyron &copy; 2026 </p>
-        </div>
-      </div>
-      <!-- Lato destro: brand Vitals e gesto di ingresso -->
-      <div class="w-[28%] h-full bg-[var(--colore-principale)] relative flex flex-col justify-between items-center py-8 text-[var(--colore-chiaro)]">
-        <div class="h-full flex items-center justify-center relative">
-          <span class="text-6xl font-[1000] uppercase tracking-tighter select-none opacity-50" style="transform: rotate(90deg); white-space: nowrap; font-size: 5.5rem; letter-spacing: -4px; color:var(--colore-scuro);"> Vitals </span>
-        </div>
-        <div class="flex flex-col items-center gap-4 w-full px-2 z-20">
-          <div class="text-xs font-black tracking-tighter flex flex-col items-center gap-1 opacity-60 text-[var(--colore-chiaro)]">
-            <span>✦</span>
-            <span>◯</span>
-          </div>
-          <div class="w-1 h-12 bg-[var(--colore-chiaro)] opacity-15 rounded-xs flex gap-[1px] p-[1px] overflow-hidden" style="writing-mode: vertical-lr;"> ||||||| | ||||| ||| || </div>
-          <div class="flex flex-col items-center animate-pulse text-[#1a1636]" onclick="goToHome()">
-            <span class="text-xs text-[var(--colore-chiaro)] tracking-widest mb-1 cursor-pointer" style="font-size: 8px; font-variant: small-caps;">Swipe Up</span>
-            <span class="text-lg text-[var(--colore-chiaro)] leading-none transform rotate-180 -translate-y-1 cursor-pointer">⋏</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Container delle pagine principali -->
-    <div id="appPagesContainer" class="w-full h-screen relative overflow-hidden">
-      <div id="page-home" class="w-full h-full p-6 overflow-y-auto no-scrollbar pb-32">
-        <!-- Intestazione home -->
-        <div class="flex justify-between items-center my-4">
-          <div>
-            <h1 id="mainGreeting" class="text-xl font-black text-[var(--colore-accento)] tracking-tight">Salute Cloud</h1>
-            <p class="text-xs text-gray-400 font-semibold uppercase">Pannello di controllo</p>
-          </div>
-          <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[var(--colore-principale)] font-bold cursor-pointer" onclick="fetchDatiCloud()">
-            <svg class="w-8 h-8 text-[var(--colore-principale)]">
-              <use href="assets/icons/sprite.svg#synchronize"></use>
-            </svg>
-          </div>
-        </div>
-        <!-- Card statistica rapida -->
-        <div onclick="openStatsPage(); event.stopPropagation();" class="mb-2 p-5 rounded-[2rem] shadow-sm flex items-center justify-between cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all" style="background: var(--gradient-stats); border: var(--border-sections);">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-2xl">
-              <svg class="w-8 h-8 text-[var(--colore-principale)]">
-                <use href="assets/icons/sprite.svg#bar-graph"></use>
-              </svg>
-            </div>
-            <div>
-              <h3 class="text-xs font-black text-[var(--colore-accento)] uppercase tracking-wider">Andamento & Statistiche</h3>
-              <p class="text-xs text-gray-400 font-medium">Analizza i grafici storici</p>
-            </div>
-          </div>
-          <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-400 shadow-sm">
-            <svg class="w-6 h-6 text-[var(--colore-principale)]">
-              <use href="assets/icons/sprite.svg#arrow-right"></use>
-            </svg>
-          </div>
-        </div>
-        <!-- Sezione prossime analisi -->
-        <div class="p-5 rounded-[2rem] shadow-sm space-y-4 mt-2" style="background: var(--gradient-stats); border: var(--border-sections);">
-          <div class="flex justify-between items-center px-1">
-            <div>
-              <h4 class="text-sm font-black text-[var(--colore-accento)] uppercase tracking-wider">Prossime Analisi</h4>
-              <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Esami pianificati e scadenze</p>
-            </div>
-            <button onclick="apriModalNuovoPromemoria()" class="w-7 h-7 text-[var(--colore-principale)] bg-white rounded-xl flex items-center justify-center text-m font-black active:scale-95 transition-all">
-              <span id="plusIcon" class="transition-transform duration-300 inline-block">
-                <svg class="w-6 h-6">
-                  <use href="assets/icons/sprite.svg#plus"></use>
-                </svg>
-              </span>
-            </button>
-          </div>
-          <!-- Promemoria popolati dinamicamente da JS -->
-          <div id="promemoriaContainer" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar"></div>
-        </div>
-        <!-- Archivio anni -->
-        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 mt-2">Archivio Anni</h3>
-        <div id="foldersContainer" class="grid grid-cols-2 gap-4"></div>
-        <div id="folderDetail" class="hidden mt-2 space-y-6">
-          <div class="flex items-center gap-3 border-b border-gray-100 pb-3">
-            <button onclick="backToFolders(); event.stopPropagation();" class="p-2 bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200">
-              <svg class="w-7 h-7 text-[var(--colore-principale)]">
-                <use href="assets/icons/sprite.svg#arrow-back"></use>
-              </svg>
-            </button>
-            <h3 id="detailYearTitle" class="text-xl font-bold text-gray-800">Anno</h3>
-          </div>
-          <div id="examsTimeline" class="space-y-8"></div>
-        </div>
-      </div>
-      <div id="page-search" class="hidden w-full h-full p-6 overflow-y-auto no-scrollbar pb-32">
-        <!-- Pagina ricerca -->
-        <div class="my-4">
-          <h2 class="text-2xl font-extrabold text-[var(--colore-accento)]">Cerca Biomarcatore</h2>
-          <p class="text-xs text-gray-400 font-semibold uppercase mb-4">Storico analisi incrociato</p>
-          <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex items-center gap-3 shadow-sm mb-6">
-            <span class="text-xl text-gray-400">
-              <svg class="w-6 h-6 translate-y-[3px] text-[var(--colore-principale)]">
-                <use href="assets/icons/sprite.svg#magnifying-glass"></use>
-              </svg>
-            </span>
-            <input type="text" id="searchInput" oninput="eseguiRicerca()" placeholder="Scrivi il nome di un esame..." class="w-full text-sm font-bold text-gray-900 outline-none bg-transparent placeholder-gray-300">
-          </div>
-          <div id="searchResultsContainer" class="space-y-3">
-            <p class="text-center text-xs font-semibold text-gray-400 py-10">Inserisci una parola chiave per avviare la ricerca.</p>
-          </div>
-        </div>
-      </div>
-      <!-- Pagina terapie -->
-      <div id="page-therapies" class="hidden min-h-screen pb-32 animate-fade-in">
-        <header class="p-6 pb-2">
-          <h1 class="text-2xl font-black text-[var(--colore-accento)] leading-none">Piani Terapeutici</h1>
-          <p class="text-[10px] font-bold text-gray-400 uppercase mt-1">Monitoraggio terapie e scadenze farmaci</p>
-        </header>
-        <div class="px-6 mt-4" id="therapiesContainer">
-          <p class="text-center text-xs font-semibold text-gray-400 py-10">Nessuna terapia attiva registrata.</p>
-        </div>
-      </div>
-      <!-- Pagina impostazioni -->
-      <div id="page-settings" class="hidden w-full h-full p-6 overflow-y-auto no-scrollbar pb-32">
-        <div class="my-4">
-          <h2 class="text-2xl font-extrabold text-[var(--colore-accento)]">Impostazioni</h2>
-          <div class="mb-6 p-4 rounded-2xl border border-gray-100" style="background: var(--gradient-stats); border: var(--border-sections);">
-            <label class="block text-xs font-bold text-[var(--colore-accento)] uppercase tracking-wider mb-2">Tuo Nome (per il saluto nella Home)</label>
-            <div class="flex gap-2">
-              <input type="text" id="inputNomeUtente" placeholder="Inserisci il tuo nome..." class="flex-grow p-3 bg-[var(--bg-surface)] rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[var(--colore-principale)]/50">
-              <button onclick="salvaNomeImpostazioni()" class="bg-[var(--colore-principale)] text-white px-4 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-[#837ddc] active:scale-95 transition-all">Salva</button>
-            </div>
-          </div>
-          <p class="text-xs text-gray-400 font-semibold uppercase">Configurazione applicazione</p>
-          <!-- Selettore temi -->
-          <div class="mt-3 p-4 rounded-2xl border border-gray-100 space-y-3" style="background: var(--gradient-stats); border: var(--border-sections);">
-            <p class="text-[10px] font-black uppercase text-[var(--colore-accento)] tracking-wider">Personalizza Tema App</p>
-            <div class="grid grid-cols-3 gap-2">
-              <button onclick="applicaTema('default')" class="p-2.5 bg-[#7692FF] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Icy </button>
-              <button onclick="applicaTema('purple')" class="p-2.5 bg-[#c3b1e1] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Purple </button>
-              <button onclick="applicaTema('melon')" class="p-2.5 bg-[#FDCB7B] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Melon </button>
-              <button onclick="applicaTema('dark-midnight')" class="p-2.5 bg-[#464c55] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Dark Midnight </button>
-              <button onclick="applicaTema('blue-ocean-dark')" class="p-2.5 bg-[#6f7fae] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Blue Ocean Dark </button>
-              <button onclick="applicaTema('herbs')" class="p-2.5 bg-[#90A875] text-white text-[10px] font-black uppercase tracking-wider rounded-xl shadow-xs active:scale-95 transition-all"> Herbs </button>
-            </div>
-          </div>
-          <div class="mt-2 p-5 rounded-2xl border border-gray-100 space-y-4" style="background: var(--gradient-stats); border: var(--border-sections);">
-            <div class="flex items-center justify-between p-2 border-b border-gray-50">
-              <div class="flex items-center gap-3">
-                <span class="text-xl">👤</span>
-                <div>
-                  <h4 class="text-xs font-bold text-[var(--colore-accento)]">Profilo Utente</h4>
-                  <p class="text-[10px] text-gray-400">Account Cloud sincronizzato</p>
-                </div>
-              </div>
-              <span class="text-xs text-green-500 font-bold bg-green-50 px-2 py-1 rounded-lg">Attivo</span>
-            </div>
-            <div class="flex items-center justify-between p-2 cursor-pointer" onclick="forzaSincronizzazioneManuale()">
-              <div class="flex items-center gap-3">
-                <span class="text-xl">📤</span>
-                <!-- Cambiata l'emoji in una freccia in su per farti capire che stai inviando! -->
-                <div>
-                  <h4 class="text-xs font-bold text-[var(--colore-accento)]">Salva modifiche nel Cloud</h4>
-                  <p class="text-[10px] text-gray-400">Invia esami e allegati a Google Sheets</p>
-                </div>
-              </div>
-              <span class="text-gray-400 text-xs font-bold">→</span>
-            </div>
-          </div>
-          <!-- 🚨 PULSANTE RESET TOTALE DATI -->
-          <div class="mt-4 px-1">
-            <button onclick="piallaTuttiIDatiDellApp()" class="w-full bg-red-500 text-white font-extrabold p-4 rounded-2xl shadow-md text-xs tracking-wider uppercase hover:bg-red-600 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-              <span>🗑️</span>
-              <span>Elimina Tutti i Dati</span>
-            </button>
-            <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider text-center mt-1.5 px-2 leading-relaxed"> Attenzione: Rimuoverà per sempre esami, referti, promemoria locali e le impostazioni del profilo. </p>
-          </div>
-        </div>
-      </div>
-      <div id="statsPage" class="hidden fixed inset-x-0 top-0 bottom-0 z-40 flex flex-col p-6 bg-[var(--bg-page)] pb-28">
-        <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4 flex-shrink-0">
-          <div class="flex items-center gap-3">
-            <button onclick="closeStatsPage()" class="p-2 bg-[var(--bg-surface)] rounded-xl text-gray-600 hover:bg-gray-200">
-              <svg class="w-7 h-7 text-[var(--colore-principale)]">
-                <use href="assets/icons/sprite.svg#arrow-back"></use>
-              </svg>
-            </button>
-            <div>
-              <h2 class="text-xl font-black text-[var(--colore-accento)] leading-none">Grafici Storici</h2>
-              <p class="text-[10px] font-bold text-gray-400 uppercase mt-0.5">Analisi fluttuazione</p>
-            </div>
-          </div>
-          <button onclick="toggleFilterSidebar(true); event.stopPropagation();" class="p-3 bg-[var(--bg-surface)] border border-gray-100 shadow-sm rounded-2xl text-lg hover:bg-[var(--colore-principale)]-50/50 active:scale-95 transition-all">
-            <svg class="w-7 h-7 text-[var(--colore-principale)]">
-              <use href="assets/icons/sprite.svg#filter"></use>
-            </svg>
-          </button>
-        </div>
-        <div class="flex-1 overflow-y-auto no-scrollbar space-y-4" id="chartsContainer"></div>
-        <div id="filterSidebarOverlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-50" onclick="toggleFilterSidebar(false)">
-          <div id="filterSidebar" class="filter-sidebar absolute top-0 right-0 h-full w-64 bg-[var(--bg-surface)] shadow-2xl p-6 flex flex-col translate-x-full" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
-              <h3 class="text-sm font-black text-[var(--colore-accento)] uppercase tracking-wider">Filtra Esami</h3>
-              <button onclick="toggleFilterSidebar(false)" class="text-gray-400 font-bold text-sm p-1">✕</button>
-            </div>
-            <div class="flex-1 overflow-y-auto no-scrollbar space-y-2" id="filtersScrollContainer"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
-    <div id="overlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-30 transition-opacity" onclick="closeAllModals(); event.stopPropagation();"></div>
-    <!-- Bubble menu di accesso rapido -->
-    <div id="bubbleMenu" class="fixed bottom-28 right-6 md:right-[calc(50%-12rem)] w-14 h-14 z-40">
-      <div class="bubble-item bubble-allegato absolute top-0 left-0">
-        <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="openModal('modalAllegati')">
-          <div class="w-12 h-12 bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white rounded-full shadow-lg flex items-center justify-center border border-rose-100 hover:scale-110 transition-transform p-3">
-            <svg class="w-7 h-7 text-white">
-              <use href="assets/icons/sprite.svg#paperclip"></use>
-            </svg>
-          </div>
-          <span class="bg-white text-gray-700 text-[9px] font-bold px-2 py-0.5 rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">Allegato</span>
-        </div>
-      </div>
-      <div class="bubble-item bubble-record absolute top-0 left-0">
-        <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="openModal('modalBiomarcatori')">
-          <div class="w-12 h-12 bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white rounded-full shadow-lg flex items-center justify-center border border-rose-100 hover:scale-110 transition-transform p-3">
-            <svg class="w-7 h-7 text-white">
-              <use href="assets/icons/sprite.svg#blood-drop"></use>
-            </svg>
-          </div>
-          <span class="bg-white text-gray-700 text-[9px] font-bold px-2 py-0.5 rounded-lg shadow-sm border border-gray-100 whitespace-nowrap">Biomarcatore</span>
-        </div>
-      </div>
-    </div>
-    <button id="floatingAddBtn" onclick="toggleBubbleMenu(); event.stopPropagation();" class="hidden fixed bottom-28 right-6 md:right-[calc(50%-12rem)] w-14 h-14 bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white rounded-full shadow-lg shadow-[var(--colore-principale)] flex items-center justify-center text-2xl font-bold z-50 transition-all active:scale-95">
-      <span id="plusIcon" class="transition-transform duration-300 inline-block">
-        <svg class="w-10 h-10">
-          <use href="assets/icons/sprite.svg#plus"></use>
-        </svg>
-      </span>
-    </button>
-    <!-- Barra di navigazione inferiore -->
-    <div id="bottomNavBar" class="hidden navigation">
-      <ul>
-        <li class="list active" onclick="switchTab('home', this)">
-          <a href="#">
-            <span class="icon flex items-center justify-center p-4">
-              <svg class="w-6 h-6 translate-y-[3px] text-gray-800">
-                <use href="assets/icons/sprite.svg#home"></use>
-              </svg>
-            </span>
-            <span class="text">Home</span>
-          </a>
-        </li>
-        <li class="list" onclick="switchTab('search', this)">
-          <a href="#">
-            <span class="icon flex items-center justify-center p-4">
-              <svg class="w-6 h-6 translate-y-[3px] text-gray-800">
-                <use href="assets/icons/sprite.svg#magnifying-glass"></use>
-              </svg>
-            </span>
-            <span class="text">Cerca</span>
-          </a>
-        </li>
-        <li class="list" onclick="switchTab('therapies', this)">
-          <a href="#">
-            <span class="icon flex items-center justify-center p-4">
-              <svg class="w-6 h-6 translate-y-[3px] text-gray-800">
-                <use href="assets/icons/sprite.svg#therapies"></use>
-              </svg>
-            </span>
-            <span class="text">Terapie</span>
-          </a>
-        </li>
-        <li class="list" onclick="switchTab('settings', this)">
-          <a href="#">
-            <span class="icon flex items-center justify-center p-4">
-              <svg class="w-8 h-8 translate-y-[3px] text-gray-800">
-                <use href="assets/icons/sprite.svg#settings"></use>
-              </svg>
-            </span>
-            <span class="text">Set</span>
-          </a>
-        </li>
-        <div class="indicator"></div>
-      </ul>
-    </div>
-    <!-- Modal biomarcatori -->
-    <div id="modalBiomarcatori" class="hidden fixed bottom-0 left-0 right-0 md:left-[calc(50%-14rem)] md:right-[calc(50%-14rem)] bg-[var(--bg-page)] rounded-t-[2.5rem] shadow-2xl p-6 z-50 transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
-      <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
-      <h3 id="modalBioTitolo" class="text-xl font-black text-[var(--colore-accento)] mb-4">Nuovo Esame</h3>
-      <form id="formBiomarcatori" class="space-y-4" onsubmit="saveBiomarcatore(event)">
-        <input type="hidden" id="editIndex" value="-1">
-        <input type="hidden" id="oldData" value="">
-        <input type="hidden" id="oldBiomarcatore" value="">
-        <input type="hidden" id="oldValore" value="">
-        <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
-          <div class="flex-1">
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Data Referto</label>
-            <input type="date" id="addBioData" required class="w-full text-sm font-semibold text-gray-700 outline-none mt-1 bg-transparent">
-          </div>
-          <span class="text-xl text-gray-400 ml-2">
-            <svg class="w-5 h-5 translate-y-[3px]  text-[var(--colore-principale)]">
-              <use href="assets/icons/sprite.svg#calendar"></use>
-            </svg>
-          </span>
-        </div>
-        <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm relative">
-          <div class="flex-1">
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Seleziona Biomarcatore</label>
-            <select id="addBioNome" onchange="updateModalRanges()" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent appearance-none cursor-pointer max-h-40 overflow-y-auto"></select>
-          </div>
-          <span class="text-xs text-[var(--colore-principale)] pointer-events-none">▼</span>
-        </div>
-        <div class="bg-[var(--bg-surface)] p-5 rounded-2xl border border-[var(--colore-principale)]/30 flex flex-col items-center justify-center shadow-sm">
-          <label class="text-[10px] font-bold text-gray-400 uppercase mb-1">Valore Riscontrato</label>
-          <div class="flex items-baseline justify-center gap-1">
-            <input type="number" step="any" id="addBioValore" placeholder="0.0" required class="w-32 text-center text-3xl font-black text-gray-800 outline-none bg-transparent placeholder-gray-300">
-            <span id="addBioUnitaLabel" class="text-xs font-bold text-gray-400">mg/dL</span>
-          </div>
-        </div>
-        <!-- 📊 RIQUADRO RANGE MEDICI DINAMICO (SOTTO IL VALORE) -->
-        <div id="boxRangeInformativo" class="hidden p-4 rounded-2xl border border-dashed border-gray-100 flex items-start gap-3 transition-all duration-300" style="background-color: var(--bg-page);">
-          <span class="text-base mt-0.5">
-             <svg class="w-5 h-5 text-[var(--colore-principale)]">
-              <use href="assets/icons/sprite.svg#value-check"></use>
-             </svg>
-          </span>
-          <div class="flex-1">
-            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-wider">Riferimenti Medici Standard</h4>
-            <div id="testoRangeInformativo" class="text-xs font-bold text-gray-700 mt-1 leading-relaxed"></div>
-          </div>
-        </div>
-        <button type="submit" id="btnBioSubmit" class="w-full bg-gradient-to-r from-[var(--colore-principale)] to-[var(--colore-secondario)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Aggiungi Biomarcatore </button>
-      </form>
-    </div>
-    <div id="modalAllegati" class="hidden fixed bottom-0 left-0 right-0 md:left-[calc(50%-14rem)] md:right-[calc(50%-14rem)] bg-[var(--bg-page)] rounded-t-[2.5rem] shadow-2xl p-6 z-50 transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
-      <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
-      <h3 class="text-xl font-black text-[var(--colore-accento)] mb-4">Aggiungi Documento</h3>
-      <form id="formAllegati" class="space-y-4" onsubmit="saveAllegato(event)">
-        <input type="hidden" id="editDocIndex" value="-1">
-        <input type="hidden" id="oldDocData" value="">
-        <input type="hidden" id="oldDocTitolo" value="">
-        <input type="hidden" id="oldDocUrl" value="">
-        <!-- 📅 DATA -->
-        <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
-          <div class="flex-1">
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Collega a Data</label>
-            <input type="date" id="addDocData" required class="w-full text-sm font-semibold text-gray-700 outline-none mt-1 bg-transparent">
-          </div>
-          <span class="text-xl text-gray-400 ml-2">
-            <svg class="w-5 h-5 translate-y-[3px] text-[var(--colore-principale)]">
-              <use href="assets/icons/sprite.svg#calendar"></use>
-            </svg>
-          </span>
-        </div>
-        <!-- 💊 TERAPIA COLLEGATA -->
-        <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
-          <div class="flex-1">
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Terapia collegata</label>
-            <select id="addDocTerapiaCollegata" class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent appearance-none cursor-pointer">
-              <option value="">-- Nessuna terapia --</option>
-            </select>
-          </div>
-          <span class="text-xs text-gray-400 pointer-events-none pr-1">▼</span>
-        </div>
-        <!-- 🏷️ ETICHETTA ALLEGATO / CATEGORIA (Uniformata al 100% nei box bianchi!) -->
-        <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
-          <div class="flex-1">
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Etichetta Allegato</label>
-            <select id="addDocTag" class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent appearance-none cursor-pointer">
-              <option value="">-- Seleziona una categoria --</option>
-              <option value="Ecografia Pelvica">Ecografia Pelvica</option>
-              <option value="Ecografia Addome">Ecografia Addome</option>
-              <option value="Esami del Sangue">Esami del Sangue</option>
-              <option value="Analisi Urine">Analisi Urine</option>
-              <option value="Piano Terapeutico (PT)">Piano Terapeutico (PT)</option>
-              <option value="Visita Endocrinologica (RE)">Visita Endocrinologica (RE)</option>
-              <option value="Risonanza (RMN) / TAC">Risonanza (RMN) / TAC</option>
-              <option value="Visita Specialistica">Visita Specialistica</option>
-              <option value="Altro Referto">Altro Referto</option>
-            </select>
-          </div>
-          <span class="text-xs text-gray-400 pointer-events-none pr-1">▼</span>
-        </div>
-        <!-- ✍️ NOME DOCUMENTO -->
-        <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
-          <div class="flex-1">
-            <label class="block text-[10px] font-bold text-gray-400 uppercase">Nome Documento</label>
-            <input type="text" id="addDocTitolo" placeholder="Es. Ecografia Addominale" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent placeholder-gray-300">
-          </div>
-          <span class="text-xl text-gray-400 ml-2">
-            <svg class="w-5 h-5 text-[var(--colore-principale)]">
-              <use href="assets/icons/sprite.svg#document"></use>
-            </svg>
-          </span>
-        </div>
-        <!-- 📷 CARICAMENTO FILE -->
-        <div class="bg-[var(--bg-surface)] p-5 rounded-2xl border border-dashed border-[var(--colore-secondario)] flex flex-col items-center justify-center shadow-sm cursor-pointer relative">
-          <input type="file" id="addDocFile" class="absolute inset-0 opacity-0 cursor-pointer">
-          <span class="text-2xl mb-1">
-            <svg class="w-7 h-7 text-[var(--colore-principale)]">
-              <use href="assets/icons/sprite.svg#camera"></use>
-            </svg>
-          </span>
-          <span class="text-xs font-bold text-gray-500" id="uploadFileLabel">Seleziona File o Scatta Foto</span>
-        </div>
-        <!-- 🚀 BOTTONE PIANO TERAPEUTICO -->
-        <button type="submit" class="w-full bg-gradient-to-r from-[var(--colore-secondario)] to-[var(--colore-principale)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Salva Allegato </button>
-      </form>
-    </div>
-    <!-- Modal terapia -->
-    <div id="modalTerapia" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-6 transition-all duration-300">
-      <div class="bg-[var(--bg-page)] w-full max-w-md rounded-3xl p-6 shadow-2xl border border-gray-100 transform scale-95 transition-all duration-300 flex flex-col max-h-[85vh]">
-        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4 flex-shrink-0">
-          <h3 id="modalTerapiaTitolo" class="text-base font-black text-[var(--colore-accento)] uppercase tracking-wider">Nuovo Piano Terapeutico</h3>
-          <button onclick="chiudiModalTerapia()" class="text-gray-400 font-bold text-sm p-1 hover:text-gray-600">✕</button>
-        </div>
-        <div class="flex-1 overflow-y-auto no-scrollbar space-y-4 pb-4">
-          <input type="hidden" id="inputTerapiaId">
-          <div>
-            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Nome Terapia / Patologia</label>
-            <input type="text" id="inputTerapiaNome" placeholder="Es. Testosterone, Cistite..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
-          </div>
-          <div>
-            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Nome Farmaco / Soluzione</label>
-            <input type="text" id="inputTerapiaFarmaco" placeholder="Es. Testoviron, Cistiflor plus..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
-          </div>
-          <div>
-            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Indicazioni e Dosaggio</label>
-            <textarea id="inputTerapiaDosaggio" rows="2" placeholder="Es. Una fiala intramuscolo ogni 25 giorni per 1 anno..." class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors resize-none"></textarea>
-          </div>
-          <div>
-            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Data di Prima Assunzione / Inizio</label>
-            <div class="relative flex items-center w-full">
-              <input type="text" id="inputTerapiaDataInizio" placeholder="Seleziona Data" class="w-full px-4 py-3 pr-10 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors cursor-pointer">
-              <!-- 📅 L'ICONA DEL CALENDARIO: Agganciata a destra in modo assoluto e centrata in verticale -->
-              <span class="absolute right-3 flex items-center pointer-events-none">
-                <svg class="w-4 h-4 text-[var(--colore-principale)]">
-                  <use href="assets/icons/sprite.svg#calendar"></use>
-                </svg>
-              </span>
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Frequenza (Ogni quanti gg)</label>
-              <input type="number" id="inputTerapiaFrequenza" min="1" placeholder="Es. 25" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
-            </div>
-            <div>
-              <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Durata Complessiva (Mesi)</label>
-              <input type="number" id="inputTerapiaDurata" min="1" placeholder="Es. 12" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors">
-            </div>
-          </div>
-          <div>
-            <label class="text-[9px] font-black text-gray-400 uppercase tracking-wider block mb-1">Collega un Referto/Documento esistente</label>
-            <select id="selectTerapiaAllegato" class="w-full px-4 py-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:border-[var(--colore-principale)]/50 transition-colors"></select>
-          </div>
-        </div>
-        <div class="flex gap-3 border-t border-gray-100 pt-4 flex-shrink-0">
-          <button onclick="chiudiModalTerapia()" class="flex-1 py-3 bg-gray-100 text-gray-500 text-xs font-black uppercase tracking-wider rounded-xl active:scale-95 transition-all">Annulla</button>
-          <button onclick="saveTerapia(event)" class="flex-1 py-3 bg-[var(--colore-principale)] text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-md active:scale-95 transition-all">Salva</button>
-        </div>
-      </div>
-    </div>
-    <!-- 📄 MODAL RAPIDO PER COLLEGARE MULTIPLI ALLEGATI A UNA TERAPIA -->
-    <div id="modalCollegaAllegati" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-end justify-center" onclick="chiudiModalCollegaAllegati()">
-      <div class="w-full max-w-md bg-[var(--bg-page)] rounded-t-[2.5rem] p-6 space-y-4 shadow-2xl transform translate-y-0 transition-transform duration-300" onclick="event.stopPropagation()">
-        <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-2"></div>
-        <div>
-          <h3 class="text-base font-black text-[var(--colore-scuro)] uppercase tracking-wider">Collega Documenti</h3>
-          <p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">Seleziona i referti da associare a questo piano</p>
-        </div>
-        <!-- ID Nascosto della terapia corrente che stiamo modificando -->
-        <input type="hidden" id="collegaTerapiaTargetId">
-        <!-- Lista dinamica degli allegati con checkbox (Popolata da JS) -->
-        <div id="listaAllegatiSelezionabili" class="space-y-2 max-h-60 overflow-y-auto no-scrollbar py-1">
-          <!-- I tuoi allegati compariranno qui con un interruttore -->
-        </div>
-        <button onclick="salvaCollegamentiAllegatiBackground()" class="w-full bg-[var(--colore-principale)] text-white font-extrabold p-3.5 rounded-2xl shadow-md text-xs tracking-wider uppercase active:scale-95 transition-all"> ✓ Conferma Collegamenti </button>
-      </div>
-    </div>
-    <!-- Modal promemoria -->
-    <div id="modalPromemoria" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-end justify-center" onclick="chiudiModalPromemoria()">
-      <div class="w-full max-w-md bg-[var(--bg-page)] rounded-t-[2.5rem] p-6 space-y-4 shadow-2xl transform translate-y-0 transition-transform" onclick="event.stopPropagation()">
-        <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-2"></div>
-        <h3 class="text-lg font-black text-[var(--colore-accento)]">Pianifica Analisi</h3>
-        <form id="formPromemoria" class="space-y-3" onsubmit="salvaPromemoria(event)">
-          <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
-            <div class="flex-1">
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Quando farle?</label>
-              <input type="date" id="addPromemoriaData" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent">
-            </div>
-          </div>
-          <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
-            <div class="flex-1">
-              <label class="block text-[10px] font-bold text-gray-400 uppercase">Quali analisi / esami?</label>
-              <input type="text" id="addPromemoriaNome" placeholder="Es. Controllo Emocromo, Urina" required class="w-full text-sm font-bold text-gray-700 outline-none mt-1 bg-transparent placeholder-gray-300">
-            </div>
-          </div>
-          <button type="submit" class="w-full bg-gradient-to-r from-[var(--colore-principale)] to-[var(--colore-secondario)] text-white font-extrabold p-4 rounded-2xl shadow-lg text-sm tracking-wider uppercase"> + Aggiungi Promemoria </button>
-        </form>
-      </div>
-    </div>
-    <!-- Modal personalizzazione cartella -->
-    <div id="modalColorPicker" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden" onclick="closeColorPicker()">
-      <div class="bg-[var(--bg-page)] p-6 rounded-3xl w-80 max-w-[90%] shadow-2xl border border-gray-100 transform scale-95 transition-transform" onclick="event.stopPropagation()">
-        <h4 class="text-sm font-extrabold text-gray-400 text-center mb-1">Personalizza Cartella</h4>
-        <p class="text-[10px] font-bold text-gray-400 text-center uppercase tracking-wider mb-4">Seleziona un colore pastello</p>
-        <input type="hidden" id="selectedFolderYear" value="">
-        <div class="grid grid-cols-4 gap-3 mb-4">
-          <button onclick="applicaColoreCartella('#f3f4f6')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#f3f4f6] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#fde2e4')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#fde2e4] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#ffcad4')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#ffcad4] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#b5e2fa')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#b5e2fa] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#c5dedd')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#c5dedd] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#e2ece9')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#e2ece9] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#d8f3dc')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#d8f3dc] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#f0e6ef')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#f0e6ef] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#eaf2d7')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#eaf2d7] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#fceade')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#fceade] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#ddfff7')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#ddfff7] hover:scale-105 active:scale-95 transition-transform"></button>
-          <button onclick="applicaColoreCartella('#e8dbfc')" class="w-full h-10 rounded-xl border border-gray-200 bg-[#e8dbfc] hover:scale-105 active:scale-95 transition-transform"></button>
-        </div>
-        <div class="mt-4 border-t border-gray-100 pt-3">
-          <p class="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-2">Scegli un'icona</p>
-          <div class="grid grid-cols-5 gap-2 justify-items-center bg-[var(--bg-page)] p-2 rounded-xl">
-            <!-- 💡 Inserisci gli ID esatti dei simboli presenti nel tuo sprite.svg -->
-            <button onclick="applicaIconaCartella('star')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">⭐</button>
-            <button onclick="applicaIconaCartella('sun')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">☀️</button>
-            <button onclick="applicaIconaCartella('moon')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🌙</button>
-            <button onclick="applicaIconaCartella('cloud')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">☁️</button>
-            <button onclick="applicaIconaCartella('bolt')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">⚡</button>
-            <button onclick="applicaIconaCartella('tornado')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🌪️</button>
-            <button onclick="applicaIconaCartella('flame')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🔥</button>
-            <button onclick="applicaIconaCartella('planet')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🪐</button>
-            <button onclick="applicaIconaCartella('ufo')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🛸</button>
-            <button onclick="applicaIconaCartella('heart')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">❤️</button>
-            <button onclick="applicaIconaCartella('ghost')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">👻</button>
-            <button onclick="applicaIconaCartella('bone')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🦴</button>
-            <button onclick="applicaIconaCartella('crown')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">👑</button>
-            <button onclick="applicaIconaCartella('bomb')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">💣</button>
-            <button onclick="applicaIconaCartella('donut')" class="p-2 bg-white rounded-lg border border-gray-100 shadow-xs text-gray-600 text-sm hover:scale-105 active:scale-95">🍩</button>
-          </div>
-          <!-- 🗑️ IL TASTO ELIMINA -->
-          <button onclick="eliminaInteroAnnoArchivio()" class="w-full bg-red-500/10 text-red-500 font-black p-2.5 rounded-xl text-[9px] tracking-wider uppercase hover:bg-red-500 hover:text-white active:scale-95 transition-all flex items-center justify-center gap-1.5">
-            <span>🗑️</span>
-            <span>Elimina questo Anno</span>
-          </button>
-        </div>
-      </div>
-    </div>
-    <!-- 🚨 SYSTEM MODAL CUSTOM: AVVISI E CONFERME IN STILE PWA -->
-<div id="pwaSystemModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-[100] flex items-center justify-center p-6 animate-fade-in">
-  <div class="w-full max-w-sm bg-[var(--bg-surface)] border border-gray-100 rounded-[2.5rem] p-6 shadow-2xl space-y-4 text-center transform scale-95 transition-transform duration-300">
-    <div class="w-12 h-12 bg-[var(--colore-principale)]/10 text-[var(--colore-principale)] rounded-2xl flex items-center justify-center text-xl mx-auto" id="pwaModalIcon">
-      🔔
-    </div>
-    <div class="space-y-1">
-      <h3 class="text-sm font-black text-gray-800 uppercase tracking-wider" id="pwaModalTitle">Avviso di Sistema</h3>
-      <p class="text-xs font-bold text-gray-500 leading-relaxed px-2" id="pwaModalMessage">Messaggio...</p>
-    </div>
-    
-    <!-- Pulsantiera Dinamica -->
-    <div class="flex gap-2 pt-2" id="pwaModalButtonsContainer">
-      <!-- I bottoni verranno iniettati al volo da JavaScript -->
-    </div>
-  </div>
-</div>
+        const API_URL = "https://script.google.com/macros/s/AKfycbwVrFAO7Ca7twZ_FZ1Y1tiLAWjKnpLTEd_FAOG4nQPY4EHJh74e7j-PU3cjLykjZnc/exec";
 
-    <script src="temi.js"></script>
-    <script src="script.js"></script>
-  </body>
-</html>
+        let databaseEsami = [];
+        let databaseAllegati = [];
+        let currentOpenYear = null;
+        let isEditingModeActive = false;
+        let istanzeGrafici = {};
+
+        let configBiomarcatori = {
+        	"Tempo Quick Plasma Controllo": {
+        		unita: "sec",
+        		noRange: true
+        	},
+        	"Tempo Quick Plasma Esame": {
+        		unita: "sec",
+        		noRange: true
+        	},
+        	"Attività Protrombinica": {
+        		unita: "%",
+        		min: 70.0,
+        		max: 120.0
+        	},
+        	"Tempo TromboPlastina (PTT)": {
+        		unita: "sec",
+        		min: 20.0,
+        		max: 38.0
+        	},
+        	"Fibrogeno": {
+        		unita: "mg/dL",
+        		min: 200,
+        		max: 400
+        	},
+        	"Glicemia": {
+        		unita: "mg/dL",
+        		min: 60,
+        		max: 110
+        	},
+        	"Creatina": {
+        		unita: "mg/dL",
+        		min: 0.70,
+        		max: 1.40
+        	},
+        	"Trigliceridi": {
+        		unita: "mg/dL",
+        		min: 60,
+        		max: 170
+        	},
+        	"Colesterolo Totale": {
+        		unita: "mg/dL",
+        		isColesterolo: true
+        	},
+        	"HDL Colesterolo": {
+        		unita: "mg/dL",
+        		isHDL: true
+        	},
+        	"Gamma - GT": {
+        		unita: "IU/l",
+        		min: 11,
+        		max: 50
+        	},
+        	"Bilirubina Totale": {
+        		unita: "mg/dL",
+        		maxSoglia: 1.25
+        	},
+        	"Bilirubina Diretta": {
+        		unita: "mg/dL",
+        		maxSoglia: 0.30
+        	},
+        	"Bilirubina Indiretta": {
+        		unita: "mg/dL",
+        		maxSoglia: 0.95
+        	},
+        	"G.O.T.": {
+        		unita: "IU/l",
+        		maxSoglia: 37
+        	},
+        	"G.P.T.": {
+        		unita: "IU/l",
+        		maxSoglia: 45
+        	},
+        	"Ultra-TSH": {
+        		unita: "μIU/ml",
+        		min: 0.3000,
+        		max: 4.5000
+        	},
+        	"Prolattina": {
+        		unita: "ng/ml",
+        		min: 2.00,
+        		max: 18.00
+        	},
+        	"Testosterone Totale": {
+        		unita: "ng/ml",
+        		min: 2.2,
+        		max: 10.5
+        	},
+        	"Globuli Bianchi (WBC)": {
+        		unita: "migliaia/mmc",
+        		min: 4.00,
+        		max: 10.00
+        	},
+        	"Neutrofili %": {
+        		unita: "%",
+        		min: 50.0,
+        		max: 65.0
+        	},
+        	"Linfociti %": {
+        		unita: "%",
+        		min: 20.0,
+        		max: 40.0
+        	},
+        	"Monociti %": {
+        		unita: "%",
+        		min: 0.0,
+        		max: 8.0
+        	},
+        	"Eosinofili %": {
+        		unita: "%",
+        		min: 0.0,
+        		max: 4.0
+        	},
+        	"Basofili %": {
+        		unita: "%",
+        		min: 0.0,
+        		max: 1.0
+        	},
+        	"Neutrofili #": {
+        		unita: "10^3/μl",
+        		min: 2.00,
+        		max: 7.50
+        	},
+        	"Linfociti #": {
+        		unita: "10^3/μl",
+        		min: 1.50,
+        		max: 3.50
+        	},
+        	"Monociti #": {
+        		unita: "10^3/μl",
+        		min: 0.00,
+        		max: 0.80
+        	},
+        	"Eosinofili #": {
+        		unita: "10^3/μl",
+        		min: 0.00,
+        		max: 0.70
+        	},
+        	"Basofili #": {
+        		unita: "10^3/μl",
+        		min: 0.00,
+        		max: 0.10
+        	},
+        	"Globuli Rossi (RBC)": {
+        		unita: "milioni/mmc",
+        		min: 4.50,
+        		max: 6.00
+        	},
+        	"Emoglobina (HGB)": {
+        		unita: "g/dl",
+        		min: 14.0,
+        		max: 17.5
+        	},
+        	"Ematocrito (HCT)": {
+        		unita: "%",
+        		min: 42.0,
+        		max: 54.0
+        	},
+        	"Volume Globulare Medio (MCV)": {
+        		unita: "fl",
+        		min: 82.0,
+        		max: 98.0
+        	},
+        	"Contenuto Emoglobinico Medio (MCH)": {
+        		unita: "pg",
+        		min: 27.0,
+        		max: 33.0
+        	},
+        	"Concentrazione Emoglobinica Media (MCHC)": {
+        		unita: "%",
+        		min: 32.0,
+        		max: 38.0
+        	},
+        	"RDW-CV": {
+        		unita: "%",
+        		min: 10.0,
+        		max: 14.5
+        	},
+        	"RDW-SD": {
+        		unita: "fl",
+        		min: 39.0,
+        		max: 45.0
+        	},
+        	"Piastrine (PLT)": {
+        		unita: "migliaia/mmc",
+        		min: 150,
+        		max: 500
+        	},
+        	"Volume Piastrinico Medio (MPV)": {
+        		unita: "fl",
+        		min: 8.2,
+        		max: 12.3
+        	},
+        	"Ampiezza distribuzione Piastrine (PDW)": {
+        		unita: "fl",
+        		min: 10.0,
+        		max: 16.5
+        	},
+        	"PCT": {
+        		unita: "%",
+        		min: 0.000,
+        		max: 0.999
+        	},
+        	"Omocisteina": {
+        		unita: "μmol/L",
+        		noRange: true
+        	},
+        	"Azotemia": {
+        		unita: "mg/dL",
+        		min: 15,
+        		max: 50
+        	},
+        	"Sodiemia": {
+        		unita: "mEq/l",
+        		min: 135,
+        		max: 150
+        	},
+        	"Potassiemia": {
+        		unita: "mEq/l",
+        		min: 3.60,
+        		max: 5.40
+        	},
+        	"Colinesterasi": {
+        		unita: "U/l",
+        		min: 2500,
+        		max: 9400
+        	},
+        	"LH": {
+        		unita: "mIU/ml",
+        		min: 1.10,
+        		max: 25.00
+        	},
+        	"FSH": {
+        		unita: "mIU/ml",
+        		min: 1.50,
+        		max: 11.80
+        	},
+        	"Estradiolo": {
+        		unita: "pg/ml",
+        		maxSoglia: 87.0
+        	}
+        };
+
+        // ==================== MOSTRA RANGE DINAMICI NEL MODAL INSERIMENTO ====================
+
+        function aggiornaRiquadroInfoRange() {
+        	const selectMenu = document.getElementById('addBioNome');
+        	const box = document.getElementById('boxRangeInformativo');
+        	const testo = document.getElementById('testoRangeInformativo');
+
+        	if (!selectMenu || !box || !testo) return;
+
+        	const biomarcatoreSelezionato = selectMenu.value;
+
+        	// Se non è selezionato nulla, nascondi il riquadro ed esci
+        	if (!biomarcatoreSelezionato || !configBiomarcatori[biomarcatoreSelezionato]) {
+        		box.classList.add('hidden');
+        		return;
+        	}
+
+        	const conf = configBiomarcatori[biomarcatoreSelezionato];
+        	let htmlContenuto = "";
+
+        	// 🧪 CASO 1: COLESTEROLO TOTALE (Tre soglie complete)
+        	if (conf.isColesterolo) {
+        		htmlContenuto = `
+            <div class="space-y-1">
+                <p class="text-green-600 flex items-center gap-1">🟢 Normale: <span class="font-black">&lt; 200 ${conf.unita}</span></p>
+                <p class="text-amber-500 flex items-center gap-1">🟡 Rischio Moderato: <span class="font-black">200 - 239 ${conf.unita}</span></p>
+                <p class="text-red-500 flex items-center gap-1">🔴 Rischio Elevato: <span class="font-black">&ge; 240 ${conf.unita}</span></p>
+            </div>
+        `;
+        	}
+        	// 💊 CASO 2: HDL COLESTEROLO (Logica invertita)
+        	else if (conf.isHDL) {
+        		htmlContenuto = `
+            <div class="space-y-1">
+                <p class="text-green-600 flex items-center gap-1">🟢 Ottimale / Normale: <span class="font-black">&gt; 45 ${conf.unita}</span></p>
+                <p class="text-amber-500 flex items-center gap-1">🟡 Rischio Moderato: <span class="font-black">35 - 45 ${conf.unita}</span></p>
+                <p class="text-red-500 flex items-center gap-1">🔴 Alto Rischio Vascolare: <span class="font-black">&lt; 35 ${conf.unita}</span></p>
+            </div>
+        `;
+        	}
+
+			    // Incolla questo dentro aggiornaRiquadroInfoRange() insieme agli altri casi speciali:
+             else if (conf.tipoSpeciale === "vitaminad" || biomarcatoreSelezionato === "Vitamina D3") {
+             htmlContenuto = `
+             <div class="space-y-1">
+                <p class="text-red-500 flex items-center gap-1">🚨 Deficienza: <span class="font-black">&lt; 10 ${conf.unita}</span></p>
+                <p class="text-amber-500 flex items-center gap-1">🟡 Insufficienza: <span class="font-black">10 - 29 ${conf.unita}</span></p>
+                <p class="text-green-600 flex items-center gap-1">🟢 Sufficienza: <span class="font-black">30 - 100 ${conf.unita}</span></p>
+                <p class="text-purple-500 flex items-center gap-1">🔮 Tossicità: <span class="font-black">&gt; 100 ${conf.unita}</span></p>
+             </div>
+               `;
+            }
+
+        	// 📈 CASO 3: MASSIMA SOGLIA (Fino a...)
+        	else if (conf.maxSoglia !== undefined && conf.maxSoglia !== null) {
+        		htmlContenuto = `Valore normale atteso: <span class="text-green-600 font-black">Fino a ${conf.maxSoglia} ${conf.unita}</span>`;
+        	}
+        	// 📐 CASO 4: RANGE STANDARD (Min - Max)
+        	else if (!conf.noRange && conf.min !== undefined && conf.max !== undefined) {
+        		htmlContenuto = `Intervallo di riferimento normale: <span class="text-green-600 font-black">${conf.min} - ${conf.max} ${conf.unita}</span>`;
+        	}
+        	// ◯ CASO 5: MONITORAGGIO PURO
+        	else {
+        		htmlContenuto = `Parametro di <span class="text-purple-500 font-black">Monitoraggio Libero</span> (Nessun range fisso di riferimento).`;
+        	}		
+
+        	// Inietta il testo e mostra il box con una transizione fluida
+        	testo.innerHTML = htmlContenuto;
+        	box.classList.remove('hidden');
+        }
+
+        window.onload = function() {
+        	// FORZA IL CARICAMENTO DEL TEMA SALVATO IMMEDIATAMENTE
+        	if (typeof inizializzaTemaAllAvvio === 'function') {
+        		inizializzaTemaAllAvvio();
+        	}
+        	const select = document.getElementById('addBioNome');
+        	select.innerHTML = "";
+        	Object.keys(configBiomarcatori).forEach(key => {
+        		const opt = document.createElement('option');
+        		opt.value = key;
+        		opt.innerText = key;
+        		select.appendChild(opt);
+        	});
+
+        	document.getElementById('addDocFile').addEventListener('change', function() {
+        		if (this.files.length > 0) {
+        			document.getElementById('uploadFileLabel').innerText = "Selezionato: " + this.files[0].name;
+
+        			inizializzaTemaAllAvvio();
+        		}
+        	});
+
+        	fetchDatiCloud();
+
+        	// Attiva il calendario personalizzato sui due input
+        	flatpickr("#addBioData", {
+        		locale: "it",
+        		dateFormat: "d-m-Y",
+        		defaultDate: "today"
+        	});
+
+        	flatpickr("#addDocData", {
+        		locale: "it",
+        		dateFormat: "d-m-Y",
+        		defaultDate: "today"
+        	});
+
+        	flatpickr("#addPromemoriaData", {
+        		locale: "it",
+        		dateFormat: "d-m-Y",
+        		defaultDate: "today"
+        	});
+
+        	flatpickr("#inputTerapiaDataInizio", {
+        		locale: "it",
+        		dateFormat: "d-m-Y",
+        		defaultDate: "today"
+        	});
+
+        	renderPromemoria();
+        };
+
+        // ==================== LOGICA PROMEMORIA ANALISI (VERSIONE BLINDATA ANTI-CONFLITTO) ====================
+
+    function renderPromemoria() {
+    const container = document.getElementById('promemoriaContainer'); // Allineato al tuo HTML
+    if (!container) return;
+
+    let agendaTotale = [];
+
+    // 🩸 1. CARICAMENTO DELLE PROSSIME ANALISI (ESAMI)
+    if (databasePromemoria && databasePromemoria.length > 0) {
+        databasePromemoria.forEach(pro => {
+            if (!pro || !pro.data) return;
+            const dataEsame = new Date(pro.data.replace(/-/g, "/"));
+            if (!isNaN(dataEsame.getTime())) {
+                dataEsame.setHours(0, 0, 0, 0);
+                agendaTotale.push({
+                    tipo: "esame",
+                    nome: pro.nome || pro.biomarcatore || "Controllo",
+                    dataOggetto: dataEsame
+                });
+            }
+        });
+    }
+
+    // 💊 2. CARICAMENTO DELLE PROSSIME DOSI (FARMACI)
+    if (typeof databaseTerapie !== 'undefined' && databaseTerapie && databaseTerapie.length > 0) {
+        databaseTerapie.forEach(t => {
+            if (typeof ottieniDataProssimaAssunzione === 'function') {
+                const dataProssimaDose = ottieniDataProssimaAssunzione(t);
+                if (dataProssimaDose && !isNaN(dataProssimaDose.getTime())) {
+                    dataProssimaDose.setHours(0, 0, 0, 0);
+                    agendaTotale.push({
+                        tipo: "farmaco",
+                        nome: `💊 ${t.nome || 'Terapia'}`,
+                        dataOggetto: dataProssimaDose
+                    });
+                }
+            }
+        });
+    }
+
+    if (agendaTotale.length === 0) {
+        container.innerHTML = `<p class="text-[11px] font-medium text-gray-400 italic text-center py-4">Nessun esame o assunzione pianificata.</p>`;
+        return;
+    }
+
+    // 🌟 ORDINAMENTO CRONOLOGICO UNIFICATO
+    agendaTotale.sort((a, b) => a.dataOggetto - b.dataOggetto);
+
+    container.innerHTML = "";
+
+    // 🌟 GENERAZIONE GRAFICA DELLE CARD
+    agendaTotale.forEach((item) => {
+        const oggi = new Date();
+        oggi.setHours(0, 0, 0, 0);
+
+        // 👑 CALCOLO MATEMATICO CORRETTO E PULITO (Piallato dataDro!)
+        const diffTempo = item.dataOggetto.getTime() - oggi.getTime();
+        const diffGiorni = Math.round(diffTempo / (1000 * 60 * 60 * 24));
+
+        let testoGiorni = "";
+        let coloreBadge = "bg-purple-50 text-[var(--colore-principale)]";
+
+        if (diffGiorni < 0) {
+            testoGiorni = "Scaduto";
+            coloreBadge = "bg-red-50 text-red-500";
+        } else if (diffGiorni === 0) {
+            testoGiorni = "Oggi!";
+            coloreBadge = "bg-amber-50 text-amber-500 animate-pulse";
+        } else if (diffGiorni === 1) {
+            testoGiorni = "Domani";
+            coloreBadge = "bg-amber-50 text-amber-500";
+        } else {
+            testoGiorni = `- ${diffGiorni} giorni`;
+        }
+
+        const isFarmaco = item.tipo === "farmaco";
+        if (isFarmaco && diffGiorni > 1) {
+            coloreBadge = "bg-blue-50 text-blue-500 border border-blue-100/50";
+        }
+
+        const dataFormattata = item.dataOggetto.toLocaleDateString('it-IT', {
+            day: '2-digit',
+            month: 'short'
+        });
+
+        const row = document.createElement('div');
+        row.className = "flex justify-between items-center bg-gray-50 border border-gray-100 p-3 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group mt-1.5 shadow-2xs";
+
+        // 🎯 GESTIONE CLICK CON SPOSTAMENTO INDICATORE NAVBAR
+        if (isFarmaco) {
+            row.onclick = () => {
+                const tuttiILi = document.querySelectorAll('#bottomNavBar ul li.list');
+                const liTerapie = tuttiILi[2]; // Prende l'elemento Terapie (Indice 2)
+                
+                if (typeof switchTab === 'function') {
+                    switchTab('therapies', liTerapie); 
+                }
+            };
+        } else {
+            row.onclick = () => {
+                if (typeof eliminaPromemoriaPerNome === 'function') eliminaPromemoriaPerNome(item.nome);
+            };
+        }
+
+        row.innerHTML = `
+            <div class="flex items-center gap-3 overflow-hidden max-w-[75%]">
+                <span class="text-[10px] font-black bg-white text-gray-800 border border-gray-100 px-2 py-1 rounded-lg whitespace-nowrap shadow-2xs">${dataFormattata}</span>
+                <span class="text-xs font-black text-gray-700 truncate uppercase tracking-wide" style="font-variant: small-caps;">${item.nome}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-[9px] font-black uppercase px-2 py-1 rounded-md ${coloreBadge}">${testoGiorni}</span>
+                ${isFarmaco ? '' : '<span class="text-[10px] text-red-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity pl-1">✕</span>'}
+            </div>
+        `;
+        container.appendChild(row);
+    });
+
+    const selectMenu = document.getElementById('addBioNome');
+    if (selectMenu) {
+        selectMenu.onchange = aggiornaRiquadroInfoRange;
+    }
+}
+
+
+
+        function apriModalNuovoPromemoria() {
+        	const modal = document.getElementById('modalPromemoria');
+        	if (modal) {
+        		modal.classList.remove('hidden');
+				const inputData = document.getElementById('addPromemoriaData') || document.getElementById('addBioData');
+				if (inputData) {
+             // Imposta la data odierna in formato testo standard AAAA-MM-GG senza mandare in crash l'app
+              inputData.value = new Date().toISOString().split('T')[0];
+              }
+        	}
+        }
+
+        function chiudiModalPromemoria() {
+        	const modal = document.getElementById('modalPromemoria');
+        	if (modal) {
+        		modal.classList.add('hidden');
+        		document.getElementById('formPromemoria').reset();
+        	}
+        }
+
+        function salvaPromemoria(e) {
+        	e.preventDefault();
+
+        	// Recupera la stringa della data dall'input Flatpickr
+        	const dataInput = document.getElementById('addPromemoriaData').value;
+        	const nome = document.getElementById('addPromemoriaNome').value.trim();
+
+        	if (!dataInput || !nome) {
+        		alert("Compila tutti i campi!");
+        		return;
+        	}
+
+        	// Convertiamo la data da formato italiano (GG-MM-AAAA) a formato standard se necessario per il database
+        	let dataFormattata = dataInput;
+        	if (dataInput.includes("-") && dataInput.split("-")[0].length === 2) {
+        		const parti = dataInput.split("-");
+        		dataFormattata = `${parti[2]}-${parti[1]}-${parti[0]}`; // Diventa AAAA-MM-GG
+        	}
+
+        	// Inseriamo l'oggetto nel database locale
+        	databasePromemoria.push({
+        		data: dataFormattata,
+        		nome: nome
+        	});
+        	localStorage.setItem('health-app-promemoria', JSON.stringify(databasePromemoria));
+
+        	// Reset e rinfresco interfaccia
+        	chiudiModalPromemoria();
+        	renderPromemoria();
+        }
+
+
+        // ✨ NUOVA FUNZIONE DI ELIMINAZIONE SICURA SENZA L'USO DI INDEX NUMERICI
+        function eliminaPromemoriaPerNome(nomeEsame) {
+        	if (confirm(`Hai eseguito queste analisi o vuoi rimuovere il promemoria "${nomeEsame}"?`)) {
+        		// Filtra l'array rimuovendo l'esame che ha quel nome specifico
+        		databasePromemoria = databasePromemoria.filter(item => item.nome !== nomeEsame);
+        		localStorage.setItem('health-app-promemoria', JSON.stringify(databasePromemoria));
+        		renderPromemoria();
+        	}
+        }
+
+        function fetchDatiCloud() {
+        	document.getElementById('loadingOverlay').style.opacity = "1";
+        	document.getElementById('loadingOverlay').classList.remove('hidden');
+
+        	fetch(API_URL)
+        		.then(response => response.json())
+        		.then(data => {
+        			databaseEsami = data.esami || [];
+        			databaseAllegati = data.allegati || [];
+
+        			// 🔮 1. IL DIZIONARIO ONLINE: Scarica i limiti dal foglio Google Sheets
+        			if (data.dizionario && data.dizionario.length > 0) {
+        				configBiomarcatori = {}; // Svuota la cache precedente
+
+        				data.dizionario.forEach(item => {
+        					if (!item.biomarcatore) return;
+
+        					configBiomarcatori[item.biomarcatore] = {
+        						unita: item.unita || "",
+        						min: item.min !== null && item.min !== undefined ? parseFloat(item.min) : undefined,
+        						max: item.max !== null && item.max !== undefined ? parseFloat(item.max) : undefined,
+        						maxSoglia: item.maxSoglia !== null && item.maxSoglia !== undefined ? parseFloat(item.maxSoglia) : undefined,
+        						isColesterolo: item.tipoSpeciale && item.tipoSpeciale.toLowerCase() === "colesterolo",
+        						isHDL: item.tipoSpeciale && item.tipoSpeciale.toLowerCase() === "hdl",
+        						noRange: item.tipoSpeciale && item.tipoSpeciale.toLowerCase() === "norange"
+        					};
+        				});
+
+        				// Inietta i biomarcatori suggeriti in ordine alfabetico nella tendina HTML
+        				const selectMenu = document.getElementById('addBioNome');
+        				if (selectMenu) {
+        					selectMenu.innerHTML = '<option value="">-- Seleziona Biomarcatore --</option>';
+        					Object.keys(configBiomarcatori).sort().forEach(nomeBio => {
+        						selectMenu.innerHTML += `<option value="${nomeBio}">${nomeBio}</option>`;
+        					});
+        				}
+        			}
+
+        			// 👑 2. AGGANCIO INDIPENDENTE: Forza l'accensione del box dei range medici quando cambi esame
+        			const menuTendinaBio = document.getElementById('addBioNome');
+        			if (menuTendinaBio) {
+        				menuTendinaBio.addEventListener('change', function() {
+        					if (typeof aggiornaRiquadroInfoRange === 'function') {
+        						aggiornaRiquadroInfoRange();
+        					}
+        				});
+        			}
+
+        			// Recupera il nome dal LocalStorage del browser (I tuoi comandi originali)
+        			const nomePersonalizzato = localStorage.getItem('user-custom-name') || 'Utente';
+        			if (document.getElementById('mainGreeting')) {
+        				document.getElementById('mainGreeting').innerText = `Ciao, ${nomePersonalizzato}`;
+        			}
+
+        			// Carica il nome anche dentro la casella delle impostazioni
+        			if (document.getElementById('inputNomeUtente')) {
+        				document.getElementById('inputNomeUtente').value = localStorage.getItem('user-custom-name') || '';
+        			}
+
+        			renderFolders();
+        			if (currentOpenYear) refreshTimeline();
+        		})
+        		.catch(err => alert("Errore nel caricamento dati dal cloud: " + err))
+        		.finally(() => {
+					if (typeof renderPromemoria === 'function') renderPromemoria();
+        
+        			document.getElementById('loadingOverlay').style.opacity = "0";
+        			setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 300);
+        		});
+        }
+
+
+        // ==================== RESET TOTALE APPLICAZIONE ====================
+        function piallaTuttiIDatiDellApp() {
+        	pwaConfirm("Sei sicuro di voler eliminare DEFINITIVAMENTE tutti i dati? Questa azione non si può annullare.", "Reset Totale")
+        		.then(confermato1 => {
+        			if (!confermato1) return;
+
+        			pwaConfirm("Confermi davvero? Verranno cancellati tutti i file, gli esami, i promemoria e le terapie sia da questo dispositivo che dal Cloud.", "Ultima Conferma")
+        				.then(confermato2 => {
+        					if (!confermato2) return;
+
+        					// Mostra l'overlay di caricamento
+        					document.getElementById('loadingOverlay').style.opacity = "1";
+        					document.getElementById('loadingOverlay').classList.remove('hidden');
+
+        					// Invia il comando al cloud
+        					fetch(API_URL, {
+        							method: "POST",
+        							body: JSON.stringify({
+        								azione: "eliminaBiomarcatore",
+        								svuotaTutto: true
+        							})
+        						})
+        						.then(res => res.json())
+        						.then(res => console.log("Risposta cloud svuotamento totale:", res))
+        						.catch(err => console.warn("Impossibile svuotare il cloud, procedo in locale:", err))
+        						.finally(() => {
+        							// Pulizia locale
+        							localStorage.clear();
+        							databaseEsami = [];
+        							databaseAllegati = [];
+        							databaseTerapie = [];
+        							databasePromemoria = [];
+
+        							renderFolders();
+        							if (typeof renderTerapie === 'function') renderTerapie();
+        							if (typeof renderPromemoria === 'function') renderPromemoria();
+
+        							// 👑 Avviso di successo stile PWA prima del reload!
+        							pwaAlert("Applicazione resettata con successo! La pagina verrà ricaricata pulita.", "Reset Completato")
+        								.then(() => {
+        									window.location.reload();
+        								});
+        						});
+        				});
+        		});
+        }
+
+
+        let touchstartY = 0,
+        	touchendY = 0;
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        welcomeScreen.addEventListener('touchstart', e => {
+        	touchstartY = e.changedTouches[0].screenY;
+        });
+        welcomeScreen.addEventListener('touchend', e => {
+        	touchendY = e.changedTouches[0].screenY;
+        	if (touchstartY - touchendY > 80) goToHome();
+        });
+
+        function goToHome() {
+        	const welcomeScreen = document.getElementById('welcomeScreen');
+        	// Spinge lo schermo verso l'alto proprio come nell'animazione
+        	welcomeScreen.style.transform = 'translateY(-100%)';
+        	setTimeout(() => {
+        		welcomeScreen.classList.add('hidden');
+        		document.getElementById('floatingAddBtn').classList.remove('hidden');
+        		document.getElementById('bottomNavBar').classList.remove('hidden');
+        		// Rende visibile la home
+        		switchTab('home', document.querySelector('.navigation ul li'));
+        	}, 600);
+        }
+
+        // Database terapie
+        let databaseTerapie = JSON.parse(localStorage.getItem('health-app-terapie')) || [];
+        // Variabile per tenere traccia di quale tab di terapia è attualmente selezionata
+        let terapiaAttivaId = null;
+        // Database locale per le prossime analisi da fare
+        let databasePromemoria = JSON.parse(localStorage.getItem('health-app-promemoria')) || [];
+
+        // ==================== LOGICA DI SWITCH TAB ED ELEMENTO ATTIVO ====================
+        function switchTab(targetPageId, element) {
+        	// Rimuove lo stato attivo da tutte le voci del menu
+        	document.querySelectorAll('.navigation ul li').forEach(btn => btn.classList.remove('active'));
+        	// Attiva la voce cliccata
+        	if (element) element.classList.add('active');
+
+        	const pagine = {
+        		'home': document.getElementById('page-home'),
+        		'search': document.getElementById('page-search'),
+        		'therapies': document.getElementById('page-therapies'),
+        		'settings': document.getElementById('page-settings')
+        	};
+
+        	document.getElementById('statsPage').classList.add('hidden');
+
+        	Object.keys(pagine).forEach(key => {
+        		if (pagine[key]) {
+        			if (key === targetPageId) {
+        				pagine[key].classList.remove('hidden');
+        			} else {
+        				pagine[key].classList.add('hidden');
+        			}
+        		}
+        	});
+
+        	// 💡 LA CORREZIONE: Quando torni sulla Home, forza il rinfresco pulito del database locale
+        	if (targetPageId === 'home') {
+        		backToFolders();
+        		// Disegna le cartelle basandosi sui dati reali e aggiornati dell'app
+        		renderFolders();
+        		document.getElementById('floatingAddBtn').classList.remove('hidden');
+        	} else {
+        		document.getElementById('floatingAddBtn').classList.add('hidden');
+        	}
+
+        	if (targetPageId === 'search') setTimeout(() => document.getElementById('searchInput').focus(), 50);
+
+        	if (targetPageId === 'therapies') {
+        		if (typeof renderTerapie === 'function') renderTerapie();
+        	}
+        }
+
+
+        function eseguiRicerca() {
+        	const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        	const container = document.getElementById('searchResultsContainer');
+        	container.innerHTML = "";
+
+        	if (!query) {
+        		container.innerHTML = `<p class="text-center text-xs font-semibold text-gray-400 py-10">Inserisci una parola chiave per avviare la ricerca.</p>`;
+        		return;
+        	}
+
+        	// 1. Filtra i biomarcatori che corrispondono alla ricerca
+        	const esamiFiltrati = databaseEsami
+        		.filter(e => e.biomarcatore.toLowerCase().includes(query))
+        		.map(e => ({
+        			...e,
+        			tipo: 'esame'
+        		})); // Aggiungiamo un'etichetta per riconoscerli dopo
+
+        	// 2. Filtra gli allegati (cerca nel titolo e nell'etichetta salvata)
+        	const allegatiFiltrati = databaseAllegati
+        		.filter(a => a.titolo.toLowerCase().includes(query))
+        		.map(a => ({
+        			...a,
+        			tipo: 'allegato'
+        		})); // Aggiungiamo un'etichetta per riconoscerli dopo
+
+        	// 3. Unisce i due gruppi in un unico grande array e li ordina per data decrescente (dal più recente)
+        	const risultati = [...esamiFiltrati, ...allegatiFiltrati].sort((a, b) => new Date(b.data) - new Date(a.data));
+
+        	if (risultati.length === 0) {
+        		container.innerHTML = `<p class="text-center text-xs font-semibold text-gray-400 py-10">Nessun Biomarcatore trovato corrispondente.</p>`;
+        		return;
+        	}
+
+        	// 4. Genera visivamente i risultati differenziando la grafica
+        	risultati.forEach(r => {
+        		const d = new Date(r.data).toLocaleDateString('it-IT', {
+        			day: '2-digit',
+        			month: 'short',
+        			year: 'numeric'
+        		});
+        		const item = document.createElement('div');
+        		item.className = "bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center transition-all hover:border-gray-200";
+
+        		if (r.tipo === 'esame') {
+        			// --- GRAFICA PER I BIOMARCATORI ---
+        			const conf = configBiomarcatori[r.biomarcatore] || {
+        				unita: ""
+        			};
+        			item.innerHTML = `
+                <div>
+        <h4 class="text-xs font-extrabold text-gray-800 flex items-center gap-1.5">
+            <svg class="w-6 h-6 text-[var(--colore-principale)]">
+                <use href="assets/icons/sprite.svg#blood-drop"></use>
+            </svg>
+            <span>${r.biomarcatore}</span>
+        </h4>
+        <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Eseguito il: ${d}</p>
+    </div>
+    <div class="text-right">
+        <span class="text-base font-black text-gray-800">${r.valore}</span>
+        <span class="text-[9px] font-bold text-gray-400 block">${conf.unita}</span>
+    </div>
+            `;
+        		} else {
+        			// --- GRAFICA PER GLI ALLEGATI (con pulsante per aprire il link) ---
+        			item.innerHTML = `
+                <div class="max-w-[70%]">
+                    <h4 class="text-xs font-extrabold text-gray-800 flex items-center gap-1.5">
+                        <svg class="w-5 h-5 text-[var(--colore-principale)]">
+                        <use href="assets/icons/sprite.svg#document"></use>
+                    </svg>
+                        <span>${r.titolo}</span>
+                    </h4>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Caricato il: ${d}</p>
+                </div>
+                <div class="text-right">
+                    <button onclick="window.open('${r.url}', '_blank')" class="text-[10px] font-bold bg-[var(--colore-principale)]/10 text-[var(--colore-principale)] px-3 py-1.5 rounded-xl hover:bg-[var(--colore-principale)]/20 transition-colors uppercase tracking-wider">
+                        Apri ↗
+                    </button>
+                </div>
+            `;
+        		}
+
+        		container.appendChild(item);
+        	});
+        }
+
+        function renderFolders() {
+        	const container = document.getElementById('foldersContainer');
+        	container.innerHTML = "";
+        	document.getElementById('folderDetail').classList.add('hidden');
+        	container.classList.remove('hidden');
+
+        	const anniEsami = databaseEsami.map(item => new Date(item.data).getFullYear());
+        	const anniAllegati = databaseAllegati.map(item => new Date(item.data).getFullYear());
+        	const anni = [...new Set([...anniEsami, ...anniAllegati])].sort((a, b) => b - a);
+
+        	if (anni.length === 0) {
+        		container.innerHTML = `<div class="col-span-2 text-center py-10 text-gray-400 font-semibold text-sm">Nessun dato presente.<br>Clicca il tasto (+) per iniziare.</div>`;
+        		return;
+        	}
+
+        	anni.forEach(anno => {
+        		if (isNaN(anno)) return;
+
+        		const cartellaBox = document.createElement('div');
+        		cartellaBox.className = "relative select-none cursor-pointer group transition-all duration-300 active:scale-95";
+
+        		// Recupera il colore personalizzato salvato (se non c'è, usa il grigio pastello di default)
+        		const coloreSalvato = localStorage.getItem(`color-folder-${anno}`) || "#f3f4f6";
+
+        		// RECUPERA L'ICONA SALVATA (Se non c'è, usa 'star' come default)
+        		const iconaSalvata = localStorage.getItem(`icon-folder-${anno}`) || "star";
+
+        		// CONTEGGIO ELEMENTI DINAMICO (Esami + Allegati per questo anno)
+        		const conteggioEsami = databaseEsami.filter(item => new Date(item.data).getFullYear() === anno).length;
+        		const conteggioAllegati = databaseAllegati.filter(item => new Date(item.data).getFullYear() === anno).length;
+        		const totaleElementi = conteggioEsami + conteggioAllegati;
+
+        		// Gestione Pressione Prolungata (PC e Mobile) per cambiare colore
+        		let folderTimer;
+        		const startFolderPress = () => {
+        			folderTimer = setTimeout(() => openColorPicker(anno), 600);
+        		};
+        		const cancelFolderPress = () => {
+        			clearTimeout(folderTimer);
+        		};
+
+        		cartellaBox.addEventListener('mousedown', startFolderPress);
+        		cartellaBox.addEventListener('touchstart', startFolderPress);
+        		cartellaBox.addEventListener('mouseup', cancelFolderPress);
+        		cartellaBox.addEventListener('mouseleave', cancelFolderPress);
+        		cartellaBox.addEventListener('touchend', cancelFolderPress);
+
+        		// Clic normale per aprire l'anno
+        		cartellaBox.onclick = () => {
+        			openFolder(anno);
+        		};
+        		cartellaBox.innerHTML = `
+
+            <!--  TESSERA QUADRATA -->
+            <div id="folder-card-${anno}" 
+                 class="w-full max-w-[160px] aspect-square relative cursor-pointer flex flex-col justify-end p-4 hover:scale-[1.03] active:scale-95 transition-all duration-300 rounded-[1.8rem] ml-0 overflow-hidden"
+                 onclick="openFolder('${anno}')"
+                 style="
+                    background: linear-gradient(135deg, ${coloreSalvato} 0%, var(--colore-chiaro) 130%);
+                    border: 1px solid rgba(0, 0, 0, 0.06);
+                 ">
+        
+            <!-- 🌟 ICONA DINAMICA: L'ID punta alla variabile iconaSalvata -->
+            <svg class="absolute -top-4 -right-4 w-44 h-44 pointer-events-none transition-transform duration-500 group-hover:rotate-12" 
+                 style="
+                    color: ${coloreSalvato} !important;
+                    fill: ${coloreSalvato} !important;
+                    opacity: 0.75; 
+                    filter: brightness(0.65) contrast(1.4);
+                 ">
+                <use href="assets/icons/sprite.svg#${iconaSalvata}"></use>
+            </svg>
+
+            <!-- Blocco Contenuti -->
+            <div class="flex flex-col items-start gap-2 w-full z-10">
+                <div class="px-3.5 py-1 rounded-full flex items-center justify-center" style="background-color: rgba(0, 0, 0, 0.05);">
+                    <span class="text-xl font-black text-white tracking-tight leading-none">${anno}</span>
+                </div>
+                <div class="pl-0.5">
+                    <span class="text-[10px] font-bold text-gray-800/80 block leading-none tracking-wide" style="font-variant: small-caps;">
+                        ${totaleElementi} ${totaleElementi === 1 ? 'elemento' : 'elementi'}
+                    </span>
+                </div>
+            </div>
+        </div>
+    `;
+        		container.appendChild(cartellaBox);
+        	});
+        }
+
+        function openFolder(anno) {
+        	currentOpenYear = anno;
+        	document.getElementById('foldersContainer').classList.add('hidden');
+        	document.getElementById('folderDetail').classList.remove('hidden');
+        	document.getElementById('detailYearTitle').innerText = `${anno}`;
+        	refreshTimeline();
+        }
+
+        function refreshTimeline() {
+        	if (!currentOpenYear) return;
+        	const timeline = document.getElementById('examsTimeline');
+        	timeline.innerHTML = "";
+
+        	const esamiAnno = databaseEsami.filter(e => new Date(e.data).getFullYear() === currentOpenYear);
+        	const allegatiAnno = databaseAllegati.filter(a => new Date(a.data).getFullYear() === currentOpenYear);
+
+        	const dateUniche = [...new Set([...esamiAnno.map(e => e.data), ...allegatiAnno.map(a => a.data)])].sort((a, b) => new Date(b) - new Date(a));
+
+        	if (dateUniche.length === 0) {
+        		backToFolders();
+        		return;
+        	}
+
+        	dateUniche.forEach(dataString => {
+        		const opzioniData = {
+        			day: 'numeric',
+        			month: 'long',
+        			year: 'numeric'
+        		};
+        		const bloccoData = document.createElement('div');
+        		bloccoData.className = "space-y-3";
+        		bloccoData.innerHTML = `<h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[var(--colore-secondario)]"></span> ${new Date(dataString).toLocaleDateString('it-IT', opzioniData)}</h4><div class="grid grid-cols-3 gap-2" id="cards-container-${dataString}"></div><div class="mt-2 bg-white p-3 rounded-2xl border border-gray-50 shadow-sm"><div class="space-y-1" id="docs-container-${dataString}"><p class="text-[11px] text-gray-400 italic">Nessun documento allegato.</p></div></div>`;
+        		timeline.appendChild(bloccoData);
+
+        		const cardsContainer = document.getElementById(`cards-container-${dataString}`);
+        		let counterEsamiInData = 0;
+
+        		databaseEsami.forEach((esame, index) => {
+        			if (esame.data !== dataString) return;
+        			counterEsamiInData++;
+        			const conf = configBiomarcatori[esame.biomarcatore] || {
+        				unita: "",
+        				noRange: true
+        			};
+
+        			let emoji = "👍",
+        				colorClass = "text-green-500 bg-green-50/60 border-green-100",
+        				rangeText = "";
+
+        			if (conf.isColesterolo) {
+        				if (esame.valore < 220) {
+        					rangeText = "Normale (<220)";
+        				} else if (esame.valore <= 240) {
+        					emoji = "⚠️";
+        					colorClass = "text-amber-500 bg-amber-50/60 border-amber-100";
+        					rangeText = "A rischio (220-240)";
+        				} else {
+        					emoji = "🚨";
+        					colorClass = "text-red-500 bg-red-50/60 border-red-100";
+        					rangeText = "Elevato (>240)";
+        				}
+        			} else if (conf.isHDL) {
+        				if (esame.valore > 45) {
+        					rangeText = "Normale (>45)";
+        				} else if (esame.valore >= 35) {
+        					emoji = "⚠️";
+        					colorClass = "text-amber-500 bg-amber-50/60 border-amber-100";
+        					rangeText = "Mod. (35-45)";
+        				} else {
+        					emoji = "🚨";
+        					colorClass = "text-red-500 bg-red-50/60 border-red-100";
+        					rangeText = "Rischio (<35)";
+        				}
+        			} else if (conf.maxSoglia) {
+        				if (esame.valore > conf.maxSoglia) {
+        					emoji = "📈";
+        					colorClass = "text-red-500 bg-red-50/60 border-red-100";
+        				}
+        				rangeText = `Max: ${conf.maxSoglia}`;
+        			} else if (!conf.noRange) {
+        				if (esame.valore < conf.min) {
+        					emoji = "📉";
+        					colorClass = "text-blue-500 bg-blue-50/60 border-blue-100";
+        				} else if (esame.valore > conf.max) {
+        					emoji = "📈";
+        					colorClass = "text-red-500 bg-red-50/60 border-red-100";
+        				}
+
+					else if (conf.tipoSpeciale === "vitaminad" || esame.biomarcatore === "Vitamina D3") {
+						if (esame.valore >= 30 && esame.valore <= 100) {
+                         rangeText = "Sufficienza (30-100)";
+					    } else if (esame.valore >= 10 && esame.valore < 30) {
+						 emoji = "⚠️";
+                         colorClass = "text-amber-500 bg-amber-50/60 border-amber-100";
+                         rangeText = "Insufficienza (10-29)";
+                        } else if (esame.valore < 10) {
+                         emoji = "🚨";
+                         colorClass = "text-red-500 bg-red-50/60 border-red-100";
+                         rangeText = "Deficienza (<10)";
+                        } else {
+                         emoji = "☢️";
+                         colorClass = "text-purple-500 bg-purple-50/60 border-purple-100";
+                         rangeText = "Tossicità (>100)";
+                        }
+                    }
+						
+        				rangeText = `Ref: ${conf.min}-${conf.max}`;
+        			} else {
+        				rangeText = "Monitoraggio";
+        			}					
+
+        			const card = document.createElement('div');
+        			card.id = `card-${index}`;
+        			card.className = `bg-white rounded-2xl border ${colorClass} shadow-sm relative flex flex-col justify-between p-2 aspect-square text-center transition-transform select-none cursor-pointer`;
+
+        			let pressTimer;
+        			const startPress = () => {
+        				pressTimer = setTimeout(() => activateEditMode(), 500);
+        			};
+        			const cancelPress = () => {
+        				clearTimeout(pressTimer);
+        			};
+        			card.addEventListener('mousedown', startPress);
+        			card.addEventListener('touchstart', startPress);
+        			card.addEventListener('mouseleave', cancelPress);
+        			card.addEventListener('touchend', cancelPress);
+
+        			card.innerHTML = `
+                        <div class="absolute top-1 right-1 text-xs indicator-status">${emoji}</div>
+                        <div class="edit-controls hidden absolute inset-0 bg-white/95 rounded-2xl flex items-center justify-center gap-2 z-10">
+                            <button onclick="deleteBiomarcatore(${index}, event)" class="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md font-bold text-xs hover:scale-105 active:scale-95">✕</button>
+                            <button onclick="openEditModal(${index}, event)" class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-md text-xs hover:scale-105 active:scale-95">✏️</button>
+                        </div>
+                        <div class="flex-1 flex flex-col justify-center items-center mt-3">
+                            <span class="text-lg font-black text-gray-800 tracking-tight leading-none">${esame.valore}</span>
+                            <span class="text-[8px] font-bold text-gray-400 mt-0.5">${conf.unita}</span>
+                        </div>
+                        <div class="space-y-0.5 mb-1">
+                            <div class="text-[9px] font-extrabold text-gray-700 truncate w-full px-1">${esame.biomarcatore}</div>
+                            <div class="text-[7px] font-medium text-gray-400 truncate w-full">${rangeText}</div>
+                        </div>`;
+        			cardsContainer.appendChild(card);
+        		});
+
+        		if (counterEsamiInData === 0) cardsContainer.classList.add('hidden');
+
+        		const docsContainer = document.getElementById(`docs-container-${dataString}`);
+        		const allegati = databaseAllegati.filter(a => a.data === dataString);
+        		if (allegati.length > 0) {
+        			docsContainer.innerHTML = "";
+        			databaseAllegati.forEach((doc, index) => {
+        				if (doc.data !== dataString) return;
+
+        				const docRow = document.createElement('div');
+        				docRow.id = `doc-row-${index}`;
+        				docRow.className = "flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl text-xs font-semibold text-gray-600 cursor-pointer relative select-none group transition-transform";
+
+        				// Clic normale apre il documento, ma solo se NON siamo in modalità modifica
+        				docRow.onclick = () => {
+        					if (!isEditingModeActive) window.open(doc.url, '_blank');
+        				};
+
+        				// Gestione pressione prolungata su PC e Mobile
+        				let docTimer;
+        				const startDocPress = () => {
+        					docTimer = setTimeout(() => activateEditMode(), 500);
+        				};
+        				const cancelDocPress = () => {
+        					clearTimeout(docTimer);
+        				};
+        				docRow.addEventListener('mousedown', startDocPress);
+        				docRow.addEventListener('touchstart', startDocPress);
+        				docRow.addEventListener('mouseup', cancelDocPress);
+        				docRow.addEventListener('mouseleave', cancelDocPress);
+        				docRow.addEventListener('touchend', cancelDocPress);
+
+        				docRow.innerHTML = `
+            <div class="edit-controls-doc hidden absolute inset-0 bg-white/95 rounded-xl flex items-center justify-end gap-2 px-2 z-10">
+                <button onclick="deleteAllegato(${index}, event)" class="w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md font-bold text-xs hover:scale-105 active:scale-95">✕</button>
+                <button onclick="openEditAllegatoModal(${index}, event)" class="w-7 h-7 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-md text-xs hover:scale-105 active:scale-95">✏️</button>
+            </div>
+
+            <div class="flex items-center gap-1.5 truncate max-w-[70%]">
+                <span>📄</span>
+                <span class="truncate">${doc.titolo}</span>
+            </div>
+            <span class="text-[10px] text-[var(--colore-principale)] font-bold uppercase tracking-wider group-hover:translate-x-1 transition-transform indicator-link">Vedi Link ↗</span>
+        `;
+        				docsContainer.appendChild(docRow);
+        			});
+        		}
+        	});
+        }
+
+        function openStatsPage() {
+        	// 1. Nascondiamo solo la schermata della Home, NON tutto il contenitore delle pagine!
+        	document.getElementById('page-home').classList.add('hidden');
+
+        	// 2. Mostriamo la pagina delle statistiche
+        	document.getElementById('statsPage').classList.remove('hidden');
+
+        	// 3. Nascondiamo il bottone fluttuante "+" per non farlo sovrapporre ai grafici
+        	document.getElementById('floatingAddBtn').classList.add('hidden');
+
+        	// 💡 NOTA: NON nascondiamo più 'bottomNavBar' o 'appPagesContainer', 
+        	// così il menu in basso resta visibile!
+
+        	creaFiltriEMostraGrafici();
+        }
+
+        function closeStatsPage() {
+        	// 1. Nascondiamo le statistiche
+        	document.getElementById('statsPage').classList.add('hidden');
+
+        	// 2. Facciamo ricomparire la Home e il bottone "+"
+        	document.getElementById('page-home').classList.remove('hidden');
+        	document.getElementById('floatingAddBtn').classList.remove('hidden');
+
+        	// 3. Resettiamo i grafici come facevi prima
+        	Object.keys(istanzeGrafici).forEach(k => istanzeGrafici[k].destroy());
+        	istanzeGrafici = {};
+        }
+
+        function toggleFilterSidebar(show) {
+        	const overlay = document.getElementById('filterSidebarOverlay');
+        	const sidebar = document.getElementById('filterSidebar');
+        	if (show) {
+        		overlay.classList.remove('hidden');
+        		setTimeout(() => sidebar.style.transform = "translateX(0)", 20);
+        	} else {
+        		sidebar.style.transform = "translateX(100%)";
+        		setTimeout(() => overlay.classList.add('hidden'), 300);
+        	}
+        }
+
+        function creaFiltriEMostraGrafici() {
+        	const containerFiltri = document.getElementById('filtersScrollContainer');
+        	const containerGrafici = document.getElementById('chartsContainer');
+        	containerFiltri.innerHTML = "";
+        	containerGrafici.innerHTML = "";
+
+        	const datiRaggruppati = {};
+        	databaseEsami.forEach(e => {
+        		if (!datiRaggruppati[e.biomarcatore]) datiRaggruppati[e.biomarcatore] = [];
+        		datiRaggruppati[e.biomarcatore].push(e);
+        	});
+
+        	const listaBiomarcatori = Object.keys(datiRaggruppati).sort();
+
+        	if (listaBiomarcatori.length === 0) {
+        		containerGrafici.innerHTML = `<p class="text-center text-sm font-semibold text-gray-400 py-12">Nessun valore inserito per poter generare statistiche.</p>`;
+        		return;
+        	}
+
+        	const btnAll = document.createElement('button');
+        	btnAll.className = "filter-badge w-full text-left px-4 py-2.5 bg-[var(--colore-principale)] text-white text-xs font-bold rounded-xl shadow-sm transition-all";
+        	btnAll.innerText = "✨ Mostra Tutti";
+        	btnAll.onclick = () => {
+        		filtraGrafico('all', btnAll);
+        		toggleFilterSidebar(false);
+        	};
+        	containerFiltri.appendChild(btnAll);
+
+        	listaBiomarcatori.forEach(nomeBio => {
+        		const btn = document.createElement('button');
+        		btn.className = "filter-badge w-full text-left px-4 py-2.5 bg-gray-50 border border-gray-100 text-gray-600 text-xs font-bold rounded-xl transition-all hover:bg-purple-50/50";
+        		btn.innerText = `🩸 ${nomeBio}`;
+        		btn.onclick = () => {
+        			filtraGrafico(nomeBio, btn);
+        			toggleFilterSidebar(false);
+        		};
+        		containerFiltri.appendChild(btn);
+
+        		const chartBox = document.createElement('div');
+        		chartBox.id = `box-chart-${nomeBio.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        		chartBox.className = "chart-box bg-white p-5 rounded-[2rem] border border-gray-100 shadow-sm space-y-3";
+
+        		const conf = configBiomarcatori[nomeBio] || {
+        			unita: ""
+        		};
+        		chartBox.innerHTML = `
+                    <div class="flex justify-between items-center px-1">
+                        <h4 class="text-sm font-black text-gray-800">${nomeBio}</h4>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wide bg-gray-50 px-2 py-1 rounded-lg border border-gray-100">${conf.unita}</span>
+                    </div>
+                    <div class="relative w-full h-44">
+                        <canvas id="canvas-${nomeBio.replace(/[^a-zA-Z0-9]/g, '_')}"></canvas>
+                    </div>
+                `;
+        		containerGrafici.appendChild(chartBox);
+
+        		const BiomarcatoreOrdinati = datiRaggruppati[nomeBio].sort((a, b) => new Date(a.data) - new Date(b.data));
+
+        		const etichetteDate = BiomarcatoreOrdinati.map(r => {
+        			const d = new Date(r.data);
+        			return d.toLocaleDateString('it-IT', {
+        				day: '2-digit',
+        				month: '2-digit',
+        				year: '2-digit'
+        			});
+        		});
+        		const arrayValori = BiomarcatoreOrdinati.map(r => r.valore);
+
+        		const coloriPunti = [];
+        		const coloriBordoPunti = [];
+
+        		BiomarcatoreOrdinati.forEach(r => {
+        			let colore = 'var(--colore-principale)';
+        			if (conf.isCololesstolo) {
+        				colore = r.valore > 220 ? '#ef4444' : '#10b981';
+        			} else if (conf.isHDL) {
+        				colore = r.valore < 35 ? '#ef4444' : '#10b981';
+        			} else if (conf.maxSoglia) {
+        				colore = r.valore > conf.maxSoglia ? '#ef4444' : '#10b981';
+        			} else if (!conf.noRange) {
+        				if (r.valore < conf.min) colore = '#3b82f6';
+        				else if (r.valore > conf.max) colore = '#ef4444';
+        				else colore = '#10b981';
+        			}
+        			coloriPunti.push(colore);
+        			coloriBordoPunti.push('#ffffff');
+        		});
+
+        		const ctx = document.getElementById(`canvas-${nomeBio.replace(/[^a-zA-Z0-9]/g, '_')}`).getContext('2d');
+        		const gradiente = ctx.createLinearGradient(0, 0, 0, 160);
+        		gradiente.addColorStop(0, 'rgba(148, 142, 242, 0.2)');
+        		gradiente.addColorStop(1, 'rgba(148, 142, 242, 0.0)');
+
+        		istanzeGrafici[nomeBio] = new Chart(ctx, {
+        			type: 'line',
+        			data: {
+        				labels: etichetteDate,
+        				datasets: [{
+        					label: nomeBio,
+        					data: arrayValori,
+        					borderColor: 'var(--colore-principale)',
+        					borderWidth: 2.5,
+        					backgroundColor: gradiente,
+        					fill: true,
+        					tension: 0.4,
+        					pointBackgroundColor: coloriPunti,
+        					pointBorderColor: coloriBordoPunti,
+        					pointBorderWidth: 2,
+        					pointRadius: 5,
+        					pointHoverRadius: 7
+        				}]
+        			},
+        			options: {
+        				responsive: true,
+        				maintainAspectRatio: false,
+        				plugins: {
+        					legend: {
+        						display: false
+        					},
+        					tooltip: {
+        						enabled: true,
+        						backgroundColor: '#1e1b4b',
+        						padding: 10,
+        						cornerRadius: 12,
+        						displayColors: false
+        					}
+        				},
+        				scales: {
+        					x: {
+        						grid: {
+        							display: false
+        						},
+        						ticks: {
+        							font: {
+        								size: 8,
+        								weight: 'bold'
+        							},
+        							color: '#9ca3af'
+        						}
+        					},
+        					y: {
+        						grid: {
+        							color: '#f3f4f6'
+        						},
+        						ticks: {
+        							font: {
+        								size: 9,
+        								weight: 'medium'
+        							},
+        							color: '#9ca3af'
+        						}
+        					}
+        				}
+        			}
+        		});
+        	});
+        }
+
+        function filtraGrafico(nomeBio, bottoneCliccato) {
+        	document.querySelectorAll('.filter-badge').forEach(b => {
+        		b.className = "filter-badge w-full text-left px-4 py-2.5 bg-gray-50 border border-gray-100 text-gray-600 text-xs font-bold rounded-xl transition-all hover:bg-purple-50/50";
+        	});
+        	bottoneCliccato.className = "filter-badge w-full text-left px-4 py-2.5 bg-[var(--colore-principale)] text-white text-xs font-bold rounded-xl shadow-sm transition-all";
+
+        	document.querySelectorAll('.chart-box').forEach(box => {
+        		if (nomeBio === 'all') {
+        			box.classList.remove('hidden');
+        		} else {
+        			const idTarget = `box-chart-${nomeBio.replace(/[^a-zA-Z0-9]/g, '_')}`;
+        			if (box.id === idTarget) box.classList.remove('hidden');
+        			else box.classList.add('hidden');
+        		}
+        	});
+        }
+
+
+        function activateEditMode() {
+        	isEditingModeActive = true;
+
+        	// Attiva tremolio su biomarcatori
+        	databaseEsami.forEach((_, index) => {
+        		const card = document.getElementById(`card-${index}`);
+        		if (card) {
+        			card.classList.add('animate-wiggle', 'border-red-300');
+        			card.querySelector('.indicator-status').classList.add('hidden');
+        			card.querySelector('.edit-controls').classList.remove('hidden');
+        		}
+        	});
+
+        	// Attiva tremolio su allegati
+        	databaseAllegati.forEach((_, index) => {
+        		const row = document.getElementById(`doc-row-${index}`);
+        		if (row) {
+        			row.classList.add('animate-wiggle', 'bg-red-50/50', 'border', 'border-red-200');
+        			row.querySelector('.indicator-link').classList.add('hidden');
+        			row.querySelector('.edit-controls-doc').classList.remove('hidden');
+        		}
+        	});
+        }
+
+
+        function clearEditMode() {
+        	if (!isEditingModeActive) return;
+        	isEditingModeActive = false;
+        	// Disattiva biomarcatori
+        	databaseEsami.forEach((_, index) => {
+        		const card = document.getElementById(`card-${index}`);
+        		if (card) {
+        			card.classList.remove('animate-wiggle', 'border-red-300');
+        			card.querySelector('.indicator-status').classList.remove('hidden');
+        			card.querySelector('.edit-controls').classList.add('hidden');
+        		}
+        	});
+        	// Disattiva allegati
+        	databaseAllegati.forEach((_, index) => {
+        		const row = document.getElementById(`doc-row-${index}`);
+        		if (row) {
+        			row.classList.remove('animate-wiggle', 'bg-red-50/50', 'border', 'border-red-200');
+        			row.querySelector('.indicator-link').classList.remove('hidden');
+        			row.querySelector('.edit-controls-doc').classList.add('hidden');
+        		}
+        	});
+        }
+
+        function deleteBiomarcatore(index, event) {
+        	if (event) event.stopPropagation();
+    const esame = databaseEsami[index];
+    if (!esame) return;
+
+    // 👑 1. Richiesta di conferma con il nuovo popup custom smussato
+    pwaConfirm(`Vuoi davvero eliminare definitivamente ${esame.biomarcatore} (${esame.valore})?`, "Elimina Valore")
+    .then(confermato => {
+        if (!confermato) {
+            clearEditMode();
+            return; // Se clicca NO si ferma qui
+        }
+
+        // Se clicca SÌ, esegue la fetch silenziosa in background senza bloccare lo schermo
+        isEditingModeActive = false;
+
+        // 💾 Rimozione immediata dalla memoria RAM per farlo sparire dallo schermo in 0ms
+        databaseEsami.splice(index, 1);
+        renderFolders();
+        if (currentOpenYear) refreshTimeline();
+        clearEditMode();
+
+        // 🌐 Spedisce il comando di cancellazione a Google Sheets in sottofondo
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                azione: "eliminaBiomarcatore",
+                data: esame.data,
+                biomarcatore: esame.biomarcatore,
+                valore: esame.valore
+            })
+        })
+        .then(res => res.json())
+        .then(res => console.log("Biomarcatore rimosso dal cloud in background:", res))
+        .catch(err => console.warn("Errore di rete cloud, cancellazione comunque salvata sul telefono:", err));
+    });
+}
+
+        function openEditModal(index, event) {
+        	event.stopPropagation();
+        	clearEditMode();
+        	const esame = databaseEsami[index];
+        	openModal('modalBiomarcatori');
+        	document.getElementById('modalBioTitolo').innerText = "Modifica Biomarcatore";
+        	document.getElementById('btnBioSubmit').innerText = "✓ Aggiorna Biomarcatore";
+        	document.getElementById('editIndex').value = index;
+        	document.getElementById('oldData').value = esame.data;
+        	document.getElementById('oldBiomarcatore').value = esame.biomarcatore;
+        	document.getElementById('oldValore').value = esame.valore;
+        	document.getElementById('addBioData').value = esame.data;
+        	document.getElementById('addBioNome').value = esame.biomarcatore;
+        	document.getElementById('addBioValore').value = esame.valore;
+        	updateModalRanges();
+        }
+
+        function toggleBubbleMenu() {
+        	const menu = document.getElementById('bubbleMenu');
+        	const overlay = document.getElementById('overlay');
+        	const plus = document.getElementById('plusIcon');
+        	if (menu.classList.contains('hidden')) {
+        		menu.classList.remove('hidden');
+        		overlay.classList.remove('hidden');
+        		setTimeout(() => {
+        			menu.classList.add('menu-active');
+        			plus.style.transform = 'rotate(135deg)';
+        		}, 20);
+        	} else {
+        		closeAllModals();
+        	}
+        }
+
+        function openModal(modalId) {
+        	const menu = document.getElementById('bubbleMenu');
+        	menu.classList.remove('menu-active');
+        	setTimeout(() => {
+        		menu.classList.add('hidden');
+        		document.getElementById('overlay').classList.remove('hidden');
+        		const modal = document.getElementById(modalId);
+        		modal.classList.remove('hidden');
+        		if (modalId === 'modalBiomarcatori') {
+        			if (parseInt(document.getElementById('editIndex').value) === -1) {
+        				document.getElementById('modalBioTitolo').innerText = "Nuovo Biomarcatore";
+        				document.getElementById('btnBioSubmit').innerText = "+ Aggiungi Biomarcatore";
+        				document.getElementById('addBioData').valueAsDate = new Date();
+        			}
+        			updateModalRanges();
+        		} else {
+        			document.getElementById('addDocData').valueAsDate = new Date();
+        			document.getElementById('uploadFileLabel').innerText = "Seleziona File o Scatta Foto";
+        		}
+        	}, 200);
+        	if (modalId === 'modalAllegati') {
+        		aggiornaSelectTerapieInAllegati();
+        	}
+        }
+
+        function closeAllModals() {
+        	const menu = document.getElementById('bubbleMenu');
+        	const plus = document.getElementById('plusIcon');
+        	menu.classList.remove('menu-active');
+        	plus.style.transform = 'rotate(0deg)';
+        	setTimeout(() => {
+        		menu.classList.add('hidden');
+        		document.getElementById('overlay').classList.add('hidden');
+        		document.getElementById('modalBiomarcatori').classList.add('hidden');
+        		document.getElementById('modalAllegati').classList.add('hidden');
+        		document.getElementById('editIndex').value = "-1";
+        	}, 300);
+        }
+
+        function updateModalRanges() {
+        	const nome = document.getElementById('addBioNome').value;
+        	const config = configBiomarcatori[nome] || {
+        		unita: "",
+        		noRange: true
+        	};
+        	document.getElementById('addBioUnitaLabel').innerText = config.unita;
+        	const rangeBox = document.getElementById('addBioRangeBox');
+
+        	if (config.isColesterolo) {
+        		rangeBox.innerHTML = `<div class="flex justify-between text-[9px] font-bold uppercase tracking-tight"><span class="text-green-600">Normale: &lt;220</span><span class="text-amber-600">Rischio: 220-240</span><span class="text-red-600">Elevato: &gt;240</span></div>`;
+        	} else if (config.isHDL) {
+        		rangeBox.innerHTML = `<div class="flex justify-between text-[9px] font-bold uppercase tracking-tight"><span class="text-green-600">Normale: &gt;45</span><span class="text-amber-600">Mod.: 35-45</span><span class="text-red-600">Rischio: &lt;35</span></div>`;
+        	} else if (config.maxSoglia) {
+        		rangeBox.innerHTML = `Valore massimo consentito: <span class="text-red-500 font-bold">Fino a ${config.maxSoglia} ${config.unita}</span>`;
+        	} else if (config.noRange) {
+        		rangeBox.innerHTML = `<span class="text-gray-400 italic">Parametro di monitoraggio generale (Senza range fisso)</span>`;
+        	} else {
+        		rangeBox.innerHTML = `Range standard: <span class="text-[var(--colore-principale)] font-bold">${config.min} - ${config.max} ${config.unita}</span>`;
+        	}
+        }
+
+        function saveBiomarcatore(e) {
+        	e.preventDefault();
+        	const data = document.getElementById('addBioData').value;
+        	const nome = document.getElementById('addBioNome').value;
+        	const valore = parseFloat(document.getElementById('addBioValore').value);
+        	const index = parseInt(document.getElementById('editIndex').value);
+
+        	// 1. Chiude subito il modulo visivo per liberare lo schermo
+        	closeAllModals();
+
+        	// 👑 IL PARACADUTE DI FORMATTAZIONE: Se la data ha i trattini italiani, la gira per la timeline
+        	let dataFormattataPerTimeline = data;
+        	if (data && data.includes("-") && data.split("-")[0].length === 2) {
+        		const p = data.split("-");
+        		dataFormattataPerTimeline = `${p[2]}-${p[1]}-${p[0]}`; // Diventa AAAA-MM-GG
+        	}
+
+        	const nuovoBiomarcatore = {
+        		data: dataFormattataPerTimeline,
+        		biomarcatore: nome,
+        		valore: valore
+        	};
+
+        	// 2. AGGIORNAMENTO MEMORIA RAM REALE
+        	if (index === -1) {
+        		databaseEsami.push(nuovoBiomarcatore);
+        	} else {
+        		databaseEsami[index] = nuovoBiomarcatore;
+        	}
+
+        	// 👑 RAGGRUPPAMENTO DI SICUREZZA: Ordina l'array per data così i grafici non impazziscono
+        	databaseEsami.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+        	// Forza il rinfresco visivo istantaneo delle cartelle e dei quadratini
+        	renderFolders();
+        	if (currentOpenYear) {
+        		// Se siamo dentro un anno, forziamo la ricostruzione dei nodi della timeline
+        		if (typeof refreshTimeline === 'function') {
+        			refreshTimeline();
+        		} else if (typeof openFolder === 'function') {
+        			openFolder(currentOpenYear);
+        		}
+        	}
+
+        	// 3. LA FETCH CORRE IN SOTTOFONDO (SILENZIOSA)
+        	if (index === -1) {
+        		fetch(API_URL, {
+        				method: "POST",
+        				body: JSON.stringify({
+        					azione: "nuovoBiomarcatore",
+        					data: data,
+        					biomarcatore: nome,
+        					valore: valore
+        				})
+        			})
+        			.then(res => res.json())
+        			.then(res => {
+        				if (res.status === "success") {
+        					document.getElementById('formBiomarcatori').reset();
+        					console.log("Nuovo biomarcatore salvato in cloud in background.");
+        				} else {
+        					console.error("Errore background cloud: " + res.message);
+        				}
+        			})
+        			.catch(err => console.warn("Errore di rete in background, dato comunque visibile: " + err));
+        	} else {
+        		const oldData = document.getElementById('oldData').value;
+        		const oldBio = document.getElementById('oldBiomarcatore').value;
+        		const oldVal = parseFloat(document.getElementById('oldValore').value);
+
+        		fetch(API_URL, {
+        				method: "POST",
+        				body: JSON.stringify({
+        					azione: "eliminaBiomarcatore",
+        					data: oldData,
+        					biomarcatore: oldBio,
+        					valore: oldVal
+        				})
+        			})
+        			.then(res => res.json())
+        			.then(res => {
+        				if (res.status === "success") {
+        					return fetch(API_URL, {
+        						method: "POST",
+        						body: JSON.stringify({
+        							azione: "nuovoBiomarcatore",
+        							data: data,
+        							biomarcatore: nome,
+        							valore: valore
+        						})
+        					});
+        				} else {
+        					throw new Error("Errore rimozione");
+        				}
+        			})
+        			.then(res => res.json())
+        			.then(res => {
+        				if (res.status === "success") {
+        					document.getElementById('formBiomarcatori').reset();
+        					console.log("Modifica biomarcatore salvata in cloud in background.");
+        				} else {
+        					console.error("Errore modifica cloud: " + res.message);
+        				}
+        			})
+        			.catch(err => console.warn("Errore modifica in background: " + err));
+        	}
+        }
+
+
+        function deleteAllegato(index, event) {
+    if (event) event.stopPropagation();
+    const doc = databaseAllegati[index];
+    if (!doc) return;
+
+    // 👑 2. Richiesta di conferma con il nuovo popup custom smussato
+    pwaConfirm(`Vuoi davvero eliminare definitivamente il documento "${doc.titolo}"?`, "Elimina Allegato")
+    .then(confermato => {
+        if (!confermato) {
+            clearEditMode();
+            return; // Se clicca NO si ferma qui
+        }
+
+        // Se clicca SÌ, esegue la rimozione locale e la fetch in background
+        isEditingModeActive = false;
+
+        // 💾 Rimozione immediata dalla memoria RAM per farlo sparire dalla timeline in 0ms
+        databaseAllegati.splice(index, 1);
+        renderFolders();
+        if (currentOpenYear) refreshTimeline();
+        clearEditMode();
+
+        // 🌐 Spedisce il comando di cancellazione a Google Sheets in sottofondo
+        fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                azione: "eliminaAllegato",
+                data: doc.data,
+                titolo: doc.titolo,
+                url: doc.url
+            })
+        })
+        .then(res => res.json())
+        .then(res => console.log("Allegato rimosso dal cloud in background:", res))
+        .catch(err => console.warn("Errore network rimozione allegato cloud:", err));
+    });
+}
+
+
+        // 👑 LA FUNZIONE RIUNITA E CORRETTA AL 100% (SISTEMA IL CRASH):
+        function openEditAllegatoModal(index, event) {
+        	if (event) event.stopPropagation();
+        	clearEditMode();
+
+        	const doc = databaseAllegati[index];
+        	if (!doc) return;
+
+        	openModal('modalAllegati');
+
+        	// Cambia i testi del modal per la modifica (Spostati qui dentro in sicurezza!)
+        	document.querySelector('#modalAllegati h3').innerText = "Modifica Documento";
+        	document.querySelector('#modalAllegati button[type="submit"]').innerText = "✓ Aggiorna Allegato";
+
+        	// Popola i campi nascosti e i dati di backup per Google Sheets
+        	document.getElementById('editDocIndex').value = index;
+        	document.getElementById('oldDocData').value = doc.data || "";
+        	document.getElementById('oldDocTitolo').value = doc.yellow || doc.titolo || "";
+        	document.getElementById('oldDocUrl').value = doc.url || "";
+
+        	// Popola i campi visibili con i dati attuali del documento
+        	document.getElementById('addDocData').value = doc.data || "";
+        	document.getElementById('addDocTitolo').value = doc.titolo || "";
+        	document.getElementById('uploadFileLabel').innerText = "File già presente (Seleziona solo se vuoi sostituirlo)";
+        	document.getElementById('addDocTag').value = ""; // Resetta la tendina in modifica
+
+        	// Aggiorna subito il menu a tendina delle terapie
+        	if (typeof aggiornaSelectTerapieInAllegati === 'function') {
+        		aggiornaSelectTerapieInAllegati();
+        	}
+
+        	// Se l'allegato aveva già una terapia collegata, la seleziona nel menu
+        	if (doc.terapiaCollegataId || doc.terapiaId) {
+        		const selectTerapia = document.getElementById('addDocTerapiaCollegata');
+        		if (selectTerapia) {
+        			selectTerapia.value = doc.terapiaCollegataId || doc.terapiaId;
+        		}
+        	}
+        }
+
+
+
+        function aggiornaSelectTerapieInAllegati() {
+        	const selectTerapia = document.getElementById('addDocTerapiaCollegata');
+        	if (!selectTerapia) return;
+
+        	// Svuota mantenendo la prima opzione di default
+        	selectTerapia.innerHTML = '<option value="">-- Nessuna terapia --</option>';
+
+        	// Usa 'databaseTerapie' (che abbiamo definito nella Parte 1) invece di listaTerapieGlobali
+        	if (typeof databaseTerapie !== 'undefined' && databaseTerapie.length > 0) {
+        		databaseTerapie.forEach(terapia => {
+        			const option = document.createElement('option');
+        			// Usiamo l'ID univoco o il nome come valore, e mostriamo Nome + Farmaco nel menu
+        			option.value = terapia.id || terapia.nome;
+        			option.textContent = `${terapia.nome} (${terapia.farmaco || 'Nessun farmaco'})`;
+        			selectTerapia.appendChild(option);
+        		});
+        	}
+        }
+
+        function saveAllegato(e) {
+        	e.preventDefault();
+        	const fileInput = document.getElementById('addDocFile');
+        	const data = document.getElementById('addDocData').value;
+        	const tagSelezionato = document.getElementById('addDocTag').value;
+        	let titolo = document.getElementById('addDocTitolo').value.trim();
+        	const terapiaCollegata = document.getElementById('addDocTerapiaCollegata').value;
+        	const index = parseInt(document.getElementById('editDocIndex').value);
+
+        	if (tagSelezionato) {
+        		titolo = `[${tagSelezionato}] ${titolo}`;
+        	}
+
+        	if (index === -1 && fileInput.files.length === 0) {
+        		alert("Seleziona un file prima di salvare!");
+        		return;
+        	}
+
+        	// 🌟 1. Chiude subito il modulo visivo per liberare lo schermo
+        	closeAllModals();
+
+        	// 👑 IL PARACADUTE DI FORMATTAZIONE: Se Flatpickr passa la data italiana (GG-MM-AAAA), 
+        	// la giriamo in ISO (AAAA-MM-GG) per non far impazzire il motore visivo della timeline!
+        	let dataFormattataPerTimeline = data;
+        	if (data && data.includes("-")) {
+        		const parti = data.split("-");
+        		// Se la prima parte è di 2 cifre (es: 30), significa che è in formato GG-MM-AAAA e va girata
+        		if (parti[0].length === 2) {
+        			dataFormattataPerTimeline = `${parti[2]}-${parti[1]}-${parti[0]}`;
+        		}
+        	}
+
+        	// 🌟 2. AGGIORNAMENTO ISTANTANEO IN LOCALE (0 millisecondi)
+        	const nuovoAllegatoLocale = {
+        		titolo: titolo,
+        		data: dataFormattataPerTimeline, // 💡 Data standardizzata per la timeline!
+        		url: index !== -1 ? document.getElementById('oldDocUrl').value : "#",
+        		terapiaId: terapiaCollegata
+        	};
+
+        	if (index === -1) {
+        		databaseAllegati.push(nuovoAllegatoLocale);
+        	} else {
+        		databaseAllegati[index] = nuovoAllegatoLocale;
+        	}
+
+        	// Ordina al volo l'archivio per data per non sballare i cicli grafici
+        	databaseAllegati.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+        	// Forza la ricostruzione visiva immediata dello schedario e della timeline aperta
+        	renderFolders();
+        	if (currentOpenYear) {
+        		if (typeof refreshTimeline === 'function') {
+        			refreshTimeline();
+        		} else if (typeof openFolder === 'function') {
+        			openFolder(currentOpenYear);
+        		}
+        	}
+        	if (typeof renderTerapie === 'function') renderTerapie();
+
+        	// 🌟 3. LA GESTIONE DEL CLOUD CORRE IN SILENZIO IN SOTTOFONDO
+        	const inviaDatiCloud = (stringaBase64 = null, fileObj = null) => {
+        		// Al Cloud di Google Sheets continuiamo a mandare la data originale del tuo form
+        		const payload = {
+        			azione: index === -1 ? "nuovoAllegato" : "modificaAllegato",
+        			data: data,
+        			titolo: titolo,
+        			terapiaId: terapiaCollegata,
+        			oldData: document.getElementById('oldDocData').value,
+        			oldTitolo: document.getElementById('oldDocTitolo').value,
+        			oldUrl: document.getElementById('oldDocUrl').value
+        		};
+
+        		if (stringaBase64 && fileObj) {
+        			payload.nomeFile = fileObj.name;
+        			payload.tipoMime = fileObj.type;
+        			payload.fileBase64 = stringaBase64;
+        		}
+
+        		fetch(API_URL, {
+        				method: "POST",
+        				body: JSON.stringify(payload)
+        			})
+        			.then(res => res.json())
+        			.then(res => {
+        				if (res.status === "success") {
+        					// Sostituisce il link temporaneo con l'URL reale di Google Drive
+        					const cercato = databaseAllegati.find(a => a.data === dataFormattataPerTimeline && a.titolo === titolo);
+        					if (cercato) cercato.url = res.fileUrl || "#";
+
+        					document.getElementById('formAllegati').reset();
+        					document.getElementById('editDocIndex').value = "-1";
+        					document.querySelector('#modalAllegati h3').innerText = "Aggiungi Documento";
+        					document.querySelector('#modalAllegati button[type="submit"]').innerText = "+ Salva Allegato";
+
+        					console.log("Allegato sincronizzato in cloud con successo.");
+        					if (typeof renderTerapie === 'function') renderTerapie();
+        				} else {
+        					console.error("Errore caricamento cloud allegato: " + res.message);
+        				}
+        			})
+        			.catch(err => console.warn("Errore network allegato in background: " + err));
+        	};
+
+        	// Lettore file asincrono per l'invio
+        	if (fileInput.files.length > 0) {
+        		const file = fileInput.files[0];
+        		const lettore = new FileReader();
+        		lettore.onload = function(evento) {
+        			const stringaBase64 = evento.target.result.split(',')[1];
+        			inviaDatiCloud(stringaBase64, file);
+        		};
+        		lettore.readAsDataURL(file);
+        	} else {
+        		if (index !== -1) {
+        			inviaDatiCloud();
+        		}
+        	}
+        }
+
+        function backToFolders() {
+        	currentOpenYear = null;
+        	document.getElementById('folderDetail').classList.add('hidden');
+        	document.getElementById('foldersContainer').classList.remove('hidden');
+        }
+
+        function openColorPicker(anno) {
+        	document.getElementById('selectedFolderYear').value = anno;
+        	const modal = document.getElementById('modalColorPicker');
+        	modal.classList.remove('hidden');
+        	setTimeout(() => modal.querySelector('div').classList.remove('scale-95'), 10);
+        }
+
+        function closeColorPicker() {
+        	const modal = document.getElementById('modalColorPicker');
+        	modal.querySelector('div').classList.add('scale-95');
+        	setTimeout(() => modal.classList.add('hidden'), 150);
+        }
+
+        function applicaColoreCartella(colore) {
+        	const anno = document.getElementById('selectedFolderYear').value;
+        	if (!anno) return;
+
+        	localStorage.setItem(`color-folder-${anno}`, colore);
+
+        	const folderCard = document.getElementById(`folder-card-${anno}`);
+        	if (folderCard) {
+        		folderCard.style.background = `linear-gradient(135deg, ${colore} 0%, #ffffff 130%)`;
+        	}
+
+        	const folderSvg = folderCard.querySelector('svg');
+        	if (folderSvg) {
+        		folderSvg.style.color = colore;
+        		folderSvg.style.fill = colore;
+        	}
+
+        	closeColorPicker();
+        }
+
+        function applicaIconaCartella(idIcona) {
+        	const anno = document.getElementById('selectedFolderYear').value;
+        	if (!anno) return;
+
+        	// 1. Salva l'icona scelta nel browser per quell'anno specifico
+        	localStorage.setItem(`icon-folder-${anno}`, idIcona);
+
+        	// 2. Aggiorna l'icona della tessera a schermo all'istante
+        	const folderCard = document.getElementById(`folder-card-${anno}`);
+        	if (folderCard) {
+        		const useTag = folderCard.querySelector('use');
+        		if (useTag) {
+        			// Cambia l'indirizzo del link dello sprite modificando l'ID dopo il cancelletto
+        			useTag.setAttribute('href', `assets/icons/sprite.svg#${idIcona}`);
+        			// Rinfresca lo stile in linea per sicurezza
+        			useTag.style.cssText = "stroke: currentColor !important; fill: none !important; stroke-width: 1.5px;";
+        		}
+        	}
+
+        	// Chiude il modal del selettore stile
+        	closeColorPicker();
+        }
+
+        function salvaNomeImpostazioni() {
+        	const nuovoNome = document.getElementById('inputNomeUtente').value.trim();
+
+        	if (nuovoNome === "") {
+        		alert("Inserisci un nome valido!");
+        		return;
+        	}
+
+        	// 1. Salva il nome nel browser
+        	localStorage.setItem('user-custom-name', nuovoNome);
+
+        	// 2. Aggiorna immediatamente il saluto nella Home senza dover ricaricare la pagina
+        	document.getElementById('mainGreeting').innerText = `Ciao, ${nuovoNome}`;
+
+        	alert("Nome aggiornato con successo! 😀");
+        }
+        // ==================== LOGICA E RENDERING TERAPIE ====================
+        function renderTerapie() {
+        	const container = document.getElementById('therapiesContainer');
+        	if (!container) return;
+
+        	if (databaseTerapie.length === 0) {
+        		container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <svg class="w-6 h-6 translate-y-[3px] text-[var(--colore-principale)]">
+                  <use href="assets/icons/sprite.svg#therapies"></use>
+                </svg>
+                <p class="mt-2 text-xs font-semibold text-gray-400">Nessun piano terapeutico attivo.</p>
+                <button onclick="apriModalNuovaTerapia()" class="mt-4 px-4 py-2 bg-[var(--colore-principale)] text-white text-xs font-bold rounded-xl shadow-md active:scale-95 transition-all">
+                    Aggiungi Terapia
+                </button>
+            </div>
+        `;
+        		return;
+        	}
+
+        	// Se c'è almeno una terapia e non c'è una tab attiva selezionata, seleziona la prima
+        	if (!terapiaAttivaId && databaseTerapie.length > 0) {
+        		terapiaAttivaId = databaseTerapie[0].id;
+        	}
+
+        	// 1. Costruiamo le TAB orizzontali tipo Schedario Smussato
+        	let htmlTabs = `<div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-4 border-b border-gray-100">`;
+
+        	databaseTerapie.forEach(terapia => {
+        		const isActive = terapia.id === terapiaAttivaId;
+        		htmlTabs += `
+            <button onclick="selezionaTerapiaTab('${terapia.id}')" 
+                class="px-4 py-2.5 text-xs font-black uppercase tracking-wider rounded-t-xl rounded-b-sm border-t border-x transition-all duration-300 whitespace-nowrap
+                ${isActive 
+                    ? 'bg-white text-[var(--colore-principale)] border-gray-200/80 shadow-[0_-4px_12px_rgba(0,0,0,0.02)] -translate-y-[2px]' 
+                    : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100/70'
+                }">
+                ${terapia.nome}
+            </button>
+        `;
+        	});
+
+        	// Bottone "+" rapido alla fine delle tab per aggiungerne un'altra
+        	htmlTabs += `
+        <button onclick="apriModalNuovaTerapia()" class="px-3 py-2 text-xs font-bold bg-[var(--colore-principale)]/10 text-[var(--colore-principale)] rounded-t-xl rounded-b-sm border border-dashed border-[var(--colore-principale)]/30 active:scale-95 transition-all">
+            + Nuova
+        </button>
+    </div>`;
+
+        	// 2. Troviamo i dati della terapia attualmente selezionata per mostrare i dettagli
+        	const terapiaSelezionata = databaseTerapie.find(t => t.id === terapiaAttivaId) || databaseTerapie[0];
+
+        	// Calcoliamo le date future in automatico
+			const dataInizioPulita = terapiaSelezionata.dataInizio || "";
+			const frequenzaPulita = parseInt(terapiaSelezionata.frequenzaGiorni) || 1;
+			const durataPulita = parseInt(terapiaSelezionata.durataMesi) || 1;
+			
+			const dateScadenzeHTML = calcolaDateScadenzeHTML(dataInizioPulita, frequenzaPulita, durataPulita);
+
+        	// 👑 IL FILTRO POTENZIATO: Cerca se l'ID o il nome di questa terapia è incluso nella stringa multi-id (colonna D degli allegati)
+        	const allegatiDellaTerapia = databaseAllegati.filter(a => {
+        		const valoreTerapiaAllegato = a.terapiaId || a.terapiaCollegataId;
+        		if (!valoreTerapiaAllegato) return false;
+
+        		// Trasforma la colonna del foglio Excel in un array pulito di ID separati da virgola
+        		const arrayIdsElencomedi = String(valoreTerapiaAllegato).toLowerCase().split(",").map(x => x.trim());
+        		const idTerapia = String(terapiaSelezionata.id).toLowerCase().trim();
+        		const nomeTerapia = String(terapiaSelezionata.nome).toLowerCase().trim();
+
+        		return arrayIdsElencomedi.includes(idTerapia) || arrayIdsElencomedi.includes(nomeTerapia);
+        	});
+
+        	let htmlAllegatiSecondari = "";
+        	if (allegatiDellaTerapia.length > 0) {
+        		allegatiDellaTerapia.forEach(all => {
+        			htmlAllegatiSecondari += `
+                <div class="flex justify-between items-center bg-white border border-gray-100 p-3 rounded-xl shadow-xs hover:bg-gray-50 transition-colors cursor-pointer mt-2" onclick="window.open('${all.url}', '_blank')">
+                    <div class="flex items-center gap-2.5 overflow-hidden">
+                        <span class="text-base flex-shrink-0">📎</span>
+                        <span class="text-xs font-bold text-gray-700 truncate pr-2">${all.titolo}</span>
+                    </div>
+                    <span class="text-[9px] font-black text-[var(--colore-principale)] uppercase whitespace-nowrap bg-purple-50/60 px-2 py-0.5 rounded-md">Vedi ↗</span>
+                </div>
+            `;
+        		});
+        	} else {
+        		htmlAllegatiSecondari = `<p class="text-[11px] font-medium text-gray-400 italic mt-1">Nessun allegato secondario aggiunto a questa terapia.</p>`;
+        	}
+
+        	// 3. Generiamo il corpo del dettaglio della Tab attiva
+        	let htmlDettagli = `
+        <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-5 animate-fade-in">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[9px] font-black uppercase bg-purple-50 text-[var(--colore-principale)] px-2 py-0.5 rounded-md">Farmaco</span>
+                    <h3 class="text-lg font-black text-gray-800 mt-1">${terapiaSelezionata.farmaco}</h3>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="modificaTerapia('${terapiaSelezionata.id}')" class="p-2 bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                    <button onclick="eliminaTerapia('${terapiaSelezionata.id}')" class="p-2 bg-red-50 text-red-400 hover:text-red-600 rounded-xl transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-[#fcf8f9] rounded-xl p-4 border border-purple-100/30">
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Indicazioni e Dosaggio</span>
+                <p class="text-xs font-bold text-gray-700 mt-1 leading-relaxed">${terapiaSelezionata.dosaggio}</p>
+                <div class="text-[10px] font-semibold text-gray-400 mt-2 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Data d'inizio: ${formattaDataItaliana(terapiaSelezionata.dataInizio)}
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-4">
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Referto / Piano Primario</span>
+                ${terapiaSelezionata.allegatoUrl 
+                    ? `
+                    <div class="flex justify-between items-center bg-white border border-gray-100 p-3 rounded-xl shadow-sm hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.open('${terapiaSelezionata.allegatoUrl}', '_blank')">
+                        <div class="flex items-center gap-2.5 overflow-hidden">
+                            <span class="text-xl flex-shrink-0">📄</span>
+                            <span class="text-xs font-bold text-gray-700 truncate pr-2">${terapiaSelezionata.allegatoNome}</span>
+                        </div>
+                        <span class="text-[10px] font-black text-[var(--colore-principale)] uppercase whitespace-nowrap bg-purple-50 px-2 py-1 rounded-md">Apri</span>
+                    </div>
+                    `
+                    : `
+                    <p class="text-[11px] font-medium text-gray-400 italic">Nessun documento primario allegato.</p>
+                    `
+                }
+            </div>
+
+            <!-- 👑 SEZIONE AGGIORNATA CON PULSANTE RAPIDO "+ GESTISCI" IN ALTO A DESTRA -->
+            <div class="border-t border-gray-100 pt-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Altri Documenti / Esami Collegati</span>
+                    <button onclick="apriModalCollegaAllegati('${terapiaSelezionata.id}')" class="text-[9px] font-black uppercase px-2 py-0.5 bg-[var(--colore-principale)]/10 text-[var(--colore-principale)] rounded-md hover:scale-105 active:scale-95 transition-all">
+                        + Gestisci
+                    </button>
+                </div>
+                <div class="space-y-1">
+                    ${htmlAllegatiSecondari}
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-4">
+                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block mb-3">Scadenze Calcolate (Prossime assunzioni)</span>
+                <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1 no-scrollbar">
+                    ${dateScadenzeHTML}
+                </div>
+            </div>
+        </div>
+    `;
+
+        	container.innerHTML = htmlTabs + htmlDettagli;
+        }
+
+        function selezionaTerapiaTab(id) {
+        	terapiaAttivaId = id;
+        	renderTerapie();
+        }
+
+        // Apri il modale per una nuova terapia
+        function apriModalNuovaTerapia() {
+        	document.getElementById('modalTerapiaTitolo').innerText = "Nuovo Piano Terapeutico";
+        	document.getElementById('inputTerapiaId').value = "";
+        	document.getElementById('inputTerapiaNome').value = "";
+        	document.getElementById('inputTerapiaFarmaco').value = "";
+        	document.getElementById('inputTerapiaDosaggio').value = "";
+        	document.getElementById('inputTerapiaDataInizio').value = new Date().toISOString().split('T')[0];
+        	document.getElementById('inputTerapiaFrequenza').value = "";
+        	document.getElementById('inputTerapiaDurata').value = "";
+
+        	popolaSelectAllegati(null);
+
+        	const modal = document.getElementById('modalTerapia');
+        	modal.classList.remove('hidden');
+        	setTimeout(() => modal.querySelector('div').classList.remove('scale-95'), 10);
+        }
+
+        // Chiudi il modale
+        function chiudiModalTerapia() {
+        	const modal = document.getElementById('modalTerapia');
+        	modal.querySelector('div').classList.add('scale-95');
+        	setTimeout(() => modal.classList.add('hidden'), 150);
+        }
+
+        // Questa funzione scansiona la tua variabile globale degli esami e riempie il menu a tendina
+        function popolaSelectAllegati(urlSelezionato) {
+        	const select = document.getElementById('selectTerapiaAllegato');
+        	if (!select) return;
+
+        	select.innerHTML = `<option value="">-- Nessun documento allegato --</option>`;
+
+        	// 🚀 Usiamo il tuo array reale dei referti sincronizzati con Google Drive!
+        	if (typeof databaseAllegati !== 'undefined' && databaseAllegati.length > 0) {
+        		databaseAllegati.forEach((doc, indice) => {
+        			// Intercettiamo il link di Google Drive o il contenuto del file
+        			const url = doc.url || doc.allegatoUrl || doc.fileContent || doc.file || doc.webviewLink;
+        			// Intercettiamo il nome del file (es. "[Altro referto] Prova")
+        			const nomeFile = doc.titolo || doc.nomeFile || doc.allegatoNome || doc.nome || `Documento ${indice + 1}`;
+
+        			if (url) {
+        				const selected = url === urlSelezionato ? 'selected' : '';
+        				// Estraiamo l'anno se disponibile, altrimenti mettiamo un'etichetta generica
+        				const infoAnno = doc.anno || (doc.data ? doc.data.split('-')[0] : 'Drive');
+
+        				select.innerHTML += `<option value="${url}" data-nome="${nomeFile}" ${selected}>[${infoAnno}] - ${nomeFile}</option>`;
+        			}
+        		});
+        	}
+        }
+
+        // Salva o Aggiorna la Terapia
+        function saveTerapia(e) {
+        	if (e) e.preventDefault();
+
+        	const idTerapia = document.getElementById('inputTerapiaId').value;
+        	const nome = document.getElementById('inputTerapiaNome').value.trim();
+        	const farmaco = document.getElementById('inputTerapiaFarmaco').value.trim();
+        	const dosaggio = document.getElementById('inputTerapiaDosaggio').value.trim();
+        	const frequenza = Number(document.getElementById('inputTerapiaFrequenza').value);
+        	const durata = Number(document.getElementById('inputTerapiaDurata').value);
+        	const dataInizio = document.getElementById('inputTerapiaDataInizio').value;
+        	const allegatoSelezionato = document.getElementById('selectTerapiaAllegato').value;
+
+        	if (!nome || !farmaco || !dataInizio) {
+        		pwaAlert("Compila i campi obbligatori della data, del farmaco e del piano terapeutico!", "Dati Mancanti");
+        		return;
+        	}
+
+        	// Genera un ID offline unico basato sul tempo se è una nuova terapia
+        	const idGenerato = idTerapia || "TER_" + Date.now();
+
+        	const datiTerapia = {
+        		id: idGenerato,
+        		nome: nome,
+        		farmaco: farmaco,
+        		dosaggio: dosaggio,
+        		frequenzaGiorni: frequenza || 1,
+        		durataMesi: durata || 1,
+        		dataInizio: dataInizio,
+        		allegatoNome: allegatoSelezionato !== "" && databaseAllegati[allegatoSelezionato] ? databaseAllegati[allegatoSelezionato].titolo : "",
+        		allegatoUrl: allegatoSelezionato !== "" && databaseAllegati[allegatoSelezionato] ? databaseAllegati[allegatoSelezionato].url : ""
+        	};
+
+        	const azioneCloud = !idTerapia ? "nuovaTerapia" : "modificaTerapia";
+
+        	if (!idTerapia) {
+        		databaseTerapie.push(datiTerapia);
+        	} else {
+        		const idx = databaseTerapie.findIndex(t => t.id === idTerapia);
+        		if (idx !== -1) databaseTerapie[idx] = datiTerapia;
+        	}
+
+        	// 💾 1. SALVATAGGIO IN LOCALE IMMEDIATO (0 millisecondi)
+        	localStorage.setItem('health-app-terapie', JSON.stringify(databaseTerapie));
+
+        	// Chiude il modal e aggiorna la lista dei farmaci a schermo all'istante
+        	chiudiModalTerapia();
+        	if (typeof renderTerapie === 'function') renderTerapie();
+
+        	// 🌟 2. LA SINCRONIZZAZIONE DELLA TERAPIA CORRE IN SILENZIO IN BACKGROUND
+        	fetch(API_URL, {
+        			method: "POST",
+        			body: JSON.stringify({
+        				azione: azioneCloud,
+        				terapia: datiTerapia
+        			})
+        		})
+        		.then(res => res.json())
+        		.then(res => console.log("Terapia sincronizzata nel Cloud in background:", res))
+        		.catch(err => console.warn("Sincronizzazione terapia in background rimandata (Dato salvato sul telefono):", err));
+        
+		     if (typeof renderPromemoria === 'function') renderPromemoria();
+		}
+
+
+        // Elimina una Terapia dallo schedario
+        function eliminaTerapia(id) {
+        	// 👑 Usa il pwaConfirm asincrono
+        	pwaConfirm("Sei sicuro di voler eliminare definitivamente questo piano terapeutico?", "Elimina Terapia")
+        		.then(confermato => {
+        			if (!confermato) return; // Se clicca NO, si ferma
+
+        			// Se clicca SÌ, esegue la piallatura locale
+        			databaseTerapie = databaseTerapie.filter(t => t.id !== id);
+        			localStorage.setItem('health-app-terapie', JSON.stringify(databaseTerapie));
+
+        			if (terapiaAttivaId === id) {
+        				terapiaAttivaId = databaseTerapie.length > 0 ? databaseTerapie[0].id : null;
+        			}
+
+        			renderTerapie();
+
+        			// Elimina dal cloud in silenzio
+        			fetch(API_URL, {
+        					method: "POST",
+        					body: JSON.stringify({
+        						azione: "eliminaTerapia",
+        						id: id
+        					})
+        				})
+        				.then(res => res.json())
+        				.then(res => console.log("Terapia rimossa dal Cloud in background:", res))
+        				.catch(err => console.warn("Errore rimozione cloud:", err));
+        		});
+
+				if (typeof renderPromemoria === 'function') renderPromemoria();
+        }
+
+
+
+
+        // Avvia la modifica ripopolando i campi del modale
+        function modificaTerapia(id) {
+        	const terapia = databaseTerapie.find(t => t.id === id);
+        	if (!terapia) return;
+
+        	document.getElementById('modalTerapiaTitolo').innerText = "Modifica Terapia";
+        	document.getElementById('inputTerapiaId').value = terapia.id;
+        	document.getElementById('inputTerapiaNome').value = terapia.nome;
+        	document.getElementById('inputTerapiaFarmaco').value = terapia.farmaco;
+        	document.getElementById('inputTerapiaDosaggio').value = terapia.dosaggio;
+        	document.getElementById('inputTerapiaDataInizio').value = terapia.dataInizio;
+        	document.getElementById('inputTerapiaFrequenza').value = terapia.frequenzaGiorni;
+        	document.getElementById('inputTerapiaDurata').value = terapia.durataMesi;
+
+        	popolaSelectAllegati(terapia.allegatoUrl);
+
+        	const modal = document.getElementById('modalTerapia');
+        	modal.classList.remove('hidden');
+        	setTimeout(() => modal.querySelector('div').classList.remove('scale-95'), 10);
+        }
+
+        function formattaDataItaliana(dataString) {
+        	if (!dataString) return "";
+        	const parti = dataString.split('-');
+        	if (parti.length !== 3) return dataString;
+        	return `${parti[2]}/${parti[1]}/${parti[0]}`;
+        }
+
+        function calcolaDateScadenzeHTML(dataInizioStr, frequenzaGiorni, durataMesi) {
+    if (!dataInizioStr) return `<p class="col-span-2 text-center text-[11px] font-medium text-gray-400 italic">Nessuna data d'inizio impostata.</p>`;
+    
+    // 👑 IL SUPER-CONVERTITORE UNIVERSALE DI DATE (Italiane, ISO, Barre, Trattini)
+    let stringaMappata = String(dataInizioStr).trim();
+    
+    // Se la data arriva in formato italiano (GG/MM/AAAA o GG-MM-AAAA) la gira in ISO (AAAA/MM/GG)
+    if (stringaMappata.includes("/") || stringaMappata.includes("-")) {
+        const separatore = stringaMappata.includes("/") ? "/" : "-";
+        const pezzi = stringaMappata.split(separatore);
+        // Se il primo pezzo ha 2 cifre (es. 21), significa che è una data italiana e va ribaltata!
+        if (pezzi[0].length === 2) {
+            stringaMappata = `${pezzi[2]}/${pezzi[1]}/${pezzi[0]}`;
+        } else {
+            // Se inizia già con l'anno, normalizza i trattini in barre per evitare il bug del fuso orario
+            stringaMappata = stringaMappata.replace(/-/g, "/");
+        }
+    }
+
+    const dataInizio = new Date(stringaMappata);
+    const frequenza = parseInt(frequenzaGiorni) || 1;
+    const durataInMesi = parseInt(durataMesi) || 1;
+
+    // Paracadute di sicurezza: se la data rimane invalida, ti avvisa a schermo invece di nascondere il tasto
+    if (isNaN(dataInizio.getTime())) {
+        return `<p class="col-span-2 text-center text-[11px] font-medium text-gray-400 italic">Data non riconosciuta (${dataInizioStr}).</p>`;
+    }
+
+    const dataFine = new Date(dataInizio);
+    dataFine.setMonth(dataFine.getMonth() + durataInMesi);
+
+    let html = "";
+    let dataCorrente = new Date(dataInizio);
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0); // Azzera le ore per il confronto giornaliero preciso
+
+    let trovatoProssimo = false;
+    let contatoreSicurezza = 0;
+
+    // Ciclo di generazione delle card (Massimo 40 per non intasare la memoria del telefono)
+    while (dataCorrente <= dataFine && contatoreSicurezza < 40) {
+        const dataConfronto = new Date(dataCorrente);
+        dataConfronto.setHours(0, 0, 0, 0);
+
+        let classeStile = "";
+        let badge = "";
+
+        if (dataConfronto < oggi) {
+            // Data passata (Grigia sbiadita)
+            classeStile = "bg-gray-50 border-gray-100 text-gray-300 line-through";
+            badge = `<span class="text-[8px] font-bold uppercase text-gray-400">Presa</span>`;
+        } else if (!trovatoProssimo && dataConfronto >= oggi) {
+            // Prima scadenza futura o odierna: si accende con il badge viola pulsante!
+            classeStile = "bg-purple-50/60 border-purple-200 text-[var(--colore-principale)] font-black shadow-sm ring-1 ring-[var(--colore-principale)]/10 animate-pulse";
+            badge = `<span class="text-[8px] font-black uppercase bg-[var(--colore-principale)] text-white px-1.5 py-0.5 rounded">Prossima</span>`;
+            trovatoProssimo = true;
+        } else {
+            // Date future successive
+            classeStile = "bg-white border-gray-100 text-gray-700 font-semibold";
+            badge = `<span class="text-[8px] font-bold uppercase text-gray-400">Futura</span>`;
+        }
+
+        // Formattazione italiana leggibile (GG/MM/AAAA)
+        const giorno = String(dataCorrente.getDate()).padStart(2, '0');
+        const mese = String(dataCorrente.getMonth() + 1).padStart(2, '0');
+        const anno = dataCorrente.getFullYear();
+        const dataFormattata = `${giorno}/${mese}/${anno}`;
+
+        html += `
+            <div class="border p-2.5 rounded-xl flex items-center justify-between text-xs transition-all ${classeStile}">
+                <span>${dataFormattata}</span>
+                ${badge}
+            </div>
+        `;
+
+        // Avanza dei giorni stabiliti nella frequenza
+        dataCorrente.setDate(dataCorrente.getDate() + frequenza);
+        contatoreSicurezza++;
+    }
+
+    return html || `<p class="col-span-2 text-center text-[11px] font-medium text-gray-400 italic">Nessuna data generabile.</p>`;
+}
+
+
+        // ==================== FINE LOGICA TERAPIE ====================
+
+        // ==================== CANCELLAZIONE INTERO ANNO ARCHIVIO (ANTI-FANTASMA) ====================
+        function eliminaInteroAnnoArchivio() {
+        	const annoDaEliminare = document.getElementById('selectedFolderYear').value;
+        	if (!annoDaEliminare) return;
+
+        	// 👑 Conferma grafica PWA
+        	pwaConfirm(`Vuoi davvero eliminare DEFINITIVAMENTE l'anno ${annoDaEliminare}? Verranno cancellati tutti gli esami e i documenti locali e sul Cloud.`, "Elimina Archivio")
+        		.then(confermato => {
+        			if (!confermato) {
+        				closeColorPicker();
+        				return;
+        			}
+
+        			document.getElementById('loadingOverlay').style.opacity = "1";
+        			document.getElementById('loadingOverlay').classList.remove('hidden');
+
+        			// Piallatura locale immediata
+        			databaseEsami = databaseEsami.filter(e => new Date(e.data).getFullYear() !== parseInt(annoDaEliminare));
+        			databaseAllegati = databaseAllegati.filter(a => new Date(a.data).getFullYear() !== parseInt(annoDaEliminare));
+
+        			localStorage.removeItem(`color-folder-${annoDaEliminare}`);
+        			localStorage.removeItem(`icon-folder-${annoDaEliminare}`);
+
+        			renderFolders();
+        			closeColorPicker();
+
+        			fetch(API_URL, {
+        					method: "POST",
+        					body: JSON.stringify({
+        						azione: "eliminaBiomarcatore",
+        						anno: annoDaEliminare
+        					})
+        				})
+        				.then(res => res.json())
+        				.then(res => {
+        					console.log("Richiesta di cancellazione accettata dal server:", res);
+
+        					setTimeout(() => {
+        						fetch(API_URL)
+        							.then(r => r.json())
+        							.then(data => {
+        								databaseEsami = (data.esami || []).filter(e => new Date(e.data).getFullYear() !== parseInt(annoDaEliminare));
+        								databaseAllegati = (data.allegati || []).filter(a => new Date(a.data).getFullYear() !== parseInt(annoDaEliminare));
+
+        								localStorage.setItem('health-app-esami-locali', JSON.stringify(databaseEsami));
+        								localStorage.setItem('health-app-allegati-locali', JSON.stringify(databaseAllegati));
+
+        								renderFolders();
+
+        								document.getElementById('loadingOverlay').style.opacity = "0";
+        								setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 300);
+        							});
+        					}, 2500);
+        				})
+        				.catch(err => {
+        					console.warn("Errore di rete cloud, mantengo la cancellazione locale:", err);
+        					renderFolders();
+        					document.getElementById('loadingOverlay').style.opacity = "0";
+        					setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 300);
+        				});
+        		});
+        }
+
+
+        // ==================== GESTIONE MULTI-ALLEGATI PER TERAPIE (BACKGROUND) ====================
+
+        function apriModalCollegaAllegati(idTerapia) {
+        	const modal = document.getElementById('modalCollegaAllegati');
+        	const container = document.getElementById('listaAllegatiSelezionabili');
+        	if (!modal || !container) return;
+
+        	// Imposta l'ID della terapia nel campo nascosto
+        	document.getElementById('collegaTerapiaTargetId').value = idTerapia;
+        	container.innerHTML = "";
+
+        	if (databaseAllegati.length === 0) {
+        		container.innerHTML = `<p class="text-center text-xs font-semibold text-gray-400 py-6">Nessun allegato presente nell'archivio. Carica prima un referto!</p>`;
+        		modal.classList.remove('hidden');
+        		return;
+        	}
+
+        	// Genera la lista di tutti gli allegati con una veste grafica premium in linea con i tuoi temi
+        	databaseAllegati.forEach((all, index) => {
+        		// Controlla se questo specifico allegato ha già l'ID della terapia tra i suoi collegamenti
+        		const idsCollegati = all.terapiaId ? all.terapiaId.split(",") : [];
+        		const giaCollegato = idsCollegati.includes(idTerapia.toString());
+
+        		const row = document.createElement('div');
+        		row.className = "flex items-center justify-between p-3 bg-[var(--bg-surface)] border border-gray-100 rounded-xl hover:bg-gray-50/50 transition-colors cursor-pointer";
+        		// Cliccando sulla riga si fa il toggle del checkbox interno
+        		row.onclick = () => {
+        			const chk = document.getElementById(`chk-all-${index}`);
+        			if (chk) chk.checked = !chk.checked;
+        		};
+
+        		row.innerHTML = `
+            <div class="flex items-center gap-3 max-w-[80%]">
+                <span class="text-sm">📄</span>
+                <div class="truncate">
+                    <h4 class="text-xs font-bold text-gray-700 truncate">${all.titolo}</h4>
+                    <p class="text-[9px] text-gray-400 font-medium font-mono uppercase">${all.data}</p>
+                </div>
+            </div>
+            <input type="checkbox" id="chk-all-${index}" value="${index}" ${giaCollegato ? 'checked' : ''} 
+                   class="w-4 h-4 rounded text-[var(--colore-principale)] focus:ring-[var(--colore-principale)] cursor-pointer"
+                   onclick="event.stopPropagation()">
+        `;
+        		container.appendChild(row);
+        	});
+
+        	modal.classList.remove('hidden');
+        }
+
+        function chiudiModalCollegaAllegati() {
+        	const modal = document.getElementById('modalCollegaAllegati');
+        	if (modal) modal.classList.add('hidden');
+        }
+
+        function salvaCollegamentiAllegatiBackground() {
+        	const idTerapia = document.getElementById('collegaTerapiaTargetId').value;
+        	if (!idTerapia) return;
+
+        	chiudiModalCollegaAllegati();
+
+        	// Array per tenere traccia di quali allegati inviare al server per l'aggiornamento
+        	const promesseFetch = [];
+
+        	// Cicliamo tutti gli allegati presenti nell'app per vedere cosa ha scelto l'utente
+        	databaseAllegati.forEach((all, index) => {
+        		const chk = document.getElementById(`chk-all-${index}`);
+        		if (!chk) return;
+
+        		let idsCollegati = all.terapiaId ? all.terapiaId.split(",").map(x => x.trim()).filter(Boolean) : [];
+        		const eraGiaCollegato = idsCollegati.includes(idTerapia.toString());
+        		const vuoleCollegato = chk.checked;
+
+        		// Se lo stato è cambiato, dobbiamo aggiornare l'allegato sia in locale che nel Cloud!
+        		if (vuoleCollegato && !eraGiaCollegato) {
+        			idsCollegati.push(idTerapia.toString());
+        		} else if (!vuoleCollegato && eraGiaCollegato) {
+        			idsCollegati = idsCollegati.filter(id => id !== idTerapia.toString());
+        		} else {
+        			return; // Nessun cambiamento per questo allegato, salta
+        		}
+
+        		const nuovaStringaIds = idsCollegati.join(",");
+
+        		// 💾 1. AGGIORNAMENTO LOCALE ISTANTANEO (0 millisecondi)
+        		all.terapiaId = nuovaStringaIds;
+
+        		// 🌐 2. PREPARIAMO LA RICHIESTA IN BACKGROUND PER GOOGLE SHEETS
+        		// Modifichiamo la riga specifica dell'allegato nel foglio Excel
+        		const fetchJob = fetch(API_URL, {
+        			method: "POST",
+        			body: JSON.stringify({
+        				azione: "modificaAllegato",
+        				data: all.data,
+        				titolo: all.titolo,
+        				url: all.url,
+        				terapiaId: nuovaStringaIds, // Sovrascrive la colonna D con la nuova lista di ID
+        				oldData: all.data,
+        				oldTitolo: all.titolo,
+        				oldUrl: all.url
+        			})
+        		});
+        		promesseFetch.push(fetchJob);
+        	});
+
+        	// Salviamo la fotografia aggiornata degli allegati nel browser
+        	localStorage.setItem('health-app-allegati-locali', JSON.stringify(databaseAllegati));
+
+        	// Rinfresca subito i moduli a schermo per farti vedere i nuovi documenti agganciati alla terapia
+        	if (typeof renderTerapie === 'function') renderTerapie();
+
+        	// Eseguiamo tutte le fetch in parallelo in sottofondo, senza bloccare l'interfaccia!
+        	Promise.all(promesseFetch)
+        		.then(() => console.log("Collegamenti multi-allegato salvati nel Cloud con successo."))
+        		.catch(err => console.warn("Errore salvataggio cloud allegati (Dati comunque salvi sul telefono):", err));
+        }
+
+        // ==================== 👑 INTERFACCIA NOTIFICHE E AVVISI STILE PWA ====================
+
+        function pwaAlert(messaggio, titolo = "Avviso") {
+        	return new Promise((resolve) => {
+        		document.getElementById('pwaModalTitle').innerText = titolo;
+        		document.getElementById('pwaModalMessage').innerText = messaggio;
+        		document.getElementById('pwaModalIcon').innerText = "💡";
+
+        		const btnContainer = document.getElementById('pwaModalButtonsContainer');
+        		btnContainer.innerHTML = `
+            <button id="pwaBtnOk" class="flex-1 bg-[var(--colore-principale)] text-white font-extrabold p-3 rounded-xl text-xs tracking-wider uppercase active:scale-95 transition-all shadow-xs">
+                Capito ✓
+            </button>
+        `;
+
+        		document.getElementById('pwaSystemModal').classList.remove('hidden');
+
+        		document.getElementById('pwaBtnOk').onclick = () => {
+        			document.getElementById('pwaSystemModal').classList.add('hidden');
+        			resolve();
+        		};
+        	});
+        }
+
+        function pwaConfirm(messaggio, titolo = "Conferma Richiesta") {
+        	return new Promise((resolve) => {
+        		document.getElementById('pwaModalTitle').innerText = titolo;
+        		document.getElementById('pwaModalMessage').innerText = messaggio;
+        		document.getElementById('pwaModalIcon').innerText = "⚠️";
+
+        		const btnContainer = document.getElementById('pwaModalButtonsContainer');
+        		btnContainer.innerHTML = `
+            <button id="pwaBtnAnnulla" class="flex-1 bg-gray-100 text-gray-500 font-extrabold p-3 rounded-xl text-xs tracking-wider uppercase active:scale-95 transition-all">
+                No
+            </button>
+            <button id="pwaBtnConferma" class="flex-1 bg-red-500 text-white font-extrabold p-3 rounded-xl text-xs tracking-wider uppercase active:scale-95 transition-all shadow-xs">
+                Sì
+            </button>
+        `;
+
+        		document.getElementById('pwaSystemModal').classList.remove('hidden');
+
+        		document.getElementById('pwaBtnAnnulla').onclick = () => {
+        			document.getElementById('pwaSystemModal').classList.add('hidden');
+        			resolve(false);
+        		};
+
+        		document.getElementById('pwaBtnConferma').onclick = () => {
+        			document.getElementById('pwaSystemModal').classList.add('hidden');
+        			resolve(true);
+        		};
+        	});
+        }
+
+		// ==================== CALCOLO PROSSIMA ASSUNZIONE PER HOME ====================
+function ottieniDataProssimaAssunzione(terapia) {
+    if (!terapia.dataInizio || !terapia.frequenzaGiorni || !terapia.durataMesi) return null;
+
+    // 👑 IL SUPER-CONVERTITORE: Raddrizza le date italiane (GG/MM/AAAA) per evitare il bug del 12 luglio!
+    let stringaMappata = String(terapia.dataInizio).trim();
+    
+    if (stringaMappata.includes("/") || stringaMappata.includes("-")) {
+        const separatore = stringaMappata.includes("/") ? "/" : "-";
+        const pezzi = stringaMappata.split(separatore);
+        
+        // Se il primo pezzo ha 2 cifre (es. 01), è in formato italiano e va capovolto in ISO (AAAA/MM/GG)
+        if (pezzi[0].length === 2) {
+            stringaMappata = `${pezzi[2]}/${pezzi[1]}/${pezzi[0]}`;
+        } else {
+            stringaMappata = stringaMappata.replace(/-/g, "/");
+        }
+    }
+
+    const dataInizio = new Date(stringaMappata);
+    const frequenza = parseInt(terapia.frequenzaGiorni) || 1;
+    const durataInMesi = parseInt(terapia.durataMesi) || 1;
+
+    if (isNaN(dataInizio.getTime())) return null;
+
+    const dataFine = new Date(dataInizio);
+    dataFine.setMonth(dataFine.getMonth() + durataInMesi);
+
+    // Configura OGGI alla mezzanotte locale spaccata
+    const oggi = new Date();
+    oggi.setHours(0, 0, 0, 0);
+
+    let dataCorrente = new Date(dataInizio);
+    let contatore = 0;
+
+    // Cicla in avanti aggiungendo i giorni corretti
+    while (dataCorrente <= dataFine && contatore < 100) {
+        const dataConfronto = new Date(dataCorrente);
+        dataConfronto.setHours(0, 0, 0, 0);
+
+        // Se la data calcolata è OGGI o nel FUTURO, blocca il ciclo e restituisci questa data!
+        if (dataConfronto >= oggi) {
+            return new Date(dataCorrente);
+        }
+        
+        dataCorrente.setDate(dataCorrente.getDate() + frequenza);
+        contatore++;
+    }
+    return null;
+}
