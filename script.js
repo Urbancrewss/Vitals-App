@@ -2206,38 +2206,44 @@ function saveTerapia(e) {
         if (idx !== -1) databaseTerapie[idx] = datiTerapia;
     }
 
-    // 💾 1. SALVATAGGIO IN LOCALE IMMEDIATO
+    // 💾 Salvataggio locale e rendering grafici immediati OK
     localStorage.setItem('health-app-terapie', JSON.stringify(databaseTerapie));
-
     chiudiModalTerapia();
     if (typeof renderTerapie === 'function') renderTerapie();
     if (typeof renderPromemoria === 'function') renderPromemoria();
 
-    // 🌟 2. STRUTTURA DEL PACCHETTO APPIATTITA PER GOOGLE SHEETS
-    // Spediamo i campi direttamente nel corpo principale, così Code.gs li legge al volo!
-    const pacchettoSincro = {
-        azione: azioneCloud,
-        id: datiTerapia.id,
-        nome: datiTerapia.nome,
-        farmaco: datiTerapia.farmaco,
-        dosaggio: datiTerapia.dosaggio,
-        frequenzaGiorni: datiTerapia.frequenzaGiorni,
-        durataMesi: datiTerapia.durataMesi,
-        dataInizio: datiTerapia.dataInizio,
-        allegatoNome: datiTerapia.allegatoNome,
-        allegatoUrl: datiTerapia.allegatoUrl
+    // 👑 IL PACCHETTO "ANTI-ERRORE GOOGLE": Trasforma tutto in stringhe pulite
+    // Evita che Code.gs vada in blocco 500 rispedendoti l'HTML di errore!
+    const pacchettoSincroStringato = {
+        azione: String(azioneCloud),
+        id: String(datiTerapia.id),
+        nome: String(datiTerapia.nome),
+        farmaco: String(datiTerapia.farmaco),
+        dosaggio: String(datiTerapia.dosaggio),
+        frequenzaGiorni: String(datiTerapia.frequenzaGiorni),
+        durataMesi: String(datiTerapia.durataMesi),
+        dataInizio: String(datiTerapia.dataInizio),
+        allegatoNome: String(datiTerapia.allegatoNome),
+        allegatoUrl: String(datiTerapia.allegatoUrl)
     };
 
+    // Spediamo al Cloud
     fetch(API_URL, {
             method: "POST",
-            body: JSON.stringify(pacchettoSincro)
+            mode: "cors", // Forza la modalità di scambio sicuro
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8" // Dice a Google di accettare il testo senza fare controlli rigidi
+            },
+            body: JSON.stringify(pacchettoSincroStringato)
         })
-        .then(res => res.json())
-        .then(res => console.log("Sincronizzazione completata con successo nel cloud:", res))
-        .catch(err => console.warn("Sincronizzazione rimandata (salvata in locale):", err));
+        .then(res => {
+            // Se Google risponde con un errore HTML, lo blocchiamo prima che faccia crashare l'app
+            if (!res.ok) throw new Error("Risposta del server non valida");
+            return res.json();
+        })
+        .then(res => console.log("Sincronizzazione completata nel Cloud con successo:", res))
+        .catch(err => console.warn("Sincronizzazione in background rimandata (Dato salvato in locale):", err));
 }
-
-
 
 
         // Elimina una Terapia dallo schedario
