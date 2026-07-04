@@ -373,8 +373,8 @@
 
         // ==================== LOGICA PROMEMORIA ANALISI (VERSIONE BLINDATA ANTI-CONFLITTO) ====================
 
-        function renderPromemoria() {
-    const container = document.getElementById('promemoriaContainer');
+    function renderPromemoria() {
+    const container = document.getElementById('promemoriaContainer'); // Allineato al tuo HTML
     if (!container) return;
 
     let agendaTotale = [];
@@ -383,10 +383,7 @@
     if (databasePromemoria && databasePromemoria.length > 0) {
         databasePromemoria.forEach(pro => {
             if (!pro || !pro.data) return;
-
-            // Creiamo un oggetto data pulito senza spaccare stringhe
             const dataEsame = new Date(pro.data.replace(/-/g, "/"));
-            
             if (!isNaN(dataEsame.getTime())) {
                 dataEsame.setHours(0, 0, 0, 0);
                 agendaTotale.push({
@@ -415,24 +412,23 @@
         });
     }
 
-    // Se l'agenda combinata è vuota, stampa il tuo messaggio pulito
     if (agendaTotale.length === 0) {
         container.innerHTML = `<p class="text-[11px] font-medium text-gray-400 italic text-center py-4">Nessun esame o assunzione pianificata.</p>`;
         return;
     }
 
-    // 🌟 3. ORDINAMENTO CRONOLOGICO: Mette in alto la scadenza più vicina
+    // 🌟 ORDINAMENTO CRONOLOGICO UNIFICATO
     agendaTotale.sort((a, b) => a.dataOggetto - b.dataOggetto);
 
     container.innerHTML = "";
 
-    // 🌟 4. STAMPA GRAFICA IDENTICA AL TUO LOOK ORIGINALE
+    // 🌟 GENERAZIONE GRAFICA DELLE CARD
     agendaTotale.forEach((item) => {
         const oggi = new Date();
         oggi.setHours(0, 0, 0, 0);
 
-        // Calcolo matematico dei giorni rimanenti (Il tuo codice originale intatto!)
-        const diffTempo = item.dataDro || item.dataOggetto.getTime() - oggi.getTime();
+        // 👑 CALCOLO MATEMATICO CORRETTO E PULITO (Piallato dataDro!)
+        const diffTempo = item.dataOggetto.getTime() - oggi.getTime();
         const diffGiorni = Math.round(diffTempo / (1000 * 60 * 60 * 24));
 
         let testoGiorni = "";
@@ -464,10 +460,15 @@
         const row = document.createElement('div');
         row.className = "flex justify-between items-center bg-gray-50 border border-gray-100 p-3 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer group mt-1.5 shadow-2xs";
 
+        // 🎯 GESTIONE CLICK CON SPOSTAMENTO INDICATORE NAVBAR
         if (isFarmaco) {
             row.onclick = () => {
-                if (typeof switchTab === 'function') switchTab('therapies');
-                else if (typeof mostraPaginaTerapie === 'function') mostraPaginaTerapie();
+                const tuttiILi = document.querySelectorAll('#bottomNavBar ul li.list');
+                const liTerapie = tuttiILi[2]; // Prende l'elemento Terapie (Indice 2)
+                
+                if (typeof switchTab === 'function') {
+                    switchTab('therapies', liTerapie); 
+                }
             };
         } else {
             row.onclick = () => {
@@ -493,6 +494,7 @@
         selectMenu.onchange = aggiornaRiquadroInfoRange;
     }
 }
+
 
 
         function apriModalNuovoPromemoria() {
@@ -2596,8 +2598,22 @@
 function ottieniDataProssimaAssunzione(terapia) {
     if (!terapia.dataInizio || !terapia.frequenzaGiorni || !terapia.durataMesi) return null;
 
-    const stringaAdatta = terapia.dataInizio.replace(/-/g, "/");
-    const dataInizio = new Date(stringaAdatta);
+    // 👑 IL SUPER-CONVERTITORE: Raddrizza le date italiane (GG/MM/AAAA) per evitare il bug del 12 luglio!
+    let stringaMappata = String(terapia.dataInizio).trim();
+    
+    if (stringaMappata.includes("/") || stringaMappata.includes("-")) {
+        const separatore = stringaMappata.includes("/") ? "/" : "-";
+        const pezzi = stringaMappata.split(separatore);
+        
+        // Se il primo pezzo ha 2 cifre (es. 01), è in formato italiano e va capovolto in ISO (AAAA/MM/GG)
+        if (pezzi[0].length === 2) {
+            stringaMappata = `${pezzi[2]}/${pezzi[1]}/${pezzi[0]}`;
+        } else {
+            stringaMappata = stringaMappata.replace(/-/g, "/");
+        }
+    }
+
+    const dataInizio = new Date(stringaMappata);
     const frequenza = parseInt(terapia.frequenzaGiorni) || 1;
     const durataInMesi = parseInt(terapia.durataMesi) || 1;
 
@@ -2606,23 +2622,25 @@ function ottieniDataProssimaAssunzione(terapia) {
     const dataFine = new Date(dataInizio);
     dataFine.setMonth(dataFine.getMonth() + durataInMesi);
 
+    // Configura OGGI alla mezzanotte locale spaccata
     const oggi = new Date();
     oggi.setHours(0, 0, 0, 0);
 
     let dataCorrente = new Date(dataInizio);
     let contatore = 0;
 
-    // Cicla per trovare la prima data utile che è oggi o nel futuro
+    // Cicla in avanti aggiungendo i giorni corretti
     while (dataCorrente <= dataFine && contatore < 100) {
         const dataConfronto = new Date(dataCorrente);
         dataConfronto.setHours(0, 0, 0, 0);
 
+        // Se la data calcolata è OGGI o nel FUTURO, blocca il ciclo e restituisci questa data!
         if (dataConfronto >= oggi) {
-            // Abbiamo trovato la prossima dose! Restituiamo l'oggetto data pulito
             return new Date(dataCorrente);
         }
+        
         dataCorrente.setDate(dataCorrente.getDate() + frequenza);
         contatore++;
     }
-    return null; // Terapia terminata o nessuna data trovata
+    return null;
 }
