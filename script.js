@@ -2145,7 +2145,7 @@
         	}
         }
 
-        // Salva o Aggiorna la Terapia
+// Salva o Aggiorna la Terapia
 function saveTerapia(e) {
     if (e) e.preventDefault();
 
@@ -2166,7 +2166,7 @@ function saveTerapia(e) {
     // Genera un ID offline unico basato sul tempo se è una nuova terapia
     const idGenerato = idTerapia || "TER_" + Date.now();
 
-    // 👑 PROTEZIONE CHIRURGICA: Verifica che databaseAllegati esista prima di leggerlo per non far crashare lo smartphone
+    // Verifica che databaseAllegati esista prima di leggerlo per non far crashare lo smartphone
     const haAllegato = typeof databaseAllegati !== 'undefined' && databaseAllegati && allegatoSelezionato !== "" && databaseAllegati[allegatoSelezionato];
     const nomeAllegato = haAllegato ? databaseAllegati[allegatoSelezionato].titolo : "";
     const urlAllegato = haAllegato ? databaseAllegati[allegatoSelezionato].url : "";
@@ -2177,7 +2177,7 @@ function saveTerapia(e) {
         farmaco: farmaco,
         dosaggio: dosaggio,
         frequenzaGiorni: frequenza || 1,
-        durataMesi: duration || 1,
+        durataMesi: durata || 1, // 👑 CORRETTO: Messo 'durata' al posto del vecchio refuso 'duration'!
         dataInizio: dataInizio,
         allegatoNome: nomeAllegato,
         allegatoUrl: urlAllegato
@@ -2211,7 +2211,6 @@ function saveTerapia(e) {
         .then(res => res.json())
         .then(res => {
             console.log("Terapia sincronizzata nel Cloud in background:", res);
-            // Opzionale: mostra un micro messaggino di successo
         })
         .catch(err => console.warn("Sincronizzazione terapia in background rimandata:", err));
 }
