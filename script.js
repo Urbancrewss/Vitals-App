@@ -2146,68 +2146,76 @@
         }
 
         // Salva o Aggiorna la Terapia
-        function saveTerapia(e) {
-        	if (e) e.preventDefault();
+function saveTerapia(e) {
+    if (e) e.preventDefault();
 
-        	const idTerapia = document.getElementById('inputTerapiaId').value;
-        	const nome = document.getElementById('inputTerapiaNome').value.trim();
-        	const farmaco = document.getElementById('inputTerapiaFarmaco').value.trim();
-        	const dosaggio = document.getElementById('inputTerapiaDosaggio').value.trim();
-        	const frequenza = Number(document.getElementById('inputTerapiaFrequenza').value);
-        	const durata = Number(document.getElementById('inputTerapiaDurata').value);
-        	const dataInizio = document.getElementById('inputTerapiaDataInizio').value;
-        	const allegatoSelezionato = document.getElementById('selectTerapiaAllegato').value;
+    const idTerapia = document.getElementById('inputTerapiaId').value;
+    const nome = document.getElementById('inputTerapiaNome').value.trim();
+    const farmaco = document.getElementById('inputTerapiaFarmaco').value.trim();
+    const dosaggio = document.getElementById('inputTerapiaDosaggio').value.trim();
+    const frequenza = Number(document.getElementById('inputTerapiaFrequenza').value);
+    const durata = Number(document.getElementById('inputTerapiaDurata').value);
+    const dataInizio = document.getElementById('inputTerapiaDataInizio').value;
+    const allegatoSelezionato = document.getElementById('selectTerapiaAllegato').value;
 
-        	if (!nome || !farmaco || !dataInizio) {
-        		pwaAlert("Compila i campi obbligatori della data, del farmaco e del piano terapeutico!", "Dati Mancanti");
-        		return;
-        	}
+    if (!nome || !farmaco || !dataInizio) {
+        pwaAlert("Compila i campi obbligatori della data, del farmaco e del piano terapeutico!", "Dati Mancanti");
+        return;
+    }
 
-        	// Genera un ID offline unico basato sul tempo se è una nuova terapia
-        	const idGenerato = idTerapia || "TER_" + Date.now();
+    // Genera un ID offline unico basato sul tempo se è una nuova terapia
+    const idGenerato = idTerapia || "TER_" + Date.now();
 
-        	const datiTerapia = {
-        		id: idGenerato,
-        		nome: nome,
-        		farmaco: farmaco,
-        		dosaggio: dosaggio,
-        		frequenzaGiorni: frequenza || 1,
-        		durataMesi: durata || 1,
-        		dataInizio: dataInizio,
-        		allegatoNome: allegatoSelezionato !== "" && databaseAllegati[allegatoSelezionato] ? databaseAllegati[allegatoSelezionato].titolo : "",
-        		allegatoUrl: allegatoSelezionato !== "" && databaseAllegati[allegatoSelezionato] ? databaseAllegati[allegatoSelezionato].url : ""
-        	};
+    // 👑 PROTEZIONE CHIRURGICA: Verifica che databaseAllegati esista prima di leggerlo per non far crashare lo smartphone
+    const haAllegato = typeof databaseAllegati !== 'undefined' && databaseAllegati && allegatoSelezionato !== "" && databaseAllegati[allegatoSelezionato];
+    const nomeAllegato = haAllegato ? databaseAllegati[allegatoSelezionato].titolo : "";
+    const urlAllegato = haAllegato ? databaseAllegati[allegatoSelezionato].url : "";
 
-        	const azioneCloud = !idTerapia ? "nuovaTerapia" : "modificaTerapia";
+    const datiTerapia = {
+        id: idGenerato,
+        nome: nome,
+        farmaco: farmaco,
+        dosaggio: dosaggio,
+        frequenzaGiorni: frequenza || 1,
+        durataMesi: duration || 1,
+        dataInizio: dataInizio,
+        allegatoNome: nomeAllegato,
+        allegatoUrl: urlAllegato
+    };
 
-        	if (!idTerapia) {
-        		databaseTerapie.push(datiTerapia);
-        	} else {
-        		const idx = databaseTerapie.findIndex(t => t.id === idTerapia);
-        		if (idx !== -1) databaseTerapie[idx] = datiTerapia;
-        	}
+    const azioneCloud = !idTerapia ? "nuovaTerapia" : "modificaTerapia";
 
-        	// 💾 1. SALVATAGGIO IN LOCALE IMMEDIATO (0 millisecondi)
-        	localStorage.setItem('health-app-terapie', JSON.stringify(databaseTerapie));
+    if (!idTerapia) {
+        databaseTerapie.push(datiTerapia);
+    } else {
+        const idx = databaseTerapie.findIndex(t => t.id === idTerapia);
+        if (idx !== -1) databaseTerapie[idx] = datiTerapia;
+    }
 
-        	// Chiude il modal e aggiorna la lista dei farmaci a schermo all'istante
-        	chiudiModalTerapia();
-        	if (typeof renderTerapie === 'function') renderTerapie();
+    // 💾 1. SALVATAGGIO IN LOCALE IMMEDIATO (0 millisecondi)
+    localStorage.setItem('health-app-terapie', JSON.stringify(databaseTerapie));
 
-        	// 🌟 2. LA SINCRONIZZAZIONE DELLA TERAPIA CORRE IN SILENZIO IN BACKGROUND
-        	fetch(API_URL, {
-        			method: "POST",
-        			body: JSON.stringify({
-        				azione: azioneCloud,
-        				terapia: datiTerapia
-        			})
-        		})
-        		.then(res => res.json())
-        		.then(res => console.log("Terapia sincronizzata nel Cloud in background:", res))
-        		.catch(err => console.warn("Sincronizzazione terapia in background rimandata (Dato salvato sul telefono):", err));
-        
-		     if (typeof renderPromemoria === 'function') renderPromemoria();
-		}
+    // Chiude il modal e aggiorna la lista dei farmaci a schermo all'istante
+    chiudiModalTerapia();
+    if (typeof renderTerapie === 'function') renderTerapie();
+    if (typeof renderPromemoria === 'function') renderPromemoria();
+
+    // 🌟 2. LA SINCRONIZZAZIONE DELLA TERAPIA CORRE IN SILENZIO IN BACKGROUND
+    fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                azione: azioneCloud,
+                terapia: datiTerapia
+            })
+        })
+        .then(res => res.json())
+        .then(res => {
+            console.log("Terapia sincronizzata nel Cloud in background:", res);
+            // Opzionale: mostra un micro messaggino di successo
+        })
+        .catch(err => console.warn("Sincronizzazione terapia in background rimandata:", err));
+}
+
 
 
         // Elimina una Terapia dallo schedario
