@@ -2154,7 +2154,7 @@
 function saveTerapia(e) {
     if (e) e.preventDefault();
 
-    // 👑 CONTROLLO COMPATIBILITÀ ID INPUT: Cerca sia la versione 'input' che la versione 'add'
+    // Configurazione dei doppi ID per una lettura blindata al 100%
     const inputId = document.getElementById('inputTerapiaId') || document.getElementById('addTerapiaId');
     const inputNome = document.getElementById('inputTerapiaNome') || document.getElementById('addTerapiaNome') || document.getElementById('terapiaNome');
     const inputFarmaco = document.getElementById('inputTerapiaFarmaco') || document.getElementById('addTerapiaFarmaco') || document.getElementById('terapiaFarmaco');
@@ -2164,7 +2164,6 @@ function saveTerapia(e) {
     const inputDataInizio = document.getElementById('inputTerapiaDataInizio') || document.getElementById('addTerapiaDataInizio') || document.getElementById('terapiaDataInizio');
     const selectAllegato = document.getElementById('selectTerapiaAllegato') || document.getElementById('addTerapiaAllegato');
 
-    // Estrazione sicura dei valori
     const idTerapia = inputId ? inputId.value : "";
     const nome = inputNome ? inputNome.value.trim() : "";
     const farmaco = inputFarmaco ? inputFarmaco.value.trim() : "";
@@ -2174,9 +2173,8 @@ function saveTerapia(e) {
     const dataInizio = inputDataInizio ? inputDataInizio.value : "";
     const allegatoSelezionato = selectAllegato ? selectAllegato.value : "";
 
-    // 🚨 Se mancano i dati blocco l'invio prima che sporchi Google Sheets!
     if (!nome || !farmaco || !dataInizio) {
-        pwaAlert("Compila i campi obbligatori della data, del farmaco e del nome del piano!", "Dati Mancanti");
+        pwaAlert("Compila i campi obbligatori di nome, farmaco e data!", "Dati Mancanti");
         return;
     }
 
@@ -2201,34 +2199,44 @@ function saveTerapia(e) {
     const azioneCloud = !idTerapia ? "nuovaTerapia" : "modificaTerapia";
 
     if (!idTerapia) {
+        if (!Array.isArray(databaseTerapie)) databaseTerapie = [];
         databaseTerapie.push(datiTerapia);
     } else {
         const idx = databaseTerapie.findIndex(t => t.id === idTerapia);
         if (idx !== -1) databaseTerapie[idx] = datiTerapia;
     }
 
-    // 💾 1. SALVATAGGIO IN LOCALE IMMEDIATO (0 millisecondi)
+    // 💾 1. SALVATAGGIO IN LOCALE IMMEDIATO
     localStorage.setItem('health-app-terapie', JSON.stringify(databaseTerapie));
 
-    // Chiude il modal e aggiorna la lista dei farmaci a schermo all'istante
     chiudiModalTerapia();
     if (typeof renderTerapie === 'function') renderTerapie();
     if (typeof renderPromemoria === 'function') renderPromemoria();
 
-    // 🌟 2. LA SINCRONIZZAZIONE DELLA TERAPIA CORRE IN SILENZIO IN BACKGROUND
+    // 🌟 2. STRUTTURA DEL PACCHETTO APPIATTITA PER GOOGLE SHEETS
+    // Spediamo i campi direttamente nel corpo principale, così Code.gs li legge al volo!
+    const pacchettoSincro = {
+        azione: azioneCloud,
+        id: datiTerapia.id,
+        nome: datiTerapia.nome,
+        farmaco: datiTerapia.farmaco,
+        dosaggio: datiTerapia.dosaggio,
+        frequenzaGiorni: datiTerapia.frequenzaGiorni,
+        durataMesi: datiTerapia.durataMesi,
+        dataInizio: datiTerapia.dataInizio,
+        allegatoNome: datiTerapia.allegatoNome,
+        allegatoUrl: datiTerapia.allegatoUrl
+    };
+
     fetch(API_URL, {
             method: "POST",
-            body: JSON.stringify({
-                azione: azioneCloud,
-                terapia: datiTerapia
-            })
+            body: JSON.stringify(pacchettoSincro)
         })
         .then(res => res.json())
-        .then(res => {
-            console.log("Terapia sincronizzata nel Cloud in background:", res);
-        })
-        .catch(err => console.warn("Sincronizzazione terapia in background rimandata:", err));
+        .then(res => console.log("Sincronizzazione completata con successo nel cloud:", res))
+        .catch(err => console.warn("Sincronizzazione rimandata (salvata in locale):", err));
 }
+
 
 
 
@@ -2665,4 +2673,10 @@ function ottieniDataProssimaAssunzione(terapia) {
         contatore++;
     }
     return null;
+}
+
+function forzaSincronizzazioneManuale() {
+    if (typeof fetchDatiCloud === 'function') {
+        fetchDatiCloud();
+    }
 }
