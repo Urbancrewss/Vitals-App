@@ -245,12 +245,12 @@ span.flatpickr-weekday {
 
 /* Forza un riempimento generoso in fondo alla timeline quando è aperta */
 .timeline-container, #refreshTimeline, [id^="folder-timeline-"] {
-    padding-bottom: 7rem !important; /* Spinge l'ultimo allegato sopra la barra di navigazione */
+    padding-bottom: 13rem !important; /* Spinge l'ultimo allegato sopra la barra di navigazione */
 }
 
 /* Sicurezza per la zona di scroll principale dei contenuti della PWA */
 main, .page-content, #page-home {
-    padding-bottom: 8rem !important;
+    padding-bottom: 14rem !important;
 }
 
 /* Assicura che la barra di navigazione abbia il corretto livello visivo e non si impasti con il testo sotto */
